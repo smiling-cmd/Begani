@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+.env
+.venv/
+
+# React / Node
+node_modules/
+dist/
+build/
+.vite/
+
+# Local artifacts and logs
+.playwright-mcp/
+.tmp_begani_ui_reference/
+
+# OS / Editor
+.DS_Store
+.vscode/
