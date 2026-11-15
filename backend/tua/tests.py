@@ -6,7 +6,9 @@ from rest_framework.test import APITestCase
 
 from accounts.models import StudentProfile, User
 from counsellors.models import TherapistProfile
-from tua.models import TuaMessage
+from messaging.models import ChatThread
+from notifications.models import Notification
+from tua.models import PriorityRequest, TuaMessage
 
 
 class TuaTherapistRecommendationTests(APITestCase):
@@ -109,3 +111,49 @@ class TuaTherapistRecommendationTests(APITestCase):
 
         self.assertEqual(response.status_code, 502)
         self.assertEqual(TuaMessage.objects.filter(role=TuaMessage.Role.TUA).count(), 0)
+
+
+class PriorityRequestDashboardTests(APITestCase):
+    def setUp(self):
+        self.student_user = User.objects.create_user(
+            email="priority-student@example.com",
+            password="test-password",
+            role=User.Role.STUDENT,
+            is_active=True,
+        )
+        self.student = StudentProfile.objects.create(user=self.student_user, alias="priority-student")
+        self.therapist_user = User.objects.create_user(
+            email="priority-counsellor@example.com",
+            password="test-password",
+            role=User.Role.THERAPIST,
+            is_active=True,
+        )
+        self.therapist = TherapistProfile.objects.create(
+            user=self.therapist_user,
+            type=TherapistProfile.Type.SCHOOL,
+            category=TherapistProfile.Category.COUNSELLOR,
+            display_name="Priority counsellor",
+            format=TherapistProfile.Format.ONLINE,
+            status=TherapistProfile.Status.APPROVED,
+        )
+
+    def test_created_request_is_listed_for_assigned_counsellor(self):
+        self.client.force_authenticate(user=self.student_user)
+        create_response = self.client.post(
+            "/api/tua/priority/",
+            {"source": PriorityRequest.Source.FIND_SUPPORT, "phone_consent": False},
+            format="json",
+        )
+
+        self.assertEqual(create_response.status_code, 201)
+        priority_request = PriorityRequest.objects.get(id=create_response.data["id"])
+        self.assertEqual(priority_request.student, self.student)
+        self.assertEqual(priority_request.therapist, self.therapist)
+        self.assertTrue(ChatThread.objects.filter(student=self.student, therapist=self.therapist).exists())
+        self.assertTrue(Notification.objects.filter(user=self.therapist_user, type="priority_request").exists())
+
+        self.client.force_authenticate(user=self.therapist_user)
+        list_response = self.client.get("/api/tua/priority/assigned/")
+
+        self.assertEqual(list_response.status_code, 200)
+        self.assertEqual([item["id"] for item in list_response.data], [str(priority_request.id)])

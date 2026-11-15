@@ -3,8 +3,9 @@ import { AuthContext } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import { MessageCircle, Heart, BookOpen, Mountain, Sun, Phone } from 'lucide-react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import tuaImage from '../assets/TUA-transparent.png';
+import PriorityRequestDialog from '../components/PriorityRequestDialog';
 
 function getTimeGreeting() {
   const hour = new Date().getHours();
@@ -15,10 +16,12 @@ function getTimeGreeting() {
 
 export default function Home() {
   const { token, user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [selectedMood, setSelectedMood] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [moodNotice, setMoodNotice] = useState('');
   const [moodError, setMoodError] = useState('');
+  const [urgentHelpOpen, setUrgentHelpOpen] = useState(false);
 
   const moodData = [
     { label: 'Very Low', score: 2, emoji: '😞', range: '1-2' },
@@ -141,17 +144,25 @@ export default function Home() {
                 </div>
             </div>
             <div className="home-urgent-actions">
-                 <a className="home-emergency-link" href="tel:999">
-                    <Phone size={16} /> Call 999 or 112
-                 </a>
-                 <Link className="home-emergency-link" to="/support">
+                 <div className="home-emergency-call-links">
+                   <a className="home-emergency-link" href="tel:999"><Phone size={16} /> Call 999</a>
+                   <a className="home-emergency-link" href="tel:112">Call 112</a>
+                 </div>
+                 <button className="home-emergency-link home-urgent-chat-button" type="button" onClick={() => setUrgentHelpOpen(true)}>
                     <MessageCircle size={16} /> Chat with a Counsellor
-                 </Link>
+                 </button>
                  <Link className="home-urgent-cta" to="/support">Get Help Now →</Link>
             </div>
         </div>
 
       </main>
+      {urgentHelpOpen && <PriorityRequestDialog
+        token={token}
+        hasPhone={Boolean(user?.phone)}
+        source="find_support"
+        onClose={() => setUrgentHelpOpen(false)}
+        onCreated={(request) => navigate(`/chat/${request.thread_id}`, { state: { priorityRequestSent: true } })}
+      />}
     </div>
   );
 }

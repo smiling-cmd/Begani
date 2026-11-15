@@ -34,13 +34,14 @@ def get_tua_system_prompt(therapists=None):
     3. Only recommend therapists in the approved list below. Never invent or change a therapist ID.
     4. Set therapist_id to the exact ID of a recommended therapist; otherwise set it to null.
     5. For a crisis response, set therapist_id to null so the user is directed to immediate help first.
-    6. Do not put IDs or JSON in the reply text.
+    6. Set crisis_detected to true when the latest message indicates self-harm, suicide, or immediate danger.
+    7. Do not put IDs or JSON in the reply text.
 
     AVAILABLE APPROVED THERAPISTS:
     {available_therapists}
 
     Return only a valid JSON object with exactly these fields:
-    {{"reply":"a short response for the user","therapist_id":null}}
+    {{"reply":"a short response for the user","therapist_id":null,"crisis_detected":false}}
     If recommending a therapist, use that therapist's ID string for therapist_id and include their name and price in reply.
     """
 
@@ -87,4 +88,10 @@ def get_tua_response(messages, therapists):
     if not isinstance(therapist_id, str) or therapist_id not in approved_ids:
         therapist_id = None
 
-    return {"reply": reply.strip(), "therapist_id": therapist_id}
+    crisis_detected = result.get("crisis_detected") is True
+
+    return {
+        "reply": reply.strip(),
+        "therapist_id": therapist_id,
+        "crisis_detected": crisis_detected,
+    }

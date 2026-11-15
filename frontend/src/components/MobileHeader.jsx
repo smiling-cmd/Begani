@@ -66,6 +66,8 @@ export default function MobileHeader() {
     setOpen(false);
     if (notification.type === 'new_message') {
       navigate(user?.role === 'therapist' ? '/therapist-chats' : '/chats');
+    } else if (notification.type === 'priority_request' && user?.role === 'therapist') {
+      navigate('/therapist-dashboard');
     }
   };
 

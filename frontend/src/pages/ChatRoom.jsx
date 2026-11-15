@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, RefreshCw, Send } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
@@ -14,6 +14,7 @@ function getMessage(error, fallback) {
 
 export default function ChatRoom() {
   const { id } = useParams();
+  const location = useLocation();
   const { user, token } = useContext(AuthContext);
   const [thread, setThread] = useState(null);
   const [input, setInput] = useState('');
@@ -86,6 +87,12 @@ export default function ChatRoom() {
           <h1>Chat with {otherName || 'your counsellor'}</h1>
           <p>Messages are visible to you and the other participant in this conversation.</p>
         </header>
+
+        {location.state?.priorityRequestSent && (
+          <div className="priority-chat-notice" role="status">
+            A priority request was sent and the counsellor was alerted. If you may be in immediate danger, call <a href="tel:999">999</a> or <a href="tel:112">112</a>.
+          </div>
+        )}
 
         {!currentThread && loadError ? (
           <div className="panel chat-state" role="alert">

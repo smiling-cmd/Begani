@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 
 # Create your models here.
 import uuid
@@ -26,6 +27,18 @@ class ChatThread(models.Model):
     def lock_state(self, sender_user):
         """Derived at send time, never stored. Returns 'open' or 'locked'."""
         from bookings.models import Booking
+        from tua.models import PriorityRequest
+
+        now = timezone.now()
+        active_priority = PriorityRequest.objects.filter(
+            student=self.student,
+            therapist=self.therapist,
+        ).filter(
+            Q(status=PriorityRequest.Status.ACCEPTED)
+            | Q(status=PriorityRequest.Status.REQUESTED, respond_by__gt=now)
+        ).exists()
+        if active_priority:
+            return "open"
 
         bookings = Booking.objects.filter(student=self.student, therapist=self.therapist)
 

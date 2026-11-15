@@ -1,14 +1,16 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { ArrowRight, Send } from 'lucide-react';
+import { ArrowRight, Phone, Send } from 'lucide-react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import tuaImage from '../assets/TUA.png';
+import PriorityRequestDialog from '../components/PriorityRequestDialog';
 
 export default function Tua() {
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Chat State
   const [messages, setMessages] = useState([
@@ -16,6 +18,7 @@ export default function Tua() {
   ]);
   const [input, setInput] = useState(location.state?.initialMessage || '');
   const [isTyping, setIsTyping] = useState(false);
+  const [priorityDialog, setPriorityDialog] = useState(null);
   
   const chatEndRef = useRef(null);
 
@@ -45,6 +48,8 @@ export default function Tua() {
         role: 'tua',
         text: res.data.reply,
         therapistId: res.data.therapist_id || null,
+        crisisDetected: Boolean(res.data.crisis_detected),
+        conversationId: res.data.conversation_id,
       }]);
     } catch (error) {
       console.error(error);
@@ -59,6 +64,7 @@ export default function Tua() {
   };
 
   const suggestions = ["I'm feeling stressed", "I can't sleep", "Exam anxiety", "I feel lonely", "I'd like to see a counsellor"];
+  const conversationId = messages.reduce((latest, message) => message.conversationId || latest, null);
 
   return (
     <div className="app-shell tua-page">
@@ -87,12 +93,30 @@ export default function Tua() {
                       View therapist &amp; book <ArrowRight size={16} />
                     </Link>
                   )}
+                  {!isUser && msg.crisisDetected && (
+                    <div className="tua-crisis-actions" role="alert">
+                      <p>If you may be in immediate danger, call emergency services now.</p>
+                      <div className="tua-crisis-links">
+                        <a href="tel:999"><Phone size={15} /> Call 999</a>
+                        <a href="tel:112"><Phone size={15} /> Call 112</a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
             {isTyping && <p className="tua-typing" role="status">TUA is typing…</p>}
             <div ref={chatEndRef} />
           </div>
+
+          {conversationId && user?.role === 'student' && (
+            <div className="tua-crisis-actions" aria-label="Urgent counsellor request">
+              <p>Need urgent support? Request a chat with an approved school counsellor.</p>
+              <button type="button" onClick={() => setPriorityDialog({ conversationId })}>
+                Connect me with a counsellor now
+              </button>
+            </div>
+          )}
 
           {messages.length === 1 && (
             <div className="tua-suggestions" aria-label="Suggested messages">
@@ -123,6 +147,14 @@ export default function Tua() {
           TUA is an AI companion, not a therapist. It can support small worries and introduce you to a counsellor, but it can't diagnose or treat. In an emergency, use the emergency line on Home or Find Support.
         </p>
       </main>
+      {priorityDialog && <PriorityRequestDialog
+        token={token}
+        hasPhone={Boolean(user?.phone)}
+        source="tua"
+        conversationId={priorityDialog.conversationId}
+        onClose={() => setPriorityDialog(null)}
+        onCreated={(request) => navigate(`/chat/${request.thread_id}`, { state: { priorityRequestSent: true } })}
+      />}
     </div>
   );
 }
