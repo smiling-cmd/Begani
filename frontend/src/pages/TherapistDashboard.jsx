@@ -1,18 +1,15 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
-import axios from 'axios';
+import api from '../api';
 import { CalendarCheck, CalendarDays, CalendarPlus, Clock3, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const api = 'http://127.0.0.1:8000/api';
-
-function loadDashboard(token) {
-  const headers = { Authorization: `Bearer ${token}` };
+function loadDashboard() {
   return Promise.all([
-    axios.get(`${api}/bookings/therapist-list/`, { headers }),
-    axios.get(`${api}/counsellors/availability/`, { headers }),
-    axios.get(`${api}/messaging/threads/`, { headers }),
+    api.get('/api/bookings/therapist-list/'),
+    api.get('/api/counsellors/availability/'),
+    api.get('/api/messaging/threads/'),
   ]);
 }
 
@@ -32,7 +29,8 @@ export default function TherapistDashboard() {
   const [priorityRequests, setPriorityRequests] = useState([]);
   const [priorityLoading, setPriorityLoading] = useState(true);
   const [priorityError, setPriorityError] = useState('');
-  const [currentTime, setCurrentTime] = useState(Date.now());
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const [currentYear, setCurrentYear] = useState(() => new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [slotDate, setSlotDate] = useState('');
   const [slotTime, setSlotTime] = useState('');
@@ -42,7 +40,7 @@ export default function TherapistDashboard() {
   const fetchDashboard = useCallback(async () => {
     if (!token) return;
     try {
-      const [bookingRes, slotRes, threadRes] = await loadDashboard(token);
+      const [bookingRes, slotRes, threadRes] = await loadDashboard();
       setBookings(Array.isArray(bookingRes.data) ? bookingRes.data : []);
       setSlots(Array.isArray(slotRes.data) ? slotRes.data : []);
       setThreads(Array.isArray(threadRes.data) ? threadRes.data : []);
@@ -56,9 +54,7 @@ export default function TherapistDashboard() {
   const fetchPriorityRequests = useCallback(async () => {
     if (!token) return;
     try {
-      const { data } = await axios.get(`${api}/tua/priority/assigned/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await api.get('/api/tua/priority/assigned/');
       setPriorityRequests(Array.isArray(data) ? data : []);
       setPriorityError('');
     } catch (error) {
@@ -70,6 +66,8 @@ export default function TherapistDashboard() {
 
   useEffect(() => {
     if (!token) return undefined;
+    // These callbacks update state only after their API requests resolve.
+    // oxlint-disable-next-line react/set-state-in-effect
     void fetchDashboard();
     void fetchPriorityRequests();
     const dashboardRefresh = window.setInterval(() => void fetchDashboard(), 30000);
@@ -81,15 +79,20 @@ export default function TherapistDashboard() {
   }, [fetchDashboard, fetchPriorityRequests, token]);
 
   useEffect(() => {
-    const ticker = window.setInterval(() => setCurrentTime(Date.now()), 1000);
+    const ticker = window.setInterval(() => {
+      const now = Date.now();
+      setCurrentTime(now);
+      setCurrentYear((year) => {
+        const nextYear = new Date(now).getFullYear();
+        return year === nextYear ? year : nextYear;
+      });
+    }, 1000);
     return () => window.clearInterval(ticker);
   }, []);
 
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
-      await axios.post(`${api}/bookings/${bookingId}/status/`, { status: newStatus }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(`/api/bookings/${bookingId}/status/`, { status: newStatus });
       setNotice({ type: 'success', text: `Booking ${newStatus}.` });
       fetchDashboard();
     } catch (error) {
@@ -99,9 +102,7 @@ export default function TherapistDashboard() {
 
   const handleOpenPriorityRequest = async (requestId) => {
     try {
-      const { data } = await axios.post(`${api}/tua/priority/${requestId}/accept/`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await api.post(`/api/tua/priority/${requestId}/accept/`, {});
       navigate(`/chat/${data.thread_id}`);
     } catch (error) {
       setNotice({ type: 'error', text: error.response?.data?.error || 'Could not open this priority chat.' });
@@ -116,10 +117,10 @@ export default function TherapistDashboard() {
     const start = new Date(`${slotDate}T${slotTime}`);
     const end = new Date(start.getTime() + 60 * 60 * 1000);
     try {
-      await axios.post(`${api}/counsellors/availability/create/`, {
+      await api.post('/api/counsellors/availability/create/', {
         starts_at: start.toISOString(),
         ends_at: end.toISOString(),
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      });
       setSlotDate('');
       setSlotTime('');
       setNotice({ type: 'success', text: 'Availability added. Students can now book this time.' });
@@ -133,7 +134,6 @@ export default function TherapistDashboard() {
     }
   };
 
-  const currentYear = new Date().getFullYear();
   const totalBookings = bookings.filter((booking) => new Date(booking.slot_time).getFullYear() === currentYear).length;
   const awaiting = bookings.filter((booking) => booking.status === 'requested').length;
   const upcoming = bookings.filter((booking) => booking.status === 'confirmed').length;

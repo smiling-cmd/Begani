@@ -1,11 +1,10 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { ArrowRight, BookOpen, Bookmark, Headphones, Heart, Search, Video, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
-
-const api = 'http://127.0.0.1:8000/api/resources/';
+import studentsPhoto from '../assets/students.jpeg';
 
 function getResourceIcon(type) {
   if (type === 'audio') return Headphones;
@@ -38,7 +37,7 @@ export default function Resources() {
   useEffect(() => {
     if (!token) return undefined;
     let active = true;
-    axios.get(api, { headers: { Authorization: `Bearer ${token}` } })
+    api.get('/api/resources/')
       .then(({ data }) => {
         if (active) setResources(Array.isArray(data) ? data : data.results || []);
       })
@@ -86,7 +85,7 @@ export default function Resources() {
             <p>Find a quick practice, learn what support can look like, or browse by topic.</p>
             <Link to="/support" className="button">Find someone to talk to <ArrowRight size={16} /></Link>
           </div>
-          <div className="resource-hero-icon" aria-hidden="true"><Heart size={54} strokeWidth={1.4} /></div>
+          <img className="resource-hero-photo" src={studentsPhoto} alt="Two students smiling together" />
         </section>
 
         <div className="resource-controls">

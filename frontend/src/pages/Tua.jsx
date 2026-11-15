@@ -1,14 +1,14 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { ArrowRight, Phone, Send } from 'lucide-react';
-import axios from 'axios';
+import api from '../api';
 import Sidebar from '../components/Sidebar';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import tuaImage from '../assets/TUA.png';
 import PriorityRequestDialog from '../components/PriorityRequestDialog';
 
 export default function Tua() {
-  const { token, user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -37,11 +37,7 @@ export default function Tua() {
 
     try {
       // Call the Django backend
-      const res = await axios.post(
-        'http://127.0.0.1:8000/api/tua/chat/',
-        { message: text },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await api.post('/api/tua/chat/', { message: text });
       
       // Add the real AI reply
       setMessages([...newMessages, {
@@ -76,7 +72,7 @@ export default function Tua() {
           <p>A friendly AI companion for small worries. It helps you find the right counsellor when you're ready.</p>
         </header>
 
-        <section className="panel tua-chat-panel" aria-label="TUA conversation">
+        <section className="card tua-chat-panel" aria-label="TUA conversation">
           <div className="tua-message-list" role="log" aria-live="polite">
             {messages.map((msg, i) => {
               const isUser = msg.role === 'user';
@@ -148,7 +144,6 @@ export default function Tua() {
         </p>
       </main>
       {priorityDialog && <PriorityRequestDialog
-        token={token}
         hasPhone={Boolean(user?.phone)}
         source="tua"
         conversationId={priorityDialog.conversationId}

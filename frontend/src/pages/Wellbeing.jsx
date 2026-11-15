@@ -1,11 +1,12 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
-import { Activity, ArrowRight, BookOpen, Heart, Pause, Play, Sprout, Wind } from 'lucide-react';
+import api from '../api';
+import { Activity, ArrowRight, BookOpen, Heart, Pause, Play, Sprout, TrendingDown, TrendingUp, Wind } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import MoodWheel from '../components/MoodWheel';
 import { AuthContext } from '../context/AuthContext';
 
-const api = 'http://127.0.0.1:8000/api/wellbeing';
+// Legacy moods array kept for check-in history display only
 const moods = [
   { score: 2, label: 'Very low', face: '☹' },
   { score: 4, label: 'Low', face: '🙁' },
@@ -63,16 +64,14 @@ export default function Wellbeing() {
   useEffect(() => {
     if (!token) return undefined;
     let active = true;
-    const headers = { Authorization: `Bearer ${token}` };
-
-    axios.get(`${api}/moods/`, { headers })
+    api.get('/api/wellbeing/moods/')
       .then(({ data }) => {
         if (active) setCheckins(Array.isArray(data) ? data : data.results || []);
       })
       .catch(() => { if (active) setMoodError('Could not load your check-ins. Please try again later.'); })
       .finally(() => { if (active) setLoadingMoods(false); });
 
-    axios.get(`${api}/journals/`, { headers })
+    api.get('/api/wellbeing/journals/')
       .then(({ data }) => {
         if (active) setJournalEntries(Array.isArray(data) ? data : data.results || []);
       })
@@ -118,15 +117,31 @@ export default function Wellbeing() {
     return (recent.reduce((total, mood) => total + mood.score, 0) / recent.length).toFixed(1);
   }, [checkins]);
 
+  // Mood insight: compare this week (last 7) vs previous week (8–14)
+  const moodInsight = useMemo(() => {
+    if (checkins.length < 2) return null;
+    const thisWeek = checkins.slice(0, 7);
+    const lastWeek = checkins.slice(7, 14);
+    const thisAvg = thisWeek.reduce((s, c) => s + c.score, 0) / thisWeek.length;
+    if (lastWeek.length === 0) {
+      if (thisAvg >= 8) return { trend: 'up', line: "You've been doing really well this week. Keep it up." };
+      if (thisAvg >= 6) return { trend: 'neutral', line: "You're holding steady. That's worth acknowledging." };
+      return { trend: 'down', line: "It's been a tough week. You showed up anyway — that matters." };
+    }
+    const lastAvg = lastWeek.reduce((s, c) => s + c.score, 0) / lastWeek.length;
+    const diff = thisAvg - lastAvg;
+    if (diff >= 1) return { trend: 'up', line: `Up ${diff.toFixed(1)} points from last week. Something's going right.` };
+    if (diff <= -1) return { trend: 'down', line: `Down ${Math.abs(diff).toFixed(1)} points from last week. Be gentle with yourself.` };
+    return { trend: 'neutral', line: "Your mood has been consistent week over week." };
+  }, [checkins]);
+
   const handleSaveMood = async () => {
     if (!selectedMood || savingMood) return;
     setSavingMood(true);
     setMoodNotice('');
     setMoodError('');
     try {
-      const { data } = await axios.post(`${api}/moods/`, { score: selectedMood.score, source: 'wellbeing' }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await api.post('/api/wellbeing/moods/', { score: selectedMood.score, source: 'wellbeing' });
       setCheckins((current) => [data, ...current]);
       setSelectedMood(null);
       setMoodNotice('Your check-in is saved. Thanks for taking a moment for yourself.');
@@ -144,9 +159,7 @@ export default function Wellbeing() {
     setSavingJournal(true);
     setJournalError('');
     try {
-      const { data } = await axios.post(`${api}/journals/`, { body }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await api.post('/api/wellbeing/journals/', { body });
       setJournalEntries((current) => [data, ...current]);
       setJournalDraft('');
     } catch (error) {
@@ -205,13 +218,9 @@ export default function Wellbeing() {
             <div className="section-title-row">
               <h2><Heart size={21} /> How are you feeling?</h2>
             </div>
-            <p className="muted-copy">There’s no right answer. Choose what feels closest right now.</p>
-            <div className="mood-options" role="group" aria-label="Choose your mood">
-              {moods.map((mood) => (
-                <button key={mood.score} type="button" className={`mood-option${selectedMood?.score === mood.score ? ' selected' : ''}`} onClick={() => setSelectedMood(mood)} aria-pressed={selectedMood?.score === mood.score}>
-                  <span aria-hidden="true">{mood.face}</span><small>{mood.label}</small>
-                </button>
-              ))}
+            <p className="muted-copy">There's no right answer. Choose what feels closest right now.</p>
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0 16px' }}>
+              <MoodWheel selected={selectedMood} onChange={setSelectedMood} size={270} />
             </div>
             <button type="button" className="button mood-save" onClick={handleSaveMood} disabled={!selectedMood || savingMood}>
               {savingMood ? 'Saving…' : 'Save check-in'}
@@ -233,6 +242,35 @@ export default function Wellbeing() {
               {breathing ? <><Pause size={16} /> Pause exercise</> : <><Play size={16} /> Start exercise</>}
             </button>
           </section>
+
+          {moodInsight && (
+            <section className="panel mood-insight-card">
+              <div className="section-title-row">
+                <h2>
+                  {moodInsight.trend === 'up' && <TrendingUp size={21} color="var(--sky)" />}
+                  {moodInsight.trend === 'down' && <TrendingDown size={21} color="var(--terra)" />}
+                  {moodInsight.trend === 'neutral' && <Activity size={21} color="var(--sage)" />}
+                  {' '}Your week
+                </h2>
+              </div>
+              <div className="mood-insight-avg">
+                <span className="mood-insight-number">{average}</span>
+                <span className="mood-insight-denom">/ 10</span>
+              </div>
+              <p className="mood-insight-line">{moodInsight.line}</p>
+              <div className="mood-insight-bar-wrap">
+                <div
+                  className="mood-insight-bar"
+                  style={{ width: `${(parseFloat(average) / 10) * 100}%` }}
+                  role="progressbar"
+                  aria-valuenow={parseFloat(average)}
+                  aria-valuemin={0}
+                  aria-valuemax={10}
+                />
+              </div>
+              <p className="mood-insight-label">7-day average</p>
+            </section>
+          )}
         </div>
 
         <section className="panel journal-panel">
@@ -261,7 +299,7 @@ export default function Wellbeing() {
         </section>
 
         <section className="support-nudge">
-          <div><strong>Need a little more support?</strong><p>You don’t have to figure everything out on your own.</p></div>
+          <div><strong>Need a little more support?</strong><p>You don't have to figure everything out on your own.</p></div>
           <Link to="/support" className="button button-warning">Find support <ArrowRight size={16} /></Link>
         </section>
       </main>

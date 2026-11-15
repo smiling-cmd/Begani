@@ -1,11 +1,9 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { ArrowLeft, RefreshCw, Send } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
-
-const api = 'http://127.0.0.1:8000/api/messaging/';
 
 function getMessage(error, fallback) {
   const detail = error.response?.data?.error || error.response?.data?.detail;
@@ -29,9 +27,7 @@ export default function ChatRoom() {
     const fetchThread = async (silent = false) => {
       const requestId = ++requestIdRef.current;
       try {
-        const { data } = await axios.get(`${api}${id}/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await api.get(`/api/messaging/${id}/`);
         if (requestId === requestIdRef.current) setThread(data);
       } catch (error) {
         if (requestId === requestIdRef.current && !silent) {
@@ -62,9 +58,7 @@ export default function ChatRoom() {
     setSending(true);
     setSendError('');
     try {
-      await axios.post(`${api}${id}/send/`, { body }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post(`/api/messaging/${id}/send/`, { body });
       setInput('');
       await fetchThreadRef.current?.(true);
     } catch (error) {

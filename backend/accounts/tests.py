@@ -116,6 +116,27 @@ class UserProfileUpdateTests(APITestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.full_name, "")
 
+    def test_profile_includes_absolute_student_photo_url_when_available(self):
+        student = User.objects.create_user(
+            email="photo-student@example.com",
+            password="test-password",
+            role=User.Role.STUDENT,
+        )
+        StudentProfile.objects.create(
+            user=student,
+            alias="PhotoStudent",
+            photo="student_photos/profile.jpg",
+        )
+        self.client.force_authenticate(user=student)
+
+        response = self.client.get("/api/auth/me/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data["photo"],
+            "http://testserver/media/student_photos/profile.jpg",
+        )
+
     def test_student_can_set_a_distinct_public_alias(self):
         student = User.objects.create_user(
             email="student@example.com",

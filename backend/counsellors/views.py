@@ -1,10 +1,18 @@
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.shortcuts import get_object_or_404
+from accounts.permissions import IsUniversityAdmin
 from .models import TherapistProfile, AvailabilitySlot
-from .serializers import TherapistProfileSerializer, TherapistDetailSerializer, AvailabilitySlotSerializer
+from .serializers import (
+    AdminTherapistSerializer,
+    TherapistProfileSerializer,
+    TherapistDetailSerializer,
+    AvailabilitySlotSerializer,
+)
+
 
 class TherapistListView(generics.ListAPIView):
     serializer_class = TherapistProfileSerializer
@@ -52,3 +60,40 @@ class TherapistAvailabilityView(APIView):
         serializer.is_valid(raise_exception=True)
         slot = serializer.save(therapist=therapist)
         return Response(AvailabilitySlotSerializer(slot).data, status=status.HTTP_201_CREATED)
+
+
+class AdminTherapistListView(generics.ListAPIView):
+    serializer_class = AdminTherapistSerializer
+    permission_classes = [IsUniversityAdmin]
+
+    def get_queryset(self):
+        return TherapistProfile.objects.select_related(
+            'user',
+            'verification',
+        ).order_by('-user__date_joined')
+
+
+class AdminTherapistApproveView(APIView):
+    permission_classes = [IsUniversityAdmin]
+
+    def post(self, request, pk):
+        therapist = get_object_or_404(TherapistProfile, id=pk)
+        action = request.data.get('action')
+
+        if action == 'approve':
+            verification = getattr(therapist, 'verification', None)
+            if not verification or not verification.registration_number.strip():
+                return Response(
+                    {'error': 'Cannot approve. Missing registration details.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            therapist.status = TherapistProfile.Status.APPROVED
+            message = 'Therapist approved successfully.'
+        elif action == 'reject':
+            therapist.status = TherapistProfile.Status.SUSPENDED
+            message = 'Therapist rejected.'
+        else:
+            return Response({'error': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        therapist.save(update_fields=['status'])
+        return Response({'message': message, 'status': therapist.status})

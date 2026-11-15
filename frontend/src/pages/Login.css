@@ -1,0 +1,19 @@
+.begani-login-glass {
+  display: block;
+  width: min(100%, 620px);
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  padding-top: clamp(28px, 3vw, 44px);
+  padding-bottom: clamp(28px, 3vw, 44px);
+}
+.begani-login-glass .begani-signup-heading { margin-bottom: 22px; }
+.begani-login-form { display: grid; gap: 12px; }
+.begani-login-form .begani-signup-field { min-height: 54px; }
+.begani-login-form .begani-signup-field input { height: 49px; }
+.begani-login-form .begani-signup-submit { margin-top: 5px; }
+.begani-login-glass .begani-signup-login { margin-top: 21px; }
+
+@media (max-width: 900px) {
+  .begani-login-glass { width: min(100%, 620px); }
+}

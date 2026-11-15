@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../context/AuthContext';
 
 function getErrorMessage(error) {
@@ -28,11 +28,7 @@ export default function OnboardingName() {
     setSaving(true);
     setError('');
     try {
-      const { data } = await axios.patch(
-        'http://127.0.0.1:8000/api/auth/me/update/',
-        { full_name: fullName, alias: publicAlias },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const { data } = await api.patch('/api/auth/me/update/', { full_name: fullName, alias: publicAlias });
       login(token, data);
       navigate('/welcome', { replace: true });
     } catch (requestError) {

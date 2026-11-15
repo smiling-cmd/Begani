@@ -1,11 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { Bell, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
-import beganiLogo from '../assets/logo.png';
-
-const api = 'http://127.0.0.1:8000/api/notifications/';
+import beganiLogo from '../assets/logo-light.png';
 
 function formatDate(value) {
   const date = new Date(value);
@@ -24,8 +22,7 @@ export default function MobileHeader() {
     const controller = new AbortController();
     const loadNotifications = async () => {
       try {
-        const { data } = await axios.get(api, {
-          headers: { Authorization: `Bearer ${token}` },
+        const { data } = await api.get('/api/notifications/', {
           signal: controller.signal,
         });
         setNotifications(data);
@@ -47,15 +44,17 @@ export default function MobileHeader() {
   const unreadCount = notifications.filter((notification) => !notification.read_at).length;
   const profileName = user?.full_name || user?.alias || user?.email || 'Profile';
   const profileInitial = profileName.charAt(0).toUpperCase();
-  const homePath = user?.role === 'therapist' ? '/therapist-dashboard' : '/home';
+  const homePath = user?.role === 'admin'
+    ? '/admin-dashboard'
+    : user?.role === 'therapist'
+      ? '/therapist-dashboard'
+      : '/home';
 
   const handleNotificationClick = async (notification) => {
     if (!notification.read_at) {
       setError('');
       try {
-        const { data } = await axios.patch(`${api}${notification.id}/read/`, {}, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await api.patch(`/api/notifications/${notification.id}/read/`, {});
         setNotifications((current) => current.map((item) => item.id === data.id ? data : item));
       } catch {
         setError('Could not update this notification. Please try again.');

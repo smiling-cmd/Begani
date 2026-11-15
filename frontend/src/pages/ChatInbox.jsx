@@ -1,11 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { MessageCircle, RefreshCw } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
-
-const api = 'http://127.0.0.1:8000/api/messaging/threads/';
 
 function formatDate(value) {
   const date = new Date(value);
@@ -23,8 +21,7 @@ export default function ChatInbox() {
     const controller = new AbortController();
     const loadThreads = async () => {
       try {
-        const { data } = await axios.get(api, {
-          headers: { Authorization: `Bearer ${token}` },
+        const { data } = await api.get('/api/messaging/threads/', {
           signal: controller.signal,
         });
         setThreads(data);

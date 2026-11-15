@@ -1,10 +1,10 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { ArrowRight, CalendarDays, Clock3, MapPin, Mountain, Users, X } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
+import activitiesPhoto from '../assets/activities.jpeg';
 
-const api = 'http://127.0.0.1:8000/api/activities/';
 const typeLabels = {
   hiking: 'Hiking',
   painting: 'Painting',
@@ -47,10 +47,9 @@ export default function Activities() {
   useEffect(() => {
     if (!token) return undefined;
     let active = true;
-    const headers = { Authorization: `Bearer ${token}` };
     Promise.all([
-      axios.get(api, { headers }),
-      axios.get(`${api}registrations/`, { headers }),
+      api.get('/api/activities/'),
+      api.get('/api/activities/registrations/'),
     ])
       .then(([activityResponse, registrationResponse]) => {
         if (!active) return;
@@ -97,11 +96,7 @@ export default function Activities() {
     setJoiningIds((current) => [...current, activity.id]);
     setRegistrationNotice({ type: '', text: '' });
     try {
-      const { data, status: responseStatus } = await axios.post(
-        `${api}${activity.id}/register/`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const { data, status: responseStatus } = await api.post(`/api/activities/${activity.id}/register/`, {});
       setRegistrations((current) => [
         ...current.filter((registration) => registration.activity !== data.activity),
         data,
@@ -132,7 +127,8 @@ export default function Activities() {
             <h2>There’s room for you here.</h2>
             <p>Choose an activity that feels right. Registration is currently open for free activities.</p>
           </div>
-            <div className="activity-count"><strong>{registrations.filter((registration) => registration.status !== 'cancelled').length}</strong><span>your registrations</span></div>
+          <img className="activity-intro-photo" src={activitiesPhoto} alt="Students gathering in a circle outdoors" />
+          <div className="activity-count"><strong>{registrations.filter((registration) => registration.status !== 'cancelled').length}</strong><span>your registrations</span></div>
         </section>
 
         <div className="activity-tools">

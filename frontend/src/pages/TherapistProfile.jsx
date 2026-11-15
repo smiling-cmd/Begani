@@ -1,9 +1,11 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../api';
 import Sidebar from '../components/Sidebar';
 import { ArrowLeft, Calendar } from 'lucide-react';
+import onlineSessionPhoto from '../assets/online.jpeg';
+import inPersonSessionPhoto from '../assets/physical .jpeg';
 
 export default function TherapistProfile() {
   const { id } = useParams();
@@ -18,9 +20,7 @@ export default function TherapistProfile() {
   useEffect(() => {
     const fetchTherapist = async () => {
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/api/counsellors/${id}/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(`/api/counsellors/${id}/`);
         setTherapist(res.data);
       } catch (err) {
         console.error("API Error Details:", err.response?.data || err.message);
@@ -35,10 +35,7 @@ export default function TherapistProfile() {
   const handleBook = async (slotId) => {
     setBookingLoading(true);
     try {
-      await axios.post('http://127.0.0.1:8000/api/bookings/create/', 
-        { slot_id: slotId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post('/api/bookings/create/', { slot_id: slotId });
       alert("Booking requested! The therapist will confirm shortly.");
       navigate('/home');
     } catch (err) {
@@ -80,6 +77,20 @@ export default function TherapistProfile() {
                   <span className="therapist-profile-badge secondary">
                     {therapist.session_length_minutes} mins
                   </span>
+                </div>
+                <div className="therapist-format-list" aria-label="Available session formats">
+                  {(therapist.format === 'online' || therapist.format === 'both') && (
+                    <div className="therapist-format-card">
+                      <img src={onlineSessionPhoto} alt="A person taking notes during an online counselling session" />
+                      <span>Online sessions</span>
+                    </div>
+                  )}
+                  {(therapist.format === 'in_person' || therapist.format === 'both') && (
+                    <div className="therapist-format-card">
+                      <img src={inPersonSessionPhoto} alt="A student talking with a counsellor in person" />
+                      <span>In-person sessions</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>

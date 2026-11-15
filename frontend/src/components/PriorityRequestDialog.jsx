@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { Phone, X } from 'lucide-react';
 
-export default function PriorityRequestDialog({ token, hasPhone, source, conversationId, onClose, onCreated }) {
+export default function PriorityRequestDialog({ hasPhone, source, conversationId, onClose, onCreated }) {
   const [phoneConsent, setPhoneConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -13,15 +13,11 @@ export default function PriorityRequestDialog({ token, hasPhone, source, convers
     setSubmitting(true);
     setError('');
     try {
-      const { data } = await axios.post(
-        'http://127.0.0.1:8000/api/tua/priority/',
-        {
-          source,
-          phone_consent: phoneConsent,
-          ...(conversationId ? { tua_conversation_id: conversationId } : {}),
-        },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const { data } = await api.post('/api/tua/priority/', {
+        source,
+        phone_consent: phoneConsent,
+        ...(conversationId ? { tua_conversation_id: conversationId } : {}),
+      });
       onCreated(data);
     } catch (requestError) {
       setError(requestError.response?.data?.error || 'Could not send your request. Please try again.');

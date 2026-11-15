@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
-from .models import TherapistProfile, AvailabilitySlot
+from .models import TherapistProfile, AvailabilitySlot, TherapistVerification
 
 class TherapistProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -51,3 +51,31 @@ class TherapistDetailSerializer(serializers.ModelSerializer):
             'approach', 'languages', 'session_length_minutes',
             'format', 'fee_kes', 'type', 'slots'
         )
+
+
+class AdminTherapistSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email', read_only=True)
+    registration_number = serializers.SerializerMethodField()
+    licence_expiry = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TherapistProfile
+        fields = (
+            'id', 'display_name', 'email', 'type', 'category',
+            'status', 'registration_number', 'licence_expiry'
+        )
+
+    @staticmethod
+    def get_verification(therapist):
+        try:
+            return therapist.verification
+        except TherapistVerification.DoesNotExist:
+            return None
+
+    def get_registration_number(self, therapist):
+        verification = self.get_verification(therapist)
+        return verification.registration_number if verification else None
+
+    def get_licence_expiry(self, therapist):
+        verification = self.get_verification(therapist)
+        return verification.licence_expiry if verification else None

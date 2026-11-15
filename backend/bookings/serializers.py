@@ -57,3 +57,16 @@ class TherapistBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ('id', 'student_alias', 'slot_time', 'status', 'fee_kes_snapshot', 'is_priority')
+
+class StudentBookingSerializer(serializers.ModelSerializer):
+    therapist_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Booking
+        fields = ('id', 'starts_at', 'status', 'therapist_name')
+        read_only_fields = fields
+
+    def get_therapist_name(self, obj):
+        user = getattr(obj.therapist, 'user', None)
+        name = (getattr(user, 'full_name', '') or '').strip()
+        return name or 'Your counsellor'

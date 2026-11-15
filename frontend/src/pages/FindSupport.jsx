@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../api';
 import { MessageCircle, Search } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { Link, useNavigate } from 'react-router-dom';
+import studentsPhoto from '../assets/physical .jpeg';
 
 export default function FindSupport() {
   const { token, user } = useContext(AuthContext);
@@ -20,9 +21,7 @@ export default function FindSupport() {
   useEffect(() => {
     const fetchTherapists = async () => {
       try {
-        const res = await axios.get('http://127.0.0.1:8000/api/counsellors/', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get('/api/counsellors/');
         setTherapists(res.data);
       } catch (error) {
         console.error("Failed to fetch therapists", error);
@@ -46,7 +45,7 @@ export default function FindSupport() {
     setStartingChatId(therapistId);
     setChatError('');
     try {
-      const { data } = await axios.post('http://127.0.0.1:8000/api/messaging/start/', { therapist_id: therapistId }, { headers: { Authorization: `Bearer ${token}` } });
+      const { data } = await api.post('/api/messaging/start/', { therapist_id: therapistId });
       navigate(`/chat/${data.thread_id}`);
     } catch (error) {
       setChatError(error.response?.data?.error || 'Could not start chat. Please try again.');
@@ -62,10 +61,10 @@ export default function FindSupport() {
       {/* MAIN CONTENT */}
       <main className="page-content">
         
-        <div className="support-heading" style={{ marginBottom: '2rem' }}>
+        <div className="support-heading support-page-heading">
           <div>
-            <h1 style={{ color: 'var(--heading)', fontSize: '2rem', margin: 0, fontWeight: '800' }}>Find Support</h1>
-            <p style={{ color: 'var(--muted)', margin: '0.3rem 0 0 0', fontWeight: '500' }}>Chat with a counsellor first, then book when you feel ready. You're not alone.</p>
+            <h1>Find Support</h1>
+            <p>Chat with a counsellor first, then book when you feel ready. You're not alone.</p>
           </div>
           {user?.role === 'student' && (
             <Link className="button button-secondary support-chats-link" to="/chats">
@@ -74,21 +73,36 @@ export default function FindSupport() {
           )}
         </div>
 
+        <section className="support-community-panel panel">
+          <img src={studentsPhoto} alt="A student talking with a counsellor" />
+          <div>
+            <strong>You can start with one conversation.</strong>
+            <p>Browse counsellors and choose someone you feel comfortable talking to.</p>
+          </div>
+        </section>
+
         {/* Search Bar */}
-        <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '12px', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2rem', boxShadow: 'var(--shadow)' }}>
-          <Search size={20} color="var(--muted)" />
-          <input 
-            type="text" 
-            placeholder="Search by name or specialty..." 
+        <div className="search-field support-search-field">
+          <Search size={20} aria-hidden="true" />
+          <label className="sr-only" htmlFor="support-search">Search counsellors</label>
+          <input
+            id="support-search"
+            type="search"
+            placeholder="Search by name or specialty..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ border: 'none', outline: 'none', flex: 1, fontSize: '0.95rem', padding: '0.5rem 0', color: 'var(--ink)', background: 'transparent' }}
           />
         </div>
 
-        <div role="group" aria-label="Filter counsellors" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginTop: '-1rem', marginBottom: '1.5rem' }}>
+        <div className="filter-list support-filter-list" role="group" aria-label="Filter counsellors">
           {[['all', 'All'], ['school_counsellor', 'School counsellors'], ['private', 'Private therapists']].map(([value, label]) => (
-            <button key={value} type="button" onClick={() => setTypeFilter(value)} aria-pressed={typeFilter === value} style={{ border: typeFilter === value ? '1px solid var(--brand-green)' : '1px solid var(--line)', borderRadius: '20px', padding: '0.55rem 1rem', color: typeFilter === value ? 'white' : 'var(--heading)', background: typeFilter === value ? 'var(--brand-green)' : 'var(--card)', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
+            <button
+              key={value}
+              className={`filter-chip${typeFilter === value ? ' selected' : ''}`}
+              type="button"
+              onClick={() => setTypeFilter(value)}
+              aria-pressed={typeFilter === value}
+            >
               {label}
             </button>
           ))}
@@ -98,51 +112,51 @@ export default function FindSupport() {
 
         {/* Therapist Grid */}
         {loading ? (
-          <p>Loading therapists...</p>
+          <p className="muted-copy">Loading therapists...</p>
         ) : error ? (
-          <div role="alert" style={{ background: 'var(--terra-soft)', borderLeft: '4px solid var(--terra)', borderRadius: '12px', padding: '1.25rem', color: 'var(--ink)' }}>
+          <div className="support-error-state" role="alert">
             <p>{error}</p>
-            <button type="button" onClick={() => { setError(''); setLoading(true); setRetryCount((count) => count + 1); }} style={{ border: 0, borderRadius: '8px', padding: '0.6rem 0.9rem', color: 'white', background: 'var(--brand-green)', cursor: 'pointer' }}>Try again</button>
+            <button className="button" type="button" onClick={() => { setError(''); setLoading(true); setRetryCount((count) => count + 1); }}>Try again</button>
           </div>
         ) : filteredTherapists.length === 0 ? (
-          <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '12px', padding: '1.5rem', color: 'var(--muted)' }}>
+          <div className="panel support-empty-state">
             <p>No counsellors match those filters yet.</p>
-            <button type="button" onClick={() => { setSearch(''); setTypeFilter('all'); }} style={{ border: '1px solid var(--brand-green)', borderRadius: '20px', padding: '0.55rem 1rem', color: 'var(--heading)', background: 'var(--card)', cursor: 'pointer' }}>Clear filters</button>
+            <button className="button button-secondary" type="button" onClick={() => { setSearch(''); setTypeFilter('all'); }}>Clear filters</button>
           </div>
         ) : (
           <div className="therapist-grid">
             {filteredTherapists.map((therapist) => (
-              <div key={therapist.id} style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '16px', padding: '1.5rem', boxShadow: 'var(--shadow)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '1rem' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'var(--surface-subtle)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5rem' }}>
+              <article className="card support-counsellor-card" key={therapist.id}>
+                <div className="support-counsellor-heading">
+                  <div className="support-counsellor-avatar" aria-hidden="true">
                     👤
                   </div>
-                  <div>
-                    <h3 style={{ margin: 0, color: 'var(--heading)', fontSize: '1.1rem' }}>{therapist.display_name}</h3>
-                    <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>{therapist.title}</p>
+                  <div className="support-counsellor-copy">
+                    <h3>{therapist.display_name}</h3>
+                    <p>{therapist.title}</p>
                   </div>
                 </div>
                 
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                  <span style={{ background: 'var(--tint)', color: 'var(--green)', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600' }}>
+                <div className="support-counsellor-badges">
+                  <span className="price-tag">
                     {therapist.type === 'private' ? `KES ${therapist.fee_kes}` : 'Free (School)'}
                   </span>
-                  <span style={{ background: 'var(--surface-subtle)', color: 'var(--heading)', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600' }}>
+                  <span className="price-tag support-category-tag">
                     {therapist.category}
                   </span>
                 </div>
 
-                <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '1rem', lineHeight: '1.4' }}>
+                <p className="support-counsellor-bio">
                   {therapist.bio || "Experienced professional ready to help."}
                 </p>
 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="support-counsellor-actions">
                   <Link className="button support-profile-button" to={`/therapist/${therapist.id}`}>View Profile</Link>
-                  <button type="button" onClick={() => handleStartChat(therapist.id)} disabled={Boolean(startingChatId)} style={{ flex: 1, padding: '0.6rem', background: 'var(--card)', color: 'var(--heading)', border: '1px solid var(--brand-green)', borderRadius: '8px', cursor: startingChatId ? 'wait' : 'pointer', fontWeight: '600', fontSize: '0.85rem' }}>
+                  <button className="button button-secondary support-chat-button" type="button" onClick={() => handleStartChat(therapist.id)} disabled={Boolean(startingChatId)}>
                     {startingChatId === therapist.id ? 'Starting…' : 'Chat first'}
                   </button>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}

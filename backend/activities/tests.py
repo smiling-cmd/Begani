@@ -119,3 +119,68 @@ class ActivityRegistrationTests(APITestCase):
 
         self.assertEqual(response.status_code, 409)
         self.assertEqual(ActivityRegistration.objects.filter(activity=self.activity).count(), 1)
+
+
+class AdminActivityCreateTests(APITestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            email="activity-admin@example.com",
+            password="test-password",
+            role=User.Role.ADMIN,
+            is_active=True,
+            is_staff=False,
+        )
+        self.student = User.objects.create_user(
+            email="activity-student@example.ac.ke",
+            password="test-password",
+            role=User.Role.STUDENT,
+            is_active=True,
+        )
+
+    def test_admin_can_create_published_activity(self):
+        self.client.force_authenticate(user=self.admin)
+        starts_at = timezone.now() + timedelta(days=2)
+
+        response = self.client.post(
+            "/api/activities/admin/create/",
+            {
+                "title": "Campus yoga",
+                "type": Activity.Type.YOGA,
+                "description": "A beginner-friendly session.",
+                "starts_at": starts_at.isoformat(),
+                "duration_minutes": 75,
+                "location_text": "Campus hall",
+                "capacity": 20,
+                "fee_kes": 0,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        activity = Activity.objects.get(id=response.data["id"])
+        self.assertEqual(activity.status, Activity.Status.PUBLISHED)
+        self.assertEqual(activity.created_by, self.admin)
+        self.assertEqual(activity.capacity, 20)
+
+        self.client.force_authenticate(user=self.student)
+        student_activities = self.client.get("/api/activities/")
+        self.assertEqual(student_activities.status_code, 200)
+        self.assertEqual(student_activities.data[0]["title"], "Campus yoga")
+
+    def test_non_admin_cannot_create_activities(self):
+        self.client.force_authenticate(user=self.student)
+
+        response = self.client.post(
+            "/api/activities/admin/create/",
+            {
+                "title": "Campus yoga",
+                "type": Activity.Type.YOGA,
+                "starts_at": (timezone.now() + timedelta(days=2)).isoformat(),
+                "location_text": "Campus hall",
+                "capacity": 20,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(Activity.objects.exists())

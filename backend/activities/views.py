@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.permissions import IsUniversityAdmin
 from .models import Activity, ActivityRegistration
 
 
@@ -36,12 +37,59 @@ class ActivityListView(generics.ListAPIView):
         ).order_by("starts_at")
 
 
+class AdminActivityCreateSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Activity
+        fields = (
+            "id",
+            "title",
+            "type",
+            "description",
+            "starts_at",
+            "duration_minutes",
+            "location_text",
+            "capacity",
+            "fee_kes",
+            "status",
+        )
+
+    def validate_starts_at(self, value):
+        if value <= timezone.now():
+            raise serializers.ValidationError("Choose a future start date and time.")
+        return value
+
+    def validate_duration_minutes(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Duration must be at least one minute.")
+        return value
+
+    def validate_capacity(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Capacity must be at least one.")
+        return value
+
+
+class AdminActivityCreateView(generics.CreateAPIView):
+    queryset = Activity.objects.all()
+    serializer_class = AdminActivityCreateSerializer
+    permission_classes = [IsUniversityAdmin]
+
+    def perform_create(self, serializer):
+        serializer.save(
+            status=Activity.Status.PUBLISHED,
+            created_by=self.request.user,
+        )
+
+
 class ActivityRegistrationSerializer(serializers.ModelSerializer):
     activity_title = serializers.CharField(source="activity.title", read_only=True)
+    activity_starts_at = serializers.DateTimeField(source="activity.starts_at", read_only=True)
 
     class Meta:
         model = ActivityRegistration
-        fields = ("id", "activity", "activity_title", "status", "registered_at")
+        fields = ("id", "activity", "activity_title", "activity_starts_at", "status", "registered_at")
         read_only_fields = fields
 
 

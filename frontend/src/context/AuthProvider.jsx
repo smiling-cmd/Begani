@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AuthContext } from './AuthContext';
+import api from '../api';
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -16,18 +17,16 @@ export default function AuthProvider({ children }) {
   useEffect(() => {
     if (!token) return;
     const requestVersion = profileRequestVersion.current;
-    fetch('http://127.0.0.1:8000/api/auth/me/', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    // The shared client attaches the current token and handles 401 responses.
+    api.get('/api/auth/me/')
       .then((response) => {
-        if (response.ok) return response.json();
-        throw new Error('Token expired');
+        if (profileRequestVersion.current === requestVersion) setUser(response.data);
       })
-      .then((profile) => {
-        if (profileRequestVersion.current === requestVersion) setUser(profile);
-      })
-      .catch(() => {
-        if (profileRequestVersion.current === requestVersion) logout();
+      .catch((error) => {
+        // Only log out if the token is actually invalid
+        if (error.response?.status === 401 && profileRequestVersion.current === requestVersion) {
+          logout();
+        }
       });
   }, [token]);
 
