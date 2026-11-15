@@ -4,7 +4,7 @@ from typing import cast
 from django.http import HttpResponse
 from rest_framework.test import APIClient, APITestCase
 
-from .models import User
+from .models import StudentProfile, User
 
 
 class RegistrationSignInTests(APITestCase):
@@ -92,6 +92,16 @@ class UserProfileUpdateTests(APITestCase):
         self.assertEqual(self.user.full_name, "Amina Njoroge")
         self.assertEqual(json.loads(response.content)["full_name"], "Amina Njoroge")
 
+    def test_non_students_cannot_set_a_public_alias(self):
+        response = self.client.patch(
+            "/api/auth/me/update/",
+            {"alias": "counsellor"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("alias", response.data)
+
     def test_rejects_blank_full_name(self):
         response = cast(
             HttpResponse,
@@ -105,3 +115,54 @@ class UserProfileUpdateTests(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.user.refresh_from_db()
         self.assertEqual(self.user.full_name, "")
+
+    def test_student_can_set_a_distinct_public_alias(self):
+        student = User.objects.create_user(
+            email="student@example.com",
+            password="test-password",
+            role=User.Role.STUDENT,
+        )
+        profile = StudentProfile.objects.create(user=student, alias="Student_123abc")
+        self.client.force_authenticate(user=student)
+
+        response = cast(
+            HttpResponse,
+            self.client.patch(
+                "/api/auth/me/update/",
+                {"full_name": "Amina Njoroge", "alias": "  Amina.N  "},
+                format="json",
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        profile.refresh_from_db()
+        self.assertEqual(profile.alias, "Amina.N")
+        self.assertEqual(json.loads(response.content)["alias"], "Amina.N")
+
+    def test_rejects_aliases_used_by_another_student_case_insensitively(self):
+        student = User.objects.create_user(
+            email="student@example.com",
+            password="test-password",
+            role=User.Role.STUDENT,
+        )
+        profile = StudentProfile.objects.create(user=student, alias="Student_123abc")
+        other_student = User.objects.create_user(
+            email="other-student@example.com",
+            password="test-password",
+            role=User.Role.STUDENT,
+        )
+        StudentProfile.objects.create(user=other_student, alias="Yvonne")
+        self.client.force_authenticate(user=student)
+
+        response = cast(
+            HttpResponse,
+            self.client.patch(
+                "/api/auth/me/update/",
+                {"alias": "yvonne"},
+                format="json",
+            ),
+        )
+
+        self.assertEqual(response.status_code, 400)
+        profile.refresh_from_db()
+        self.assertEqual(profile.alias, "Student_123abc")

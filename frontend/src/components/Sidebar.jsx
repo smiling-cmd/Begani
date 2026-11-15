@@ -64,7 +64,7 @@ export default function Sidebar() {
           <div className="sidebar-user">
             <div className="user-avatar" aria-hidden="true"><UserRound size={18} /></div>
             <div className="user-copy">
-              <strong>{user?.full_name || user?.alias || user?.email || 'User'}</strong>
+              <strong>{user?.alias || user?.full_name || user?.email || 'User'}</strong>
               <small>{user?.role}</small>
             </div>
           </div>
