@@ -5,8 +5,8 @@ import { API_BASE_URL } from '../api';
 import { ArrowRight, AtSign, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import beganiLogo from '../assets/logo1.png';
-import campusBackground from '../assets/Sunlit Campus Clock Tower Landscape.png';
-import campusStudentArt from '../assets/Serene Campus Study Day.png';
+import campusBackground from '../assets/campus.jpg';
+import happyStudents from '../assets/happy students.jpg';
 import './Register.css';
 import './Login.css';
 
@@ -55,7 +55,7 @@ export default function Login() {
     <main
       className="begani-signup-page begani-login-page"
       style={{
-        '--begani-campus-image': `url("${campusStudentArt}")`,
+        '--begani-campus-image': `url("${happyStudents}")`,
         '--signup-campus-background': `url("${campusBackground}")`,
       }}
     >
@@ -63,8 +63,8 @@ export default function Login() {
         <img className="begani-signup-logo" src={beganiLogo} alt="Begani — Share the load." />
         <img
           className="begani-signup-girl"
-          src={campusStudentArt}
-          alt="A student relaxing on campus with her cat"
+          src={happyStudents}
+          alt="Happy students spending time together"
         />
       </section>
 

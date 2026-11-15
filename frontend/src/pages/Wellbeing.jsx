@@ -182,9 +182,9 @@ export default function Wellbeing() {
       <Sidebar />
       <main className="page-content">
         <header className="page-heading">
-          <div className="eyebrow"><Sprout size={16} /> Your space to check in</div>
-          <h1>Wellbeing</h1>
-          <p>Small steps count. Take care of your mind, body, and heart at your own pace.</p>
+          <div className="eyebrow"><Sprout size={16} /> Your daily reset</div>
+          <h1>Make space for calm.</h1>
+          <p>A small pause can change the shape of your day. Check in, breathe, and take what you need.</p>
         </header>
 
         <div className="wellbeing-grid">
@@ -228,11 +228,12 @@ export default function Wellbeing() {
           </section>
 
           <section className="panel breathing-card">
+            <span className="wellbeing-practice-kicker">Today’s practice · 3 minutes</span>
             <div className="section-title-row">
-              <h2><Wind size={21} /> Guided breathing</h2>
+              <h2><Wind size={21} /> Deep breath reset</h2>
               <span className="breathing-pattern">4 · 4 · 6</span>
             </div>
-            <p>Follow a gentle pace: breathe in, pause, then breathe out slowly.</p>
+            <p>Let your shoulders soften. Follow a gentle pace: breathe in, pause, then breathe out slowly.</p>
             <div className={`breath-orb${breathing ? ' is-breathing' : ''}`} aria-live="polite">
               <strong>{breathing ? secondsLeft : 'Ready'}</strong>
               <span>{breathing ? phases[phaseIndex].name : 'Take a pause'}</span>

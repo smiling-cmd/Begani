@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import Sidebar from '../components/Sidebar';
-import { MessageCircle, Mountain, Sun, Zap, Phone, Calendar, Leaf } from 'lucide-react';
+import { ArrowRight, MessageCircle, Mountain, Sun, Zap, Phone, Calendar, Leaf } from 'lucide-react';
 import api from '../api';
 import { Link, useNavigate } from 'react-router-dom';
 import tuaImage from '../assets/TUA-transparent.png';
 import PriorityRequestDialog from '../components/PriorityRequestDialog';
 import MoodWheel from '../components/MoodWheel';
-import studentsPhoto from '../assets/students2.jpeg';
+import MobileHeader from '../components/MobileHeader';
+import focusShiftVideo from '../assets/animo-focus-shift-720p.mp4';
 
 function getTimeGreeting() {
   const hour = new Date().getHours();
@@ -143,33 +143,29 @@ export default function Home() {
 
   // Home is the student dashboard; therapist accounts use TherapistDashboard.
   return (
-    <div className="app-shell">
-      <Sidebar />
-
-      <main className="page-content home-page-content">
-
-        <section className="home-community-card">
-          <div className="home-community-copy">
-            <header className="home-page-header">
-              <div>
-                <h1 className="home-greeting-title">
-                  {getTimeGreeting()}, {user?.full_name?.trim() || user?.alias || 'friend'}!
-                </h1>
-                <p className="home-page-tagline">Take a moment. You matter.</p>
-              </div>
-            </header>
-            <span className="home-community-eyebrow">Campus community</span>
-            <h2>Connection can start small.</h2>
-            <p>Find activities and people that help campus feel a little more like yours.</p>
-            <Link to="/activities">Explore activities <Mountain size={15} /></Link>
+    <div className="app-shell home-scroll-app">
+      <MobileHeader />
+      <main className="page-content home-page-content home-scroll-page">
+        <nav className="home-scroll-nav" aria-label="Home sections">
+          <a href="#welcome">Welcome</a><a href="#tua">TUA</a><a href="#check-in">Check-in</a><a href="#support">Support</a>
+        </nav>
+        <section id="welcome" className="home-focus-film home-scroll-slide scroll-reveal scroll-reveal-delay-1" aria-labelledby="focus-film-title">
+          <div className="home-focus-film-copy">
+            <span className="home-community-eyebrow">A moment to reset</span>
+            <h1 id="focus-film-title">{getTimeGreeting()}, {user?.full_name?.trim() || user?.alias || 'friend'}.</h1>
+            <p>Take a slow breath, notice where you are, and choose the next small thing that supports you.</p>
+            <a href="#tua">Meet TUA <ArrowRight size={16} /></a>
           </div>
-          <img src={studentsPhoto} alt="Students gathering together outdoors on campus" />
+          <video className="home-focus-film-video" autoPlay muted loop playsInline controls preload="metadata" aria-label="A calming focus and reset video">
+            <source src={focusShiftVideo} type="video/mp4" />
+            Your browser does not support this video.
+          </video>
         </section>
 
-        <div className="home-dashboard-grid">
+        <div id="tua" className="home-dashboard-grid home-scroll-slide scroll-reveal scroll-reveal-delay-2">
 
           {/* Mood Check-in Card */}
-          <section className="card home-card">
+          <section id="check-in" className="card home-card">
             <h3 className="home-card-title">
               <Sun size={20} aria-hidden="true" /> Daily Mood Check-in
             </h3>
@@ -253,7 +249,7 @@ export default function Home() {
         </div>
 
         {/* Bottom Banner */}
-        <div className="home-urgent-banner">
+        <div id="support" className="home-urgent-banner home-scroll-slide scroll-reveal">
             <div className="home-urgent-copy">
                 <div className="home-urgent-icon">!</div>
                 <div>

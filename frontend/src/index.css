@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
 :root {
-  --font-heading: 'Cormorant Garamond', Georgia, serif;
-  --font-body: 'DM Sans', 'Helvetica Neue', sans-serif;
+  --font-heading: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Manrope', 'Helvetica Neue', sans-serif;
 }
 
 body {
@@ -168,7 +168,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .activity-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(190px, min(24%, 240px)) auto; align-items: center; gap: 20px; overflow: hidden; padding: 24px 28px; background: linear-gradient(115deg, var(--hero-start), var(--hero-end)); }
 .activity-intro h2, .resource-hero h2 { margin: 0 0 7px; color: var(--navy); font-size: 22px; }
 .activity-intro p, .resource-hero p { margin: 0; color: var(--muted); line-height: 1.55; }
-.activity-intro-photo { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; border-radius: 15px; background: var(--surface-subtle); object-fit: cover; object-position: center; }
+.activity-intro-photo { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; border-radius: 15px; background: var(--surface-subtle); object-fit: contain; object-position: center; }
 .activity-count { display: grid; min-width: 100px; place-items: center; padding: 10px; border-radius: 14px; color: var(--green); background: var(--card); }
 .activity-count strong { font-size: 23px; }
 .activity-count span { color: var(--muted); font-size: 11px; }
@@ -195,7 +195,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .resource-hero > div:first-child { max-width: 690px; align-self: center; padding: 30px 32px; }
 .resource-hero .button { margin-top: 17px; }
 .resource-hero-icon { display: grid; width: 116px; height: 116px; flex: 0 0 auto; place-items: center; border-radius: 28px; color: var(--green); background: var(--tint); }
-.resource-hero-photo { display: block; width: 100%; height: auto; min-height: 0; aspect-ratio: 1; background: var(--surface-subtle); object-fit: cover; object-position: center; }
+.resource-hero-photo { display: block; width: 100%; height: auto; min-height: 0; aspect-ratio: 1; background: var(--surface-subtle); object-fit: contain; object-position: center; }
 .resource-controls { display: grid; gap: 14px; margin: 20px 0 23px; }
 .section-title-row > h2 { color: var(--navy); font-size: 19px; }
 .resource-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 16px; }
@@ -419,7 +419,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .therapist-format-card { display: flex; width: min(100%, 240px); flex-direction: column; align-items: stretch; gap: 9px; overflow: hidden; padding: 8px; border: 1px solid var(--line); border-radius: 13px; color: var(--heading); background: var(--surface-raised); font-size: 12px; font-weight: 650; }
 .therapist-format-card img { display: block; width: 100%; height: 150px; border-radius: 8px; background: var(--surface-subtle); object-fit: contain; object-position: center; }
 .support-community-panel { display: flex; align-items: center; gap: 22px; overflow: hidden; margin: -12px 0 26px; padding: 18px; background: linear-gradient(110deg, var(--hero-start), var(--hero-end)); }
-.support-community-panel img { display: block; width: min(42%, 420px); height: auto; aspect-ratio: 3 / 2; flex: 0 0 auto; border-radius: 14px; background: var(--surface-subtle); object-fit: cover; object-position: center; }
+.support-community-panel img { display: block; width: min(42%, 420px); height: auto; aspect-ratio: 3 / 2; flex: 0 0 auto; border-radius: 14px; background: var(--surface-subtle); object-fit: contain; object-position: center; }
 .support-community-panel strong { color: var(--heading); font-size: 15px; }
 .support-community-panel p { margin: 5px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .therapist-profile-grid { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(260px, 1fr); align-items: start; gap: 18px; }
@@ -1306,4 +1306,336 @@ h1, h2, h3, h4, h5, h6,
   .page-content { padding: 20px 16px 104px; }
   .page-heading h1, .page-title { font-size: 2.55rem; }
   .home-community-card, .home-card, .home-tua-card, .panel, .card { border-radius: 22px; }
+}
+
+/* Begani organic editorial system: a deliberately light, reassuring workspace. */
+:root {
+  --brand-teal: #20c9b3;
+  --brand-teal-deep: #118b7c;
+  --forest: #163f35;
+  --forest-soft: #245748;
+  --sage: #aebfae;
+  --sage-pale: #e6efe8;
+  --ivory: #fbf8f0;
+  --paper: #fffdf8;
+  --terracotta: #c97962;
+  --ink: #183b33;
+  --heading: #163f35;
+  --muted: #687b70;
+  --bg: var(--ivory);
+  --card: var(--paper);
+  --line: #dde6dd;
+  --tint: #e2f5ef;
+  --shadow: 0 18px 45px -34px rgba(22, 63, 53, .42);
+}
+
+body {
+  min-width: 320px;
+  background: radial-gradient(circle at 2% 0%, rgba(195, 223, 208, .48), transparent 30rem),
+    radial-gradient(circle at 100% 100%, rgba(245, 218, 194, .34), transparent 34rem), var(--ivory);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.page-heading h1, .page-title, .support-page-heading h1,
+.therapist-dashboard-title, .tua-heading h1, .home-greeting-title,
+.home-community-card h2, .home-tua-card h3, .home-urgent-title {
+  font-family: var(--font-heading) !important;
+  font-weight: 400;
+  letter-spacing: -.04em;
+}
+
+.page-heading h1, .page-title { font-size: clamp(2.75rem, 5vw, 4.75rem); line-height: .98; }
+.eyebrow, .home-community-eyebrow { color: var(--brand-teal-deep); font-size: 10px; font-weight: 800; letter-spacing: .17em; }
+
+.sidebar {
+  border-right: 1px solid rgba(255,255,255,.08);
+  background: radial-gradient(circle at 18% 2%, rgba(174, 191, 174, .33), transparent 20rem),
+    linear-gradient(165deg, #204e41 0%, var(--forest) 58%, #102f28 100%);
+}
+.brand-lockup { margin-bottom: 50px; }
+.sidebar-link { min-height: 46px; border-radius: 14px; color: rgba(251, 248, 240, .75); font-size: 13px; }
+.sidebar-link.is-active { border-color: rgba(32, 201, 179, .24); background: rgba(32, 201, 179, .16); box-shadow: inset 3px 0 0 var(--brand-teal); }
+.sidebar-link:hover { background: rgba(255,255,255,.10); }
+.sidebar-user { border-radius: 18px; background: rgba(255,255,255,.08); }
+.tua-nav-icon { border-radius: 9px; background: var(--sage-pale); }
+
+.panel, .card, .settings-card, .settings-appearance, .settings-logout,
+.admin-content-panel, .therapist-dashboard-card, .therapist-info-card,
+.calendar-month, .calendar-agenda, .journal-panel {
+  border: 1px solid rgba(22, 63, 53, .10);
+  border-radius: 24px;
+  background: rgba(255, 253, 248, .88);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.92);
+}
+.panel:hover, .card:hover { box-shadow: 0 22px 50px -34px rgba(22, 63, 53, .48), inset 0 1px 0 #fff; }
+
+.button, .btn-primary, .home-mood-submit {
+  border-color: var(--brand-teal);
+  border-radius: 999px;
+  color: #073d35;
+  background: var(--brand-teal);
+  box-shadow: 0 12px 22px -16px rgba(17, 139, 124, .7);
+}
+.button:hover:not(:disabled), .btn-primary:hover:not(:disabled), .home-mood-submit:hover:not(:disabled) {
+  color: #fff;
+  background: var(--brand-teal-deep);
+}
+.button-secondary, .btn-secondary, .button-light, .filter-chip, .icon-button {
+  border-color: #d8e2d8;
+  border-radius: 999px;
+  background: rgba(255,253,248,.86);
+}
+.filter-chip.selected { border-color: var(--forest); background: var(--forest); }
+.button-warning, .button-danger { border-color: var(--terracotta); background: var(--terracotta); }
+.search-field, .tua-composer, .chat-composer { border-color: #d7e2d8; background: rgba(255,253,248,.93); }
+
+.home-page-content::before { opacity: .8; }
+.home-community-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(22, 63, 53, .10);
+  border-radius: 32px;
+  background: linear-gradient(118deg, #e0eee5 0%, #f8f2e6 62%, #f1e8d9 100%);
+  box-shadow: 0 28px 60px -42px rgba(22, 63, 53, .55);
+}
+.home-community-card::after { content: ''; position: absolute; right: 34%; bottom: -110px; width: 260px; height: 260px; border-radius: 48% 52% 43% 57%; background: rgba(174,191,174,.28); pointer-events: none; }
+.home-community-copy { position: relative; z-index: 1; }
+.home-community-card > img { position: relative; z-index: 1; filter: saturate(.72) sepia(.08); }
+.home-community-card a { color: var(--forest); font-weight: 800; }
+.home-community-card a svg { color: var(--brand-teal-deep); }
+.home-card { border-radius: 26px; }
+.home-card-title { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 400; }
+.home-quick-access-icon, .resource-icon, .resource-hero-icon { color: var(--brand-teal-deep); background: var(--tint); }
+.home-tua-card { border-radius: 28px; background: linear-gradient(135deg, #d8eee4, #f5f0e4); }
+.home-tua-cta { background: var(--forest); }
+.home-urgent-banner { border-color: #ead4c9; background: #fbefe8; }
+.home-urgent-icon { color: #fffaf7; background: var(--terracotta); }
+.home-emergency-link { color: #9a4f3c; }
+
+.activity-intro, .resource-hero { border-radius: 28px; background: linear-gradient(125deg, #dcece2, #fbf2e6); }
+.activity-art { background: linear-gradient(145deg, #e5efe5, #bfdbc9); }
+.resource-card, .activity-card, .therapist-card { border-radius: 22px; }
+.resource-card:hover, .activity-card:hover, .therapist-card:hover { transform: translateY(-3px); }
+.chat-message.mine, .tua-message-bubble.is-user { background: linear-gradient(140deg, var(--forest-soft), var(--forest)); }
+
+.begani-signup-page { color: var(--ink); background: var(--ivory); font-family: var(--font-body); }
+.begani-signup-page .begani-signup-glass { border-radius: 30px; }
+.begani-signup-page .begani-signup-heading h1 { font-family: var(--font-heading) !important; font-weight: 400 !important; }
+.begani-signup-page .begani-signup-submit { border-color: var(--brand-teal); color: #073d35; background: var(--brand-teal); }
+.begani-signup-page .begani-signup-submit:hover:not(:disabled) { color: #fff; background: var(--brand-teal-deep); }
+
+@media (max-width: 640px) {
+  .page-heading h1, .page-title { font-size: 2.7rem; }
+  .home-community-card { border-radius: 24px; }
+  .home-community-card::after { right: -80px; bottom: -105px; }
+  .panel, .card, .home-card, .home-tua-card { border-radius: 20px; }
+}
+
+/* Night mode: a distinct forest workspace with high-contrast paper-like surfaces. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --green: #75d2bd; --brand-green: #20c9b3; --navy: #ecf6ee;
+  --heading: #f2faf3; --ink: #e4f0e8; --muted: #abc0b3;
+  --bg: #10231e; --card: #182f28; --line: #315046;
+  --surface-subtle: #203c33; --surface-raised: #1c352d; --tint: #1b4a3d;
+  --sage-soft: #203b32; --terra-soft: #452d29;
+  --hero-start: #1e4539; --hero-end: #172d26;
+  --surface-success: #1d4532; --ink-success: #a8e4bd;
+  --surface-warning: #443b20; --ink-warning: #f3dc9a;
+  --line-subtle: #29443a; --surface-journal: #1c352d; --ink-journal: #d4e5da;
+  --surface-tag: #244337; --ink-tag: #bee0ca; --surface-paid: #493a1f; --ink-paid: #f3d894;
+}
+.page-heading h1, .page-title, .activity-intro h2, .resource-hero h2,
+.activity-title-row h2, .resource-card h3, .section-title-row > h2,
+.dialog-card h2, .empty-state h2 { color: var(--heading); }
+.page-heading > p, .page-subtitle, .activity-intro p, .resource-hero p,
+.activity-description, .activity-meta, .preview-note, .resource-card > p { color: var(--muted); }
+.activity-count { color: var(--forest); background: rgba(255,253,248,.9); }
+.activity-count span { color: var(--muted); }
+
+.home-community-slideshow { position: relative; z-index: 1; min-height: clamp(280px, 24vw, 360px); overflow: hidden; background: #e7eee6; }
+.home-community-slideshow > img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 14px; opacity: 0; object-fit: contain; object-position: center; transition: opacity .65s ease; }
+.home-community-slideshow > img.is-active { opacity: 1; }
+.home-community-slide-caption { position: absolute; z-index: 2; right: 18px; bottom: 15px; left: 18px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid rgba(255,255,255,.52); border-radius: 999px; color: #f9fbf2; background: rgba(12,45,37,.64); box-shadow: 0 8px 18px rgba(5,27,21,.2); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 11px; font-weight: 700; }
+.home-community-slide-dots { display: flex; align-items: center; gap: 5px; }
+.home-community-slide-dots button { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.48); cursor: pointer; }
+.home-community-slide-dots button.is-active { width: 19px; border-radius: 999px; background: #20c9b3; }
+
+:root[data-theme='dark'] body { background: radial-gradient(circle at 0 0, rgba(32,201,179,.11), transparent 30rem), radial-gradient(circle at 100% 100%, rgba(113,143,111,.10), transparent 32rem), var(--bg); }
+:root[data-theme='dark'] .panel, :root[data-theme='dark'] .card, :root[data-theme='dark'] .settings-card, :root[data-theme='dark'] .settings-appearance, :root[data-theme='dark'] .settings-logout, :root[data-theme='dark'] .admin-content-panel, :root[data-theme='dark'] .therapist-dashboard-card, :root[data-theme='dark'] .therapist-info-card, :root[data-theme='dark'] .calendar-month, :root[data-theme='dark'] .calendar-agenda, :root[data-theme='dark'] .journal-panel { border-color: rgba(154,211,184,.16); background: rgba(24,47,40,.92); box-shadow: 0 20px 44px -33px rgba(0,0,0,.78), inset 0 1px 0 rgba(255,255,255,.04); }
+:root[data-theme='dark'] .home-community-card, :root[data-theme='dark'] .activity-intro, :root[data-theme='dark'] .resource-hero { background: linear-gradient(125deg, #1b4438, #172e27); }
+:root[data-theme='dark'] .wellbeing-checkins, :root[data-theme='dark'] .mood-insight-card { background: linear-gradient(135deg, #1a3c32, #1b3029); }
+:root[data-theme='dark'] .home-tua-card { background: linear-gradient(135deg, #1d4a3d, #20362d); }
+:root[data-theme='dark'] .button-secondary, :root[data-theme='dark'] .btn-secondary, :root[data-theme='dark'] .button-light, :root[data-theme='dark'] .filter-chip, :root[data-theme='dark'] .icon-button { color: var(--ink); border-color: var(--line); background: var(--surface-raised); }
+:root[data-theme='dark'] .home-community-slideshow { background: #152c25; }
+
+/* Therapist and admin use the same shared surfaces, with role-specific hierarchy. */
+.therapist-dashboard-title { font-size: clamp(2.6rem, 4.4vw, 4.2rem); font-weight: 400; }
+.therapist-dashboard-stats { gap: 16px; }.therapist-stat-card { border-radius: 20px; }
+.therapist-stat-card-heading { color: var(--brand-teal-deep); }.therapist-dashboard-card, .admin-therapist-panel { border-radius: 26px; }
+.therapist-dashboard-section-title, .admin-therapist-heading h2 { font-family: var(--font-heading); font-size: 1.7rem; font-weight: 400; }
+.admin-therapist-row { border-color: rgba(22,63,53,.10); border-radius: 18px; background: rgba(255,253,248,.52); }
+:root[data-theme='dark'] .admin-therapist-row { border-color: var(--line); background: var(--surface-raised); }
+
+@media (max-width: 760px) {
+  .home-community-slideshow { min-height: 260px; }
+  .home-community-slideshow > img { padding: 10px; }
+}
+
+/* Let pages travel naturally on scroll-journey pages (Home). Keep sticky sidebar everywhere else. */
+@media (min-width: 641px) {
+  .app-shell { align-items: stretch; }
+  /* Home uses a full-width scroll journey without a persistent sidebar */
+  .home-scroll-app .sidebar { position: relative; top: auto; height: auto; min-height: 100vh; align-self: stretch; }
+  .page-content { padding-bottom: clamp(64px, 10vw, 140px); }
+}
+
+/* Media-led home sections create a gentle, website-like scroll story. */
+.home-focus-film {
+  display: grid;
+  grid-template-columns: minmax(260px, .78fr) minmax(0, 1.22fr);
+  overflow: hidden;
+  margin: 24px 0;
+  border: 1px solid rgba(22,63,53,.12);
+  border-radius: 32px;
+  background: linear-gradient(135deg, #1b4a3d, #102d26);
+  box-shadow: 0 28px 60px -42px rgba(11,42,33,.7);
+}
+.home-focus-film-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(28px, 4vw, 64px); color: #f6faf2; }
+.home-focus-film-copy .home-community-eyebrow { color: #82dec9; }
+.home-focus-film-copy h2 { max-width: 430px; margin: 11px 0; font-family: var(--font-heading); font-size: clamp(2.35rem, 4vw, 4.5rem); font-weight: 400; letter-spacing: -.04em; line-height: .96; }
+.home-focus-film-copy p { max-width: 420px; margin: 0; color: rgba(246,250,242,.76); line-height: 1.65; }
+.home-focus-film-copy a { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding: 12px 18px; border-radius: 999px; color: #103c32; background: #20c9b3; font-size: 12px; font-weight: 800; text-decoration: none; }
+.home-focus-film-video { display: block; width: 100%; min-height: 340px; max-height: 520px; background: #0b2922; object-fit: contain; }
+:root[data-theme='dark'] .home-focus-film { border-color: rgba(154,211,184,.16); background: linear-gradient(135deg, #163d33, #0d211c); }
+
+@media (max-width: 760px) {
+  .home-focus-film { grid-template-columns: 1fr; border-radius: 24px; }
+  .home-focus-film-copy { padding: 30px 24px; }
+  .home-focus-film-video { min-height: 220px; max-height: 330px; }
+}
+
+/* Progressive viewport motion: content rises in with the reader's scroll. */
+@keyframes begani-scroll-reveal {
+  from { opacity: .01; transform: translateY(44px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@supports (animation-timeline: view()) {
+  .scroll-reveal {
+    animation: begani-scroll-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 4% cover 34%;
+    will-change: transform, opacity;
+  }
+  .scroll-reveal-delay-1 { animation-range: entry 8% cover 38%; }
+  .scroll-reveal-delay-2 { animation-range: entry 12% cover 42%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal, .scroll-reveal-delay-1, .scroll-reveal-delay-2 { animation: none !important; transform: none !important; }
+}
+
+/* Home scroll-journey: no sidebar rail, but mobile header still needs spacing */
+.home-scroll-app { display: block; }
+.home-scroll-app .mobile-topbar { display: none; }
+@media (max-width: 640px) {
+  .home-scroll-app { padding-top: 56px; padding-bottom: 24px; }
+  .home-scroll-app .mobile-topbar { display: flex; }
+}
+
+/* Home is a scroll journey: no persistent app rail is needed here. */
+.home-scroll-page { width: min(100%, 1480px); padding-top: 18px; }
+.home-scroll-nav { position: sticky; z-index: 20; top: 14px; display: flex; width: fit-content; gap: 3px; margin: 0 auto 22px; padding: 5px; border: 1px solid rgba(22,63,53,.12); border-radius: 999px; background: rgba(255,253,248,.82); box-shadow: 0 10px 28px -21px rgba(22,63,53,.45); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.home-scroll-nav a { padding: 9px 13px; border-radius: 999px; color: var(--muted); font-size: 11px; font-weight: 800; text-decoration: none; }
+.home-scroll-nav a:hover { color: #fff; background: var(--forest); }
+.home-scroll-slide { scroll-margin-top: 82px; }
+.home-focus-film { min-height: min(720px, calc(100svh - 100px)); }
+.home-focus-film-copy h1, .home-focus-film-copy h2 { max-width: 500px; margin: 11px 0; font-family: var(--font-heading); font-size: clamp(2.7rem, 5.2vw, 5.8rem); font-weight: 400; letter-spacing: -.05em; line-height: .92; }
+.home-dashboard-grid { min-height: min(760px, calc(100svh - 100px)); align-content: center; }
+.home-dashboard-grid .home-tua-card { order: -1; grid-column: 1 / -1; min-height: 260px; }
+.home-urgent-banner { min-height: min(260px, calc(100svh - 160px)); align-content: center; }
+:root[data-theme='dark'] .home-scroll-nav { border-color: var(--line); background: rgba(24,47,40,.84); }
+:root[data-theme='dark'] .home-scroll-nav a:hover { background: var(--brand-teal); color: #073d35; }
+
+@media (max-width: 760px) {
+  .home-scroll-page { padding-top: 10px; }
+  .home-scroll-nav { top: 8px; width: calc(100% - 10px); justify-content: space-between; margin-bottom: 16px; }
+  .home-scroll-nav a { padding: 8px 9px; font-size: 10px; }
+  .home-focus-film { min-height: auto; }
+  .home-dashboard-grid { min-height: auto; }
+  .home-dashboard-grid .home-tua-card { min-height: 220px; }
+  .home-urgent-banner { min-height: auto; }
+}
+
+/* Wellbeing: a quiet, guided-practice dashboard rather than a clinical tracker. */
+.wellbeing-grid {
+  grid-template-columns: minmax(0, 1.12fr) minmax(300px, .88fr);
+  gap: 20px;
+}
+.wellbeing-grid > .panel { padding: clamp(20px, 2.4vw, 30px); }
+.wellbeing-checkins {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(228,241,229,.94), rgba(255,251,242,.92));
+}
+.wellbeing-checkins::after {
+  position: absolute;
+  top: -95px;
+  right: -76px;
+  width: 235px;
+  height: 235px;
+  border: 1px solid rgba(32,201,179,.22);
+  border-radius: 50%;
+  box-shadow: 0 0 0 32px rgba(32,201,179,.05), 0 0 0 64px rgba(32,201,179,.035);
+  content: '';
+  pointer-events: none;
+}
+.wellbeing-checkins > * { position: relative; z-index: 1; }
+.wellbeing-checkins .section-title-row h2, .mood-tracker .section-title-row h2 { font-size: clamp(1.65rem, 2.2vw, 2.05rem); }
+.mood-summary { margin: 20px 0 14px; padding: 17px 19px; border: 1px solid rgba(22,63,53,.08); border-radius: 18px; background: rgba(255,253,248,.72); }
+.mood-summary strong { font-family: var(--font-heading); font-size: 2.05rem; font-weight: 400; }
+.checkin-list { gap: 5px; }
+.checkin-row { padding: 10px 3px; border-bottom-color: rgba(22,63,53,.08); }
+.checkin-face { width: 40px; height: 40px; border-radius: 50%; background: #fffdf8; }
+.score-pill { color: #0f6b5e; background: #dff5ed; }
+
+.mood-tracker { background: rgba(255,253,248,.92); }
+.mood-tracker > .muted-copy { max-width: 360px; margin: 10px 0 5px; }
+.mood-tracker .mood-wheel { filter: drop-shadow(0 16px 18px rgba(22,63,53,.10)); }
+.mood-save { width: auto; min-width: 180px; margin: 2px auto 0; }
+
+.breathing-card {
+  position: relative;
+  overflow: hidden;
+  color: #f9fbf2;
+  background: linear-gradient(135deg, #1c4a3e 0%, #285f4e 58%, #397462 100%);
+}
+.breathing-card::before, .breathing-card::after { position: absolute; border-radius: 50%; content: ''; pointer-events: none; }
+.breathing-card::before { width: 300px; height: 300px; right: -130px; bottom: -142px; border: 1px solid rgba(236,247,225,.26); box-shadow: 0 0 0 34px rgba(236,247,225,.06), 0 0 0 68px rgba(236,247,225,.04); }
+.breathing-card::after { width: 100px; height: 100px; left: -38px; top: -45px; background: rgba(224,239,188,.11); }
+.breathing-card > * { position: relative; z-index: 1; }
+.wellbeing-practice-kicker { display: block; margin-bottom: 13px; color: #b9e5d7; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.breathing-card .section-title-row h2 { font-family: var(--font-heading); font-size: clamp(1.8rem, 2.5vw, 2.35rem); font-weight: 400; }
+.breathing-card > p { max-width: 430px; color: rgba(248,253,244,.80); }
+.breathing-pattern { color: #e8f7ef; background: rgba(255,255,255,.13); }
+.breath-orb { width: 142px; height: 142px; margin: 24px auto 12px; border: 1px solid rgba(255,255,255,.32); background: radial-gradient(circle at 33% 25%, #b9e7bd, #71aa83 58%, #44745d); box-shadow: 0 0 0 17px rgba(255,255,255,.07), 0 15px 34px rgba(4,34,25,.22); }
+.breath-orb strong { color: #153e34; font-family: var(--font-heading); font-size: 2.65rem; font-weight: 400; }
+.breath-orb span { color: #164236; font-weight: 700; }
+.breathing-progress { color: #b9e5d7 !important; }
+.breathing-card .button { border-color: #f5f9ee; color: #163f35; background: #f5f9ee; }
+
+.mood-insight-card { background: linear-gradient(145deg, #fff7ea, #f2e7cf); }
+.mood-insight-number { font-family: var(--font-heading); font-size: 4rem; font-weight: 400; }
+.mood-insight-bar { background: linear-gradient(90deg, #20c9b3, #245748); }
+.journal-panel { border-radius: 28px; background: linear-gradient(125deg, rgba(255,253,248,.96), rgba(237,245,237,.86)); }
+.journal-panel .section-title-row h2 { font-family: var(--font-heading); font-size: clamp(1.8rem, 2.5vw, 2.35rem); font-weight: 400; }
+.journal-entry { border: 1px solid rgba(22,63,53,.07); border-radius: 16px; background: rgba(255,253,248,.72); }
+.support-nudge { border-radius: 22px; background: #e3f1e6; }
+
+@media (max-width: 760px) {
+  .wellbeing-grid { grid-template-columns: 1fr; gap: 16px; }
+  .wellbeing-grid > .panel { padding: 20px; }
+  .wellbeing-checkins { order: 1; }.mood-tracker { order: 2; }.breathing-card { order: 3; }.mood-insight-card { order: 4; }
+  .breath-orb { width: 128px; height: 128px; }
+  .journal-panel { border-radius: 22px; }
 }

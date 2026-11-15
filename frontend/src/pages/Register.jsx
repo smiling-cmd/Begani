@@ -13,8 +13,8 @@ import {
 import { AuthContext } from '../context/AuthContext';
 import api, { API_BASE_URL } from '../api';
 import beganiLogo from '../assets/logo1.png';
-import campusBackground from '../assets/Sunlit Campus Clock Tower Landscape.png';
-import campusStudentArt from '../assets/student signup.jpeg';
+import campusBackground from '../assets/campus.jpg';
+import happyStudents from '../assets/happy students.jpg';
 import './Register.css';
 
 function getErrorMessage(error) {
@@ -140,8 +140,8 @@ export default function Register() {
       <section className="begani-signup-art" aria-label="Begani campus illustration">
         <img
           className="begani-signup-girl"
-          src={campusStudentArt}
-          alt="A student studying outdoors"
+          src={happyStudents}
+          alt="Happy students spending time together"
         />
         <img className="begani-signup-logo" src={beganiLogo} alt="Begani — Share the load." />
       </section>
