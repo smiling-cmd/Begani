@@ -1,11 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
 :root {
-  --font-heading: 'Manrope', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', 'Helvetica Neue', sans-serif;
 }
 
 body {
@@ -18,27 +17,27 @@ h1, h2, h3, h4, h5, h6 {
 
 :root {
   color-scheme: light;
-  --green: #2F6F69;
-  --brand-green: #2F6F69;
-  --sage: #A8B9A3;
-  --ivory: #F5F0E7;
-  --sky: #8FBFA4;
-  --terra: #E07A5F;
-  --on-terra: #1d2b25;
-  --terra-soft: #FDF0EF;
-  --navy: #2F6F69;
-  --heading: #2F6F69;
-  --tint: #EAF4F2;
-  --sage-soft: #F0F4EF;
-  --bg: #F5F0E7;
-  --card: #FFFFFF;
-  --ink: #1d2b25;
-  --muted: #5A6A88;
-  --line: #E8EDE6;
-  --surface-subtle: #F3F6F4;
-  --surface-raised: #F8FAF7;
-  --hero-start: #e3f1ee;
-  --hero-end: #f7fbfa;
+  --green: #234938;
+  --brand-green: #1d4131;
+  --sage: #aebba9;
+  --ivory: #f7f4ed;
+  --sky: #cad9cf;
+  --terra: #c9795f;
+  --on-terra: #fffaf3;
+  --terra-soft: #f5e6dd;
+  --navy: #193a2b;
+  --heading: #193a2b;
+  --tint: #e5eee7;
+  --sage-soft: #edf1e9;
+  --bg: #f7f4ed;
+  --card: #fffdfa;
+  --ink: #21342b;
+  --muted: #68766e;
+  --line: #e3e1d7;
+  --surface-subtle: #f1f3ed;
+  --surface-raised: #fffefa;
+  --hero-start: #dce7dc;
+  --hero-end: #f8f3e9;
   --surface-success: #e8f5eb;
   --ink-success: #1b5736;
   --surface-warning: #fff4c9;
@@ -826,3 +825,485 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .mood-insight-bar-wrap { height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: 4px; }
 .mood-insight-bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--sky), var(--green)); transition: width .6s ease; }
 .mood-insight-label { margin: 0; font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: .02em; text-transform: uppercase; }
+
+/* ==========================================================================
+   Visual refinement layer
+   Shared elevation, type scale, interaction states and theme-aware accents.
+   Only presentation changes: no layout structure or behaviour is altered.
+   ========================================================================== */
+
+:root {
+  --font-display: 'Plus Jakarta Sans', 'Manrope', Inter, sans-serif;
+  --shadow: 0 1px 2px rgba(24, 48, 38, .04), 0 12px 28px -16px rgba(24, 48, 38, .22);
+  --shadow-soft: 0 2px 6px rgba(24, 48, 38, .04), 0 18px 38px -22px rgba(24, 48, 38, .26);
+  --line-soft: color-mix(in srgb, var(--line) 82%, var(--muted));
+  --ring-green: 0 0 0 3px color-mix(in srgb, var(--green) 18%, transparent);
+  --ease-out: cubic-bezier(.22, .68, .2, 1);
+}
+
+:root[data-theme='dark'] {
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 30px -18px rgba(0, 0, 0, .6);
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, .34), 0 20px 44px -24px rgba(0, 0, 0, .7);
+  --line-soft: color-mix(in srgb, var(--line) 74%, var(--muted));
+  --ring-green: 0 0 0 3px color-mix(in srgb, var(--green) 26%, transparent);
+}
+
+/* Base typography and scroll feel */
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+h1, h2, h3, h4, h5, h6 { text-wrap: balance; }
+p { text-wrap: pretty; }
+::selection { background: color-mix(in srgb, var(--terra) 32%, transparent); color: var(--ink); }
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--green) 34%, transparent) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { border: 3px solid transparent; border-radius: 999px; background: color-mix(in srgb, var(--green) 32%, transparent) padding-box; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--green) 52%, transparent) padding-box; }
+button { -webkit-tap-highlight-color: transparent; }
+
+/* Page frame and headings */
+@media (min-width: 641px) {
+  .page-heading, .page-header { margin-bottom: 28px; }
+}
+.page-heading h1, .page-title,
+.support-page-heading h1, .therapist-dashboard-title {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: clamp(27px, 3.3vw, 38px);
+  font-weight: 800;
+  letter-spacing: -.025em;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.page-heading > p, .page-subtitle, .support-page-heading p, .therapist-dashboard-subtitle { max-width: 66ch; }
+.eyebrow {
+  width: fit-content;
+  padding: 5px 11px;
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--green) 90%, var(--ink));
+  background: color-mix(in srgb, var(--tint) 72%, transparent);
+  font-size: 11px;
+  letter-spacing: .09em;
+}
+.section-title-row h2, .section-title-row > h2 { font-family: var(--font-display); letter-spacing: -.01em; }
+
+/* Sidebar */
+.sidebar {
+  background:
+    radial-gradient(120% 55% at 0% 0%, rgba(255, 255, 255, .1), transparent 62%),
+    linear-gradient(180deg, #35796F 0%, var(--brand-green) 46%, #27605A 100%);
+  box-shadow: 4px 0 26px -14px rgba(18, 45, 36, .35);
+  scrollbar-width: none;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+.brand-lockup { margin-bottom: 30px; }
+@media (min-width: 641px) { .sidebar-nav { gap: 5px; } }
+.sidebar-link {
+  border: 1px solid transparent;
+  color: #dcebe2;
+  font-weight: 500;
+  transition: background .18s var(--ease-out), color .18s var(--ease-out), border-color .18s var(--ease-out), transform .18s var(--ease-out);
+}
+.sidebar-link svg { flex: 0 0 auto; opacity: .92; }
+.sidebar-link:hover { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .08); }
+.sidebar-link.is-active {
+  background: linear-gradient(100deg, rgba(255, 255, 255, .24), rgba(255, 255, 255, .13));
+  border-color: rgba(255, 255, 255, .24);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 8px 18px -12px rgba(0, 0, 0, .55);
+  font-weight: 700;
+}
+.sidebar-link.is-active svg { opacity: 1; }
+.sidebar-user { border: 1px solid rgba(255, 255, 255, .1); transition: background .18s var(--ease-out); }
+.sidebar-user:hover { background: rgba(255, 255, 255, .14); }
+.logout-button { transition: color .18s var(--ease-out); }
+.logout-button:hover { color: #ffd9cc; }
+
+/* Surfaces */
+.card, .panel { transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out); }
+.dialog-card, .priority-dialog { box-shadow: var(--shadow-soft); }
+.settings-card, .settings-appearance, .settings-logout, .admin-content-panel, .therapist-dashboard-card, .therapist-info-card, .calendar-month, .calendar-agenda, .journal-panel { box-shadow: var(--shadow); }
+
+/* Buttons */
+.button, .btn-primary, .btn-secondary, .home-mood-submit {
+  letter-spacing: .01em;
+  transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out), background .18s var(--ease-out), border-color .18s var(--ease-out), opacity .18s var(--ease-out);
+}
+.button:not(.button-secondary):not(.button-light):not(.button-warning):not(.button-danger),
+.btn-primary {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--brand-green) 88%, #fff), var(--brand-green));
+  box-shadow: 0 1px 2px rgba(20, 48, 38, .18), 0 10px 20px -12px rgba(47, 111, 105, .6);
+}
+.button:hover:not(:disabled), .btn-primary:hover:not(:disabled), .btn-secondary:hover:not(:disabled) { transform: translateY(-1px); }
+.button:active:not(:disabled), .btn-primary:active:not(:disabled), .btn-secondary:active:not(:disabled) { transform: translateY(0); }
+.button-secondary, .btn-secondary { color: var(--heading); background: var(--card); border-color: var(--line-soft); }
+.button-secondary:hover:not(:disabled), .btn-secondary:hover:not(:disabled) { border-color: var(--sage); background: var(--surface-raised); }
+.button-danger, .button-warning { box-shadow: 0 10px 20px -14px rgba(224, 122, 95, .8); }
+.text-button { transition: color .16s var(--ease-out), gap .16s var(--ease-out); }
+.text-button:hover { gap: 10px; }
+.icon-button { transition: background .16s var(--ease-out), border-color .16s var(--ease-out), transform .16s var(--ease-out); }
+.icon-button:hover { border-color: var(--sage); background: var(--surface-raised); transform: translateY(-1px); }
+
+/* Filter chips */
+.filter-chip { transition: background .16s var(--ease-out), border-color .16s var(--ease-out), color .16s var(--ease-out), box-shadow .16s var(--ease-out); }
+.filter-chip.selected { box-shadow: 0 8px 18px -12px rgba(47, 111, 105, .8); }
+
+/* Form controls share one focus treatment */
+.settings-form input,
+.admin-form-field input,
+.admin-form-field select,
+.admin-form-field textarea,
+.journal-form textarea,
+.tua-composer input,
+.chat-composer textarea,
+.onboarding-form input,
+.search-field,
+.priority-phone-consent {
+  border-color: var(--line-soft);
+  transition: border-color .16s var(--ease-out), box-shadow .16s var(--ease-out), background .16s var(--ease-out);
+}
+.settings-form input:focus,
+.admin-form-field input:focus,
+.admin-form-field select:focus,
+.admin-form-field textarea:focus,
+.journal-form textarea:focus,
+.tua-composer input:focus,
+.chat-composer textarea:focus,
+.onboarding-form input:focus {
+  border-color: var(--green);
+  box-shadow: var(--ring-green);
+  outline: none;
+}
+.search-field:focus-within { outline: none; border-color: var(--green); box-shadow: var(--ring-green); }
+.search-field input::placeholder,
+.tua-composer input::placeholder,
+.journal-form textarea::placeholder,
+.chat-composer textarea::placeholder { color: color-mix(in srgb, var(--muted) 78%, transparent); }
+input, textarea, select { accent-color: var(--brand-green); }
+
+/* Tables */
+.therapist-appointments-table thead th { background: color-mix(in srgb, var(--surface-subtle) 70%, transparent); }
+.therapist-appointments-table thead th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+.therapist-appointments-table thead th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+.therapist-appointments-table tbody tr { transition: background .15s var(--ease-out); }
+.therapist-appointments-table tbody tr:hover { background: color-mix(in srgb, var(--tint) 55%, transparent); }
+
+/* Data lists */
+.calendar-day { transition: border-color .16s var(--ease-out), background .16s var(--ease-out), box-shadow .16s var(--ease-out), transform .16s var(--ease-out); }
+.calendar-day.is-today { border-color: color-mix(in srgb, var(--brand-green) 30%, transparent); background: color-mix(in srgb, var(--tint) 45%, var(--surface-raised)); }
+.calendar-event { border-color: var(--line-soft); }
+.checkin-row:last-child { border-bottom: 0; }
+
+/* Conversation surfaces */
+.chat-feed { border: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
+.chat-message, .tua-message-bubble { box-shadow: 0 1px 2px rgba(20, 45, 35, .05); }
+.chat-message.mine, .tua-message-bubble.is-user { background: linear-gradient(140deg, #3C857B, var(--brand-green)); }
+.chat-message.mine time { color: #d9ece2; }
+
+/* Empty and loading states read as intentional, not broken */
+.empty-state { display: grid; justify-items: center; gap: 4px; }
+.empty-state p { max-width: 46ch; }
+.calendar-empty-day svg { color: var(--green); opacity: .55; }
+
+/* Dark theme: soften surfaces that use light-only colours */
+:root[data-theme='dark'] .therapist-priority-item { border-color: color-mix(in srgb, #ef4444 34%, var(--line)); background: #33231f; }
+:root[data-theme='dark'] .therapist-priority-item-heading strong { color: #ffd0ca; }
+:root[data-theme='dark'] .therapist-priority-badge { color: #ffd7d2; background: #4b2622; }
+:root[data-theme='dark'] .therapist-priority-badge::before { background: #ffb4a9; }
+:root[data-theme='dark'] .therapist-priority-countdown { color: #ffb4a9; }
+:root[data-theme='dark'] .therapist-priority-chat-link { background: #a32f2f; }
+:root[data-theme='dark'] .therapist-priority-accepted { color: #a7e0b8; }
+:root[data-theme='dark'] .tua-crisis-actions { border-color: #7f3b3b; background: #34201f; }
+:root[data-theme='dark'] .tua-crisis-actions p { color: #ffc9c4; }
+:root[data-theme='dark'] .tua-crisis-links a { border-color: #c65454; color: #ffc9c4; }
+:root[data-theme='dark'] .tua-crisis-actions > button { background: #a32f2f; }
+:root[data-theme='dark'] .priority-chat-notice { border-color: #7f3b3b; color: #ffd0ca; background: #34201f; }
+:root[data-theme='dark'] .priority-chat-notice a { color: #ffb4a9; }
+:root[data-theme='dark'] .priority-dialog-icon { color: #ffc9c4; background: #4b2622; }
+:root[data-theme='dark'] .priority-dialog-emergency,
+:root[data-theme='dark'] .priority-dialog-calls a,
+:root[data-theme='dark'] .priority-dialog-error { color: #ffb4a9; }
+:root[data-theme='dark'] .priority-dialog-submit { border-color: #a32f2f; background: #a32f2f; }
+:root[data-theme='dark'] .admin-therapist-status.is-approved { color: #b7e4c4; background: #21402c; }
+:root[data-theme='dark'] .admin-therapist-status.is-pending { color: #f2d9a0; background: #3d3420; }
+:root[data-theme='dark'] .admin-therapist-status.is-suspended,
+:root[data-theme='dark'] .admin-therapist-status.is-left { color: #ffc9c4; background: #41221f; }
+:root[data-theme='dark'] .icon-button.is-saved { border-color: #3f5a48; }
+:root[data-theme='dark'] .activity-art,
+:root[data-theme='dark'] .activity-art-paint,
+:root[data-theme='dark'] .activity-art-yoga,
+:root[data-theme='dark'] .activity-art-mindful,
+:root[data-theme='dark'] .activity-art-music,
+:root[data-theme='dark'] .activity-art-book,
+:root[data-theme='dark'] .activity-art-painting,
+:root[data-theme='dark'] .activity-art-mindfulness,
+:root[data-theme='dark'] .activity-art-reading-club { filter: brightness(.78) saturate(.85); }
+
+/* Small screens: crisp top bar, tidy bottom navigation */
+@media (max-width: 640px) {
+  .mobile-topbar {
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    background: color-mix(in srgb, var(--card) 88%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+    box-shadow: 0 10px 24px -20px rgba(18, 45, 36, .55);
+  }
+  .sidebar {
+    padding-top: 6px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--brand-green) 94%, #fff), #27605A);
+    box-shadow: 0 -10px 28px -18px rgba(18, 45, 36, .7);
+  }
+  .sidebar-link { border: 0; color: #dcebe2; }
+  .sidebar-link.is-active { background: rgba(255, 255, 255, .17); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); }
+  .settings-card, .settings-appearance, .settings-logout, .journal-panel, .calendar-month, .calendar-agenda { box-shadow: var(--shadow); }
+  .page-heading h1, .page-title, .support-page-heading h1, .therapist-dashboard-title, .tua-heading h1 { font-size: clamp(24px, 6.4vw, 30px); }
+}
+
+/* ==========================================================================
+   Glass dashboard surface and collapsible sidebar
+   Frosted cards sit over a soft gradient canvas; the desktop sidebar can be
+   collapsed to an icon rail and remembers the choice.
+   ========================================================================== */
+
+.home-page-content { position: relative; isolation: isolate; background-image: none; }
+.home-page-content::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(46% 42% at 4% 0%, color-mix(in srgb, var(--green) 28%, transparent), transparent 68%),
+    radial-gradient(34% 32% at 98% 8%, color-mix(in srgb, var(--terra) 20%, transparent), transparent 70%),
+    radial-gradient(52% 48% at 72% 98%, color-mix(in srgb, var(--sky) 28%, transparent), transparent 72%);
+  content: '';
+  pointer-events: none;
+  filter: blur(4px);
+}
+
+/* Frosted cards */
+.home-card {
+  border: 1px solid color-mix(in srgb, #fff 58%, transparent);
+  background: color-mix(in srgb, var(--card) 58%, transparent);
+  box-shadow: 0 30px 60px -34px rgba(18, 48, 36, .4), inset 0 1px 0 rgba(255, 255, 255, .55);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  backdrop-filter: blur(26px) saturate(150%);
+}
+.home-tua-card {
+  border: 1px solid color-mix(in srgb, #fff 52%, transparent);
+  background: color-mix(in srgb, var(--tint) 74%, transparent);
+  box-shadow: 0 30px 60px -34px rgba(18, 48, 36, .38), inset 0 1px 0 rgba(255, 255, 255, .5);
+  -webkit-backdrop-filter: blur(26px) saturate(145%);
+  backdrop-filter: blur(26px) saturate(145%);
+}
+.home-community-card {
+  border-color: color-mix(in srgb, #fff 52%, transparent);
+  background: linear-gradient(115deg, color-mix(in srgb, var(--hero-start) 74%, transparent), color-mix(in srgb, var(--hero-end) 58%, transparent));
+  box-shadow: 0 34px 72px -42px rgba(18, 48, 36, .5), inset 0 1px 0 rgba(255, 255, 255, .5);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+.home-community-copy { background: color-mix(in srgb, var(--card) 28%, transparent); }
+.home-quick-access-item {
+  border-color: color-mix(in srgb, #fff 42%, transparent);
+  background: color-mix(in srgb, var(--card) 46%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.home-quick-access-item:hover { background: color-mix(in srgb, var(--card) 76%, transparent); }
+.home-mood-face {
+  border-color: color-mix(in srgb, #fff 48%, transparent);
+  background: color-mix(in srgb, var(--card) 68%, transparent);
+}
+.home-mood-option.selected .home-mood-face { background: color-mix(in srgb, var(--tint) 84%, transparent); }
+.home-urgent-banner {
+  background: color-mix(in srgb, var(--terra-soft) 64%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+/* Dark theme keeps the same glass readable */
+:root[data-theme='dark'] .home-card {
+  border-color: rgba(255, 255, 255, .1);
+  background: color-mix(in srgb, var(--card) 76%, transparent);
+  box-shadow: 0 30px 60px -34px rgba(0, 0, 0, .78), inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+:root[data-theme='dark'] .home-tua-card { border-color: rgba(255, 255, 255, .1); background: color-mix(in srgb, var(--tint) 66%, transparent); }
+:root[data-theme='dark'] .home-community-card { border-color: rgba(255, 255, 255, .1); box-shadow: 0 34px 72px -42px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .06); }
+:root[data-theme='dark'] .home-community-copy { background: color-mix(in srgb, var(--card) 34%, transparent); }
+:root[data-theme='dark'] .home-quick-access-item { border-color: rgba(255, 255, 255, .07); background: color-mix(in srgb, var(--card) 52%, transparent); }
+:root[data-theme='dark'] .home-quick-access-item:hover { background: color-mix(in srgb, var(--card) 72%, transparent); }
+:root[data-theme='dark'] .home-mood-face { border-color: rgba(255, 255, 255, .09); background: color-mix(in srgb, var(--card) 70%, transparent); }
+:root[data-theme='dark'] .home-page-content::before { opacity: .75; }
+
+/* Sidebar edge and collapse control */
+.sidebar {
+  border-right: 1px solid rgba(255, 255, 255, .13);
+  transition: flex-basis .24s var(--ease-out), width .24s var(--ease-out), padding .24s var(--ease-out);
+}
+.brand-lockup { gap: 8px; }
+.brand-logo-image { width: auto; max-width: 100%; min-width: 0; flex: 0 1 auto; }
+.sidebar-collapse-button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 10px;
+  color: #eaf4ec;
+  background: rgba(255, 255, 255, .12);
+  cursor: pointer;
+  transition: background .16s var(--ease-out), border-color .16s var(--ease-out), transform .16s var(--ease-out);
+}
+.sidebar-collapse-button:hover { border-color: rgba(255, 255, 255, .45); background: rgba(255, 255, 255, .22); }
+.sidebar-collapse-button:active { transform: scale(.94); }
+.sidebar-collapse-button:focus-visible { outline: 3px solid #ffd7b0; outline-offset: 2px; }
+
+@media (min-width: 641px) {
+  .sidebar.is-collapsed { flex-basis: 88px; width: 88px; padding-inline: 12px; }
+  .sidebar.is-collapsed .brand-lockup { justify-content: center; margin: 0 0 22px; }
+  .sidebar.is-collapsed .brand-logo-image { display: none; }
+  .sidebar.is-collapsed .sidebar-collapse-button { width: 40px; height: 40px; margin-left: 0; }
+  .sidebar.is-collapsed .sidebar-nav { justify-items: center; gap: 6px; }
+  .sidebar.is-collapsed .sidebar-link { width: 48px; min-height: 48px; justify-content: center; padding: 0; border-radius: 14px; }
+  .sidebar.is-collapsed .sidebar-link:hover { transform: none; }
+  .sidebar.is-collapsed .sidebar-link span { display: none; }
+  .sidebar.is-collapsed .tua-nav-icon { width: 26px; height: 26px; }
+  .sidebar.is-collapsed .sidebar-bottom { display: grid; justify-items: center; gap: 8px; }
+  .sidebar.is-collapsed .sidebar-user { justify-content: center; width: 100%; padding: 9px 0; }
+  .sidebar.is-collapsed .user-avatar { width: 34px; height: 34px; }
+  .sidebar.is-collapsed .user-copy { display: none; }
+  .sidebar.is-collapsed .logout-button { justify-content: center; width: 48px; margin-top: 0; padding: 12px 0; border-top: 0; border-radius: 14px; }
+  .sidebar.is-collapsed .logout-button:hover { background: rgba(255, 255, 255, .12); }
+  .sidebar.is-collapsed .logout-button span, .sidebar.is-collapsed .logout-arrow { display: none; }
+}
+
+@media (max-width: 640px) {
+  .sidebar-collapse-button { display: none; }
+  .sidebar { border-right: 0; }
+  .home-page-content::before { filter: none; opacity: .85; }
+  .home-card, .home-tua-card, .home-community-card { -webkit-backdrop-filter: blur(18px) saturate(130%); backdrop-filter: blur(18px) saturate(130%); }
+}
+
+/* ======================================================================
+   Velora-inspired visual language
+   A quiet, editorial wellbeing system: paper-like surfaces, botanical
+   greens, generous curves, and a serif voice for moments that matter.
+   ====================================================================== */
+
+body {
+  background:
+    radial-gradient(circle at 0 0, rgba(202, 217, 207, .46), transparent 30rem),
+    radial-gradient(circle at 100% 100%, rgba(236, 223, 197, .42), transparent 32rem),
+    var(--bg);
+  letter-spacing: -.01em;
+}
+
+h1, h2, h3, h4, h5, h6,
+.page-heading h1, .page-title, .support-page-heading h1,
+.therapist-dashboard-title, .tua-heading h1,
+.home-community-card h2, .home-tua-card h3 {
+  font-family: var(--font-heading) !important;
+  font-weight: 600;
+  letter-spacing: -.035em;
+}
+
+.app-shell { background: transparent; }
+.page-content { max-width: 1540px; }
+.page-heading h1, .page-title { font-size: clamp(2.45rem, 4vw, 4.2rem); line-height: .94; }
+.page-heading > p, .page-subtitle { color: var(--muted); font-size: 1rem; }
+.eyebrow { color: #65806d; font-size: 10px; font-weight: 700; letter-spacing: .16em; }
+
+.sidebar {
+  color: #f8f4ec;
+  background:
+    radial-gradient(circle at 18% 6%, rgba(202, 217, 188, .25), transparent 18rem),
+    linear-gradient(165deg, #234938 0%, #16382a 100%);
+  box-shadow: 18px 0 50px -38px rgba(18, 49, 35, .68);
+}
+.brand-lockup { margin-bottom: 46px; }
+.sidebar-link { border: 1px solid transparent; border-radius: 999px; color: rgba(255, 253, 247, .77); font-weight: 500; }
+.sidebar-link:hover { color: #fffdf7; background: rgba(255, 255, 255, .10); transform: translateX(3px); }
+.sidebar-link.is-active { border-color: rgba(255, 255, 255, .11); color: #fffdf7; background: rgba(240, 244, 230, .16); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10); }
+.sidebar-user { border: 1px solid rgba(255, 255, 255, .10); border-radius: 18px; background: rgba(255, 255, 255, .08); }
+.sidebar-collapse-button { border-radius: 50%; }
+
+.panel, .card,
+.settings-card, .settings-appearance, .settings-logout,
+.admin-content-panel, .therapist-dashboard-card, .therapist-info-card,
+.calendar-month, .calendar-agenda, .journal-panel {
+  border-color: rgba(41, 68, 52, .10);
+  border-radius: 24px;
+  background: rgba(255, 253, 250, .88);
+  box-shadow: 0 18px 44px -34px rgba(25, 58, 43, .38), inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+
+.button, .btn-primary {
+  min-height: 46px;
+  border-color: var(--brand-green);
+  border-radius: 999px;
+  background: #1d4131;
+  box-shadow: 0 12px 22px -16px rgba(20, 57, 40, .7);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+.button:hover:not(:disabled), .btn-primary:hover:not(:disabled) { background: #2c5a43; box-shadow: 0 16px 26px -18px rgba(20, 57, 40, .8); }
+.button-secondary, .btn-secondary, .button-light {
+  border-color: #d9ddd2;
+  border-radius: 999px;
+  color: var(--heading);
+  background: rgba(255, 253, 250, .82);
+}
+.btn-secondary { min-height: 46px; }
+.button-warning, .button-danger { color: #fffaf3; background: #b96652; }
+.filter-chip { border-color: #dedfd7; background: #fffdfa; }
+.filter-chip.selected { border-color: var(--brand-green); background: var(--brand-green); }
+.icon-button { border-color: #e3e1d8; background: #fffdfa; }
+
+.home-page-content::before {
+  background:
+    radial-gradient(48% 42% at 4% 0%, rgba(178, 200, 180, .55), transparent 68%),
+    radial-gradient(33% 32% at 98% 10%, rgba(239, 222, 189, .5), transparent 70%),
+    radial-gradient(45% 36% at 65% 100%, rgba(221, 231, 219, .76), transparent 72%);
+  filter: blur(18px);
+}
+.home-community-card {
+  border: 1px solid rgba(255, 255, 255, .82);
+  border-radius: 32px;
+  background: linear-gradient(120deg, rgba(224, 233, 220, .9), rgba(250, 246, 237, .93));
+  box-shadow: 0 26px 60px -42px rgba(25, 58, 43, .55), inset 0 1px 0 rgba(255, 255, 255, .75);
+}
+.home-community-copy { background: transparent; }
+.home-greeting-title { font-size: clamp(2.7rem, 5vw, 4.6rem) !important; }
+.home-page-tagline { color: #617269; font-size: 1rem; }
+.home-community-eyebrow { color: #6d846e; letter-spacing: .15em; }
+.home-community-card h2 { font-size: clamp(2rem, 3vw, 3rem); }
+.home-community-card > img { filter: saturate(.78) sepia(.06); }
+.home-card { border-radius: 26px; background: rgba(255, 253, 250, .72); box-shadow: 0 24px 50px -38px rgba(25, 58, 43, .44), inset 0 1px 0 rgba(255, 255, 255, .88); }
+.home-card-title { color: var(--heading); font-size: 1.6rem; }
+.home-quick-access-item { border-color: rgba(59, 89, 68, .09); border-radius: 18px; background: rgba(255, 253, 250, .72); }
+.home-quick-access-icon { border-radius: 15px; color: var(--green); background: #e8eee5; }
+.home-tua-card { border: 1px solid rgba(255, 255, 255, .80); border-radius: 28px; background: linear-gradient(135deg, #dce8dc, #eef1e8); box-shadow: 0 24px 50px -38px rgba(25, 58, 43, .44); }
+.home-tua-card h3 { color: var(--heading); font-size: clamp(2rem, 3vw, 3rem); }
+.home-tua-cta { border-radius: 999px; background: var(--brand-green); }
+.home-urgent-banner { border-color: #e2cfc5; border-radius: 24px; background: rgba(248, 237, 229, .84); }
+.home-urgent-title { font-family: var(--font-heading); font-size: 1.5rem; letter-spacing: -.02em; }
+
+.activity-intro, .resource-hero { border-radius: 28px; background: linear-gradient(125deg, #e0eadf, #f9f3e8); }
+.activity-card, .resource-card, .therapist-card, .calendar-event { border-radius: 20px; }
+.activity-art { color: #345a43; background: linear-gradient(145deg, #e6eee4, #bed1bf); }
+.resource-icon, .resource-hero-icon { color: #2b5540; background: #e4ece3; }
+
+.tua-page, .chat-page-content { background: transparent; }
+.tua-message-bubble, .chat-message { border-radius: 20px; }
+.chat-message.mine, .tua-message-bubble.is-user { background: linear-gradient(140deg, #315c45, #1d4131); }
+.tua-composer, .chat-composer, .search-field { border-color: #dfdfd6; border-radius: 999px; background: rgba(255, 253, 250, .9); }
+.journal-form textarea, .settings-form input, .admin-form-field input, .admin-form-field select, .admin-form-field textarea { border-color: #dfdfd6; border-radius: 14px; background: #fffdfa; }
+
+@media (max-width: 640px) {
+  .mobile-topbar { background: rgba(247, 244, 237, .88); }
+  .sidebar { background: linear-gradient(90deg, #173b2c, #234938); }
+  .sidebar-link { border-radius: 14px; }
+  .page-content { padding: 20px 16px 104px; }
+  .page-heading h1, .page-title { font-size: 2.55rem; }
+  .home-community-card, .home-card, .home-tua-card, .panel, .card { border-radius: 22px; }
+}

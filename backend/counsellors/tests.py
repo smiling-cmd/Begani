@@ -81,6 +81,11 @@ class AdminTherapistAPITests(APITestCase):
             registration_body='Professional Board',
             registration_number='REG-123',
             licence_expiry=date(2030, 1, 1),
+            register_checked=True,
+            licence_current=True,
+            category_matches=True,
+            id_matched=True,
+            certificates_seen=True,
         )
         self.client.force_authenticate(user=self.admin)
 

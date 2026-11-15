@@ -1,10 +1,22 @@
+import logging
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
-from .models import Booking
+from calendar import month_abbr
+from datetime import timedelta
+
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
+
+from messaging.models import ChatThread
+
+from .models import Booking, expire_stale_bookings
 from .serializers import BookingCreateSerializer, StudentBookingSerializer, TherapistBookingSerializer
+
+logger = logging.getLogger(__name__)
 
 # --- 1. The View to CREATE a booking (Student side) ---
 class BookingCreateView(generics.CreateAPIView):
@@ -21,6 +33,7 @@ class StudentBookingListView(generics.ListAPIView):
         student_profile = getattr(self.request.user, 'student_profile', None)
         if not student_profile:
             return Booking.objects.none()
+        expire_stale_bookings()
         return (
             Booking.objects.filter(
                 student=student_profile,
@@ -41,7 +54,92 @@ class TherapistBookingListView(generics.ListAPIView):
         therapist_profile = getattr(self.request.user, 'therapist_profile', None)
         if not therapist_profile:
             return Booking.objects.none()
+        expire_stale_bookings()
         return Booking.objects.filter(therapist=therapist_profile).order_by('-requested_at')
+
+
+# --- 2b. Aggregated, anonymised practice stats (Therapist side) ---
+class TherapistInsightsView(APIView):
+    """Real counts for the Insights page: volume, pipeline and school mix.
+
+    No student names or contact details are exposed, only aliases are used
+    elsewhere and this endpoint returns aggregates only.
+    """
+
+    permission_classes = [IsAuthenticated]
+    EXCLUDED_STATUSES = (
+        Booking.Status.DECLINED,
+        Booking.Status.EXPIRED,
+        Booking.Status.CANCELLED_BY_STUDENT,
+        Booking.Status.CANCELLED_BY_THERAPIST,
+    )
+
+    def get(self, request):
+        therapist = getattr(request.user, "therapist_profile", None)
+        if therapist is None:
+            return Response(
+                {"error": "Only therapists can view insights."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        expire_stale_bookings()
+        now = timezone.now()
+        year = now.year
+        bookings = Booking.objects.filter(therapist=therapist)
+        counted = bookings.exclude(status__in=self.EXCLUDED_STATUSES)
+
+        rows = (
+            counted.filter(starts_at__year=year)
+            .annotate(month=TruncMonth("starts_at"))
+            .values("month")
+            .annotate(count=Count("id"))
+        )
+        counts_by_month = {
+            row["month"].month: row["count"] for row in rows if row["month"]
+        }
+        monthly = [
+            {"month": month, "label": month_abbr[month], "count": counts_by_month.get(month, 0)}
+            for month in range(1, now.month + 1)
+        ]
+
+        rows = (
+            counted.values("student__class_group__university__name")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        highest = max((row["count"] for row in rows), default=0)
+        schools = [
+            {
+                "name": row["student__class_group__university__name"] or "Not provided",
+                "count": row["count"],
+                "percentage": round(row["count"] / highest * 100) if highest else 0,
+            }
+            for row in rows
+        ]
+
+        ongoing_chats = (
+            ChatThread.objects.filter(
+                therapist=therapist,
+                messages__sent_at__gte=now - timedelta(days=7),
+            )
+            .distinct()
+            .count()
+        )
+
+        return Response(
+            {
+                "year": year,
+                "booked_this_year": counted.filter(starts_at__year=year).count(),
+                "awaiting_confirmation": bookings.filter(status=Booking.Status.REQUESTED).count(),
+                "upcoming_appointments": bookings.filter(
+                    status=Booking.Status.CONFIRMED,
+                    starts_at__gte=now,
+                ).count(),
+                "ongoing_chats": ongoing_chats,
+                "monthly": monthly,
+                "schools": schools,
+            }
+        )
 
 
 # --- 3. The View to UPDATE status (Therapist side) ---
@@ -70,5 +168,11 @@ class BookingStatusUpdateView(APIView):
             return Response({"message": f"Booking {new_status} successfully."})
         except Booking.DoesNotExist:
             return Response({"error": "Booking not found"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as error:
+            return Response({"error": str(error)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            logger.exception("Unexpected error updating booking %s", pk)
+            return Response(
+                {"error": "Could not update this booking. Please try again."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

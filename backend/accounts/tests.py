@@ -11,46 +11,56 @@ class RegistrationSignInTests(APITestCase):
     def setUp(self):
         self.client = APIClient()
 
-    def test_student_and_therapist_can_sign_in_and_fetch_their_profiles(self):
-        accounts = (
-            ("new-student@jkuat.ac.ke", User.Role.STUDENT),
-            ("new-therapist@example.com", User.Role.THERAPIST),
+    def test_public_registration_creates_student_accounts_only(self):
+        password = "test-password"
+        registration = cast(
+            HttpResponse,
+            self.client.post(
+                "/api/auth/register/",
+                {
+                    "email": "new-student@jkuat.ac.ke",
+                    "password": password,
+                    "phone": "0712345678",
+                    "role": User.Role.THERAPIST,
+                },
+                format="json",
+            ),
         )
-        for email, role in accounts:
-            with self.subTest(role=role):
-                password = "test-password"
-                registration = cast(
-                    HttpResponse,
-                    self.client.post(
-                        "/api/auth/register/",
-                        {"email": email, "password": password, "phone": "0712345678", "role": role},
-                        format="json",
-                    ),
-                )
-                self.assertEqual(registration.status_code, 201)
+        self.assertEqual(registration.status_code, 201)
 
-                token_response = cast(
-                    HttpResponse,
-                    self.client.post(
-                        "/api/token/",
-                        {"email": email, "password": password},
-                        format="json",
-                    ),
-                )
-                self.assertEqual(token_response.status_code, 200)
-                access_token = json.loads(token_response.content)["access"]
+        token_response = cast(
+            HttpResponse,
+            self.client.post(
+                "/api/token/",
+                {"email": "new-student@jkuat.ac.ke", "password": password},
+                format="json",
+            ),
+        )
+        self.assertEqual(token_response.status_code, 200)
+        access_token = json.loads(token_response.content)["access"]
 
-                profile_response = cast(
-                    HttpResponse,
-                    self.client.get(
-                        "/api/auth/me/",
-                        HTTP_AUTHORIZATION=f"Bearer {access_token}",
-                    ),
-                )
-                self.assertEqual(profile_response.status_code, 200)
-                profile = json.loads(profile_response.content)
-                self.assertEqual(profile["role"], role)
-                self.assertEqual(profile["full_name"], "")
+        profile_response = cast(
+            HttpResponse,
+            self.client.get(
+                "/api/auth/me/",
+                HTTP_AUTHORIZATION=f"Bearer {access_token}",
+            ),
+        )
+        self.assertEqual(profile_response.status_code, 200)
+        profile = json.loads(profile_response.content)
+        # A role supplied by the public sign-up form must be ignored.
+        self.assertEqual(profile["role"], User.Role.STUDENT)
+        self.assertEqual(profile["full_name"], "")
+
+        rejected = cast(
+            HttpResponse,
+            self.client.post(
+                "/api/auth/register/",
+                {"email": "new-therapist@example.com", "password": password},
+                format="json",
+            ),
+        )
+        self.assertEqual(rejected.status_code, 400)
 
 
 class UserProfileUpdateTests(APITestCase):

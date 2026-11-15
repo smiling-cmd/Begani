@@ -54,8 +54,9 @@ class TuaTherapistRecommendationTests(APITestCase):
             choices=[SimpleNamespace(message=SimpleNamespace(content=content))]
         )
 
-    @patch("tua.services.client.chat.completions.create")
-    def test_returns_only_an_approved_therapist_id(self, create_completion):
+    @patch("tua.services._get_client")
+    def test_returns_only_an_approved_therapist_id(self, get_client):
+        create_completion = get_client.return_value.chat.completions.create
         create_completion.return_value = self.model_response(json.dumps({
             "reply": "I recommend Approved counsellor, who offers free sessions.",
             "therapist_id": str(self.approved_therapist.id),
@@ -82,8 +83,9 @@ class TuaTherapistRecommendationTests(APITestCase):
             response.data["reply"],
         )
 
-    @patch("tua.services.client.chat.completions.create")
-    def test_discards_unapproved_therapist_ids(self, create_completion):
+    @patch("tua.services._get_client")
+    def test_discards_unapproved_therapist_ids(self, get_client):
+        create_completion = get_client.return_value.chat.completions.create
         create_completion.return_value = self.model_response(json.dumps({
             "reply": "I recommend this counsellor.",
             "therapist_id": str(self.pending_therapist.id),
@@ -98,9 +100,9 @@ class TuaTherapistRecommendationTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(response.data["therapist_id"])
 
-    @patch("tua.services.client.chat.completions.create")
-    def test_rejects_malformed_model_json(self, create_completion):
-        create_completion.return_value = self.model_response("not JSON")
+    @patch("tua.services._get_client")
+    def test_rejects_malformed_model_json(self, get_client):
+        get_client.return_value.chat.completions.create.return_value = self.model_response("not JSON")
 
         with self.assertLogs("tua.views", level="ERROR"):
             response = self.client.post(

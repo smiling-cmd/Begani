@@ -86,10 +86,24 @@ class AdminActivityCreateView(generics.CreateAPIView):
 class ActivityRegistrationSerializer(serializers.ModelSerializer):
     activity_title = serializers.CharField(source="activity.title", read_only=True)
     activity_starts_at = serializers.DateTimeField(source="activity.starts_at", read_only=True)
+    activity_duration_minutes = serializers.IntegerField(
+        source="activity.duration_minutes",
+        read_only=True,
+    )
+    location_text = serializers.CharField(source="activity.location_text", read_only=True)
 
     class Meta:
         model = ActivityRegistration
-        fields = ("id", "activity", "activity_title", "activity_starts_at", "status", "registered_at")
+        fields = (
+            "id",
+            "activity",
+            "activity_title",
+            "activity_starts_at",
+            "activity_duration_minutes",
+            "location_text",
+            "status",
+            "registered_at",
+        )
         read_only_fields = fields
 
 
@@ -182,3 +196,46 @@ class ActivityRegistrationCreateView(APIView):
             )
 
         return Response(ActivityRegistrationSerializer(registration).data, status=response_status)
+
+
+class ActivityRegistrationCancelView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, registration_id):
+        student = getattr(request.user, "student_profile", None)
+        if student is None:
+            return Response(
+                {"detail": "Only student accounts can cancel activity registrations."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        with transaction.atomic():
+            registration = get_object_or_404(
+                ActivityRegistration.objects.select_for_update().select_related("activity"),
+                id=registration_id,
+                student=student,
+            )
+
+            if registration.status == ActivityRegistration.Status.CANCELLED:
+                return Response(ActivityRegistrationSerializer(registration).data)
+
+            if registration.status not in (
+                ActivityRegistration.Status.REGISTERED,
+                ActivityRegistration.Status.PENDING_PAYMENT,
+            ):
+                return Response(
+                    {"detail": "This activity registration can no longer be changed."},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            if registration.activity.starts_at <= timezone.now():
+                return Response(
+                    {"detail": "This activity has already started."},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            registration.status = ActivityRegistration.Status.CANCELLED
+            registration.cancelled_at = timezone.now()
+            registration.save(update_fields=("status", "cancelled_at"))
+
+        return Response(ActivityRegistrationSerializer(registration).data)

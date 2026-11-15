@@ -25,7 +25,7 @@ class TuaMessage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     conversation = models.ForeignKey(TuaConversation, on_delete=models.CASCADE, related_name="messages")
     role = models.CharField(max_length=20, choices=Role.choices)
-    content = models.TextField(help_text="Encrypted at rest")
+    content = models.TextField(help_text="Stored in Begani's database; not end-to-end encrypted")
     model_name = models.CharField(max_length=100, blank=True)
     prompt_version = models.CharField(max_length=50, blank=True)
     safety_label = models.CharField(max_length=50, blank=True, help_text="e.g., distress, crisis")

@@ -24,13 +24,15 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminResources from './pages/AdminResources';
 import AdminActivities from './pages/AdminActivities';
 import CalendarPage from './pages/Calendar';
+import NotFound from './pages/NotFound';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { token, user } = useContext(AuthContext);
-  if (!token) return <Navigate to="/" />;
-  if (allowedRoles && !user) {
+  const { token, user, initializing } = useContext(AuthContext);
+  if (!token) return <Navigate to="/login" replace />;
+  if (initializing) {
     return <main className="page-content"><p role="status">Loading your account…</p></main>;
   }
+  if (!user) return <Navigate to="/login" replace />;
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     const home = user.role === 'admin'
       ? '/admin-dashboard'
@@ -71,6 +73,7 @@ function App() {
             <Route path="/admin-activities" element={<ProtectedRoute allowedRoles={['admin']}><AdminActivities /></ProtectedRoute>} />
             <Route path="/insights" element={<ProtectedRoute allowedRoles={['therapist']}><Insights /></ProtectedRoute>} />
             <Route path="/earnings" element={<ProtectedRoute allowedRoles={['therapist']}><Earnings /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
             
           </Routes>
         </Router>

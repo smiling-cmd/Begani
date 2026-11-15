@@ -60,10 +60,14 @@ class TherapistBookingSerializer(serializers.ModelSerializer):
 
 class StudentBookingSerializer(serializers.ModelSerializer):
     therapist_name = serializers.SerializerMethodField()
+    duration_minutes = serializers.IntegerField(
+        source='therapist.session_length_minutes',
+        read_only=True,
+    )
 
     class Meta:
         model = Booking
-        fields = ('id', 'starts_at', 'status', 'therapist_name')
+        fields = ('id', 'starts_at', 'status', 'therapist_name', 'duration_minutes')
         read_only_fields = fields
 
     def get_therapist_name(self, obj):

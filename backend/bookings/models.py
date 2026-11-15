@@ -48,6 +48,9 @@ class Booking(models.Model):
     def transition(self, to_status, by_user=None, reason=""):
         if to_status not in self.ALLOWED.get(self.status, set()):
             raise ValueError(f"Cannot move from {self.status} to {to_status}")
+
+        if to_status == "confirmed" and self.confirm_by <= timezone.now():
+            raise ValueError("This booking request has expired. Please ask the student to book again.")
         
         with transaction.atomic():
             BookingStatusHistory.objects.create(
@@ -63,6 +66,43 @@ class Booking(models.Model):
             if to_status == "completed":
                 self.completed_at = timezone.now()
             self.save()
+
+            if to_status in {
+                "declined",
+                "expired",
+                "cancelled_by_student",
+                "cancelled_by_therapist",
+                "student_no_show",
+                "therapist_no_show",
+            }:
+                self.release_slot()
+
+    def release_slot(self):
+        """Make the booking's time available again after a non-completed outcome."""
+        from counsellors.models import AvailabilitySlot
+
+        slot = self.slot
+        if slot.status == AvailabilitySlot.Status.REMOVED:
+            return
+        slot.status = (
+            AvailabilitySlot.Status.OPEN
+            if self.starts_at > timezone.now()
+            else AvailabilitySlot.Status.REMOVED
+        )
+        slot.save(update_fields=["status"])
+
+
+def expire_stale_bookings():
+    """Expire requests that passed their confirmation deadline and reopen their slots."""
+    stale = Booking.objects.filter(
+        status=Booking.Status.REQUESTED,
+        confirm_by__lte=timezone.now(),
+    ).select_related("slot")
+    for booking in stale:
+        try:
+            booking.transition(Booking.Status.EXPIRED, reason="Confirmation deadline passed.")
+        except ValueError:
+            continue
 
 class BookingStatusHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

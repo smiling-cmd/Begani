@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from .models import User, StudentProfile
 import uuid
@@ -11,13 +12,21 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ('full_name', 'email', 'password', 'phone')
 
-    def validate(self, data):
-        # Public sign-up is student-only, so any Kenyan university (.ac.ke) email is accepted.
-        if not data.get('email', '').lower().endswith('.ac.ke'):
+    def validate_email(self, value):
+        # Public sign-up is student-only, so any Kenyan university (.ac.ke)
+        # email is accepted. Normalise the whole address, not just the domain.
+        email = value.strip().lower()
+        if not email.endswith('.ac.ke'):
             raise serializers.ValidationError(
-                {"email": "Use your university email, ending in .ac.ke."}
+                "Use your university email, ending in .ac.ke."
             )
-        return data
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError("An account with this email already exists.")
+        return email
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -25,7 +34,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             full_name=validated_data['full_name'],
             phone=validated_data.get('phone', ''),
-            role='student'
+            role=User.Role.STUDENT
         )
         user.is_active = True 
         user.save()

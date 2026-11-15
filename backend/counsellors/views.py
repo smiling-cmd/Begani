@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from accounts.permissions import IsUniversityAdmin
 from .models import TherapistProfile, AvailabilitySlot
 from .serializers import (
@@ -82,11 +83,35 @@ class AdminTherapistApproveView(APIView):
 
         if action == 'approve':
             verification = getattr(therapist, 'verification', None)
-            if not verification or not verification.registration_number.strip():
+            missing = []
+            if not verification:
+                missing.append('verification record')
+            else:
+                if not verification.registration_body.strip():
+                    missing.append('registration body')
+                if not verification.registration_number.strip():
+                    missing.append('registration number')
+                for field, label in (
+                    ('register_checked', 'register checked'),
+                    ('licence_current', 'licence current'),
+                    ('category_matches', 'category matches'),
+                    ('id_matched', 'ID matched'),
+                    ('certificates_seen', 'certificates seen'),
+                ):
+                    if not getattr(verification, field):
+                        missing.append(label)
+                if verification.licence_expiry < timezone.localdate():
+                    missing.append('valid (unexpired) licence')
+
+            if missing:
                 return Response(
-                    {'error': 'Cannot approve. Missing registration details.'},
+                    {'error': f'Cannot approve. Missing or unverified: {", ".join(missing)}.'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
+            verification.verified_by = request.user
+            verification.verified_at = timezone.now()
+            verification.save(update_fields=['verified_by', 'verified_at'])
             therapist.status = TherapistProfile.Status.APPROVED
             message = 'Therapist approved successfully.'
         elif action == 'reject':

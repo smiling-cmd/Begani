@@ -25,7 +25,7 @@ class MoodCheckin(models.Model):
 class JournalEntry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student = models.ForeignKey("accounts.StudentProfile", on_delete=models.CASCADE, related_name="journal_entries")
-    body = models.TextField(help_text="Encrypted at rest")
+    body = models.TextField(help_text="Stored in Begani's database; private to the student")
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)

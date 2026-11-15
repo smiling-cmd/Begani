@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../api';
 import { ArrowRight, AtSign, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import beganiLogo from '../assets/logo1.png';
@@ -24,11 +25,11 @@ export default function Login() {
     setIsSubmitting(true);
 
     try {
-      const { data: tokens } = await axios.post('http://127.0.0.1:8000/api/token/', {
+      const { data: tokens } = await axios.post(`${API_BASE_URL}/api/token/`, {
         email,
         password,
       });
-      const { data: profile } = await axios.get('http://127.0.0.1:8000/api/auth/me/', {
+      const { data: profile } = await axios.get(`${API_BASE_URL}/api/auth/me/`, {
         headers: { Authorization: `Bearer ${tokens.access}` },
       });
 

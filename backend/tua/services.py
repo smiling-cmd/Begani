@@ -1,9 +1,8 @@
 import json
 import os
-from groq import APIError, Groq
+from groq import APIError, Groq, GroqError
 from counsellors.models import TherapistProfile
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 TUA_MODEL = "openai/gpt-oss-20b"
 
 
@@ -54,7 +53,19 @@ class TuaResponseError(Exception):
     pass
 
 
+def _get_client():
+    """Create the Groq client lazily so a missing key cannot break app startup."""
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        raise TuaProviderError("GROQ_API_KEY is not configured.")
+    try:
+        return Groq(api_key=api_key)
+    except GroqError as error:
+        raise TuaProviderError("Could not initialise the TUA provider.") from error
+
+
 def get_tua_response(messages, therapists):
+    client = _get_client()
     try:
         response = client.chat.completions.create(
             model=TUA_MODEL,
@@ -63,7 +74,7 @@ def get_tua_response(messages, therapists):
             temperature=0.7,
             max_tokens=500,
         )
-    except APIError as error:
+    except (APIError, GroqError) as error:
         raise TuaProviderError from error
 
     try:

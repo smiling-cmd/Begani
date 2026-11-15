@@ -6,12 +6,14 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from accounts.models import User
 from counsellors.models import TherapistProfile
 from messaging.models import ChatThread
 from notifications.models import Notification
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from .models import PriorityRequest, SafetyEvent, TuaConversation, TuaMessage
 from .services import (
@@ -23,14 +25,47 @@ from .services import (
 
 logger = logging.getLogger(__name__)
 
+MAX_TUA_MESSAGE_LENGTH = 2000
+
+
+def notify_crisis(profile):
+    """Alert a counsellor (or an admin if none is available) about a crisis event."""
+    school_counsellors = TherapistProfile.objects.filter(
+        status=TherapistProfile.Status.APPROVED,
+        type=TherapistProfile.Type.SCHOOL,
+        user__is_active=True,
+    )
+    therapist = None
+    if profile.class_group_id:
+        therapist = school_counsellors.filter(
+            teaching_assignments__class_group_id=profile.class_group_id
+        ).order_by("display_name").first()
+    therapist = therapist or school_counsellors.order_by("display_name").first()
+
+    body = "A student may be in crisis. Please review the safety alert now."
+    if therapist:
+        Notification.objects.create(user=therapist.user, type="crisis_alert", body=body)
+        return
+
+    for admin in User.objects.filter(role=User.Role.ADMIN, is_active=True):
+        Notification.objects.create(user=admin, type="crisis_alert", body=body)
+
+
 class TuaChatView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "tua_chat"
 
     def post(self, request):
         user_message = request.data.get("message")
         if not isinstance(user_message, str) or not user_message.strip():
             return Response({"error": "Message is required"}, status=status.HTTP_400_BAD_REQUEST)
         user_message = user_message.strip()
+        if len(user_message) > MAX_TUA_MESSAGE_LENGTH:
+            return Response(
+                {"error": f"Messages must be {MAX_TUA_MESSAGE_LENGTH} characters or fewer."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         profile = getattr(request.user, 'student_profile', None)
         if not profile:
@@ -46,6 +81,8 @@ class TuaChatView(APIView):
             role=TuaMessage.Role.STUDENT, 
             content=user_message
         )
+        conversation.last_message_at = student_message.created_at
+        conversation.save(update_fields=["last_message_at"])
 
         past_messages = list(conversation.messages.order_by('-created_at')[:10])  # type: ignore
         past_messages.reverse()
@@ -76,6 +113,8 @@ class TuaChatView(APIView):
             role=TuaMessage.Role.TUA, 
             content=tua_data["reply"]
         )
+        conversation.last_message_at = timezone.now()
+        conversation.save(update_fields=["last_message_at"])
 
         if tua_data["crisis_detected"]:
             SafetyEvent.objects.create(
@@ -84,6 +123,7 @@ class TuaChatView(APIView):
                 level=SafetyEvent.Level.CRISIS,
                 detected_by=SafetyEvent.DetectedBy.MODEL,
             )
+            notify_crisis(profile)
 
         return Response({
             "reply": tua_data["reply"],

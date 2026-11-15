@@ -1,10 +1,12 @@
-import { useContext } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useContext, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   BarChart,
   BookOpen,
   Calendar,
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   DollarSign,
   Heart,
   Home as HomeIcon,
@@ -20,24 +22,62 @@ import MobileHeader from './MobileHeader';
 import beganiLogo from '../assets/logo-light.png';
 import tuaImage from '../assets/TUA.png';
 
+const collapseStorageKey = 'begani-sidebar-collapsed';
+
+function readCollapsed() {
+  try {
+    return localStorage.getItem(collapseStorageKey) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 export default function Sidebar() {
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(readCollapsed);
   const isTherapist = user?.role === 'therapist';
   const isAdmin = user?.role === 'admin';
   const isChatRoute = location.pathname === '/chats'
     || location.pathname === '/therapist-chats'
     || location.pathname.startsWith('/chat/');
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const toggleCollapsed = () => {
+    const nextCollapsed = !collapsed;
+    setCollapsed(nextCollapsed);
+    try {
+      localStorage.setItem(collapseStorageKey, String(nextCollapsed));
+    } catch {
+      /* Storage can be unavailable in private browsing; the toggle still works. */
+    }
+  };
+
   return (
     <>
       <MobileHeader />
-      <aside className="sidebar">
+      <aside className={`sidebar${collapsed ? ' is-collapsed' : ''}`}>
         <div className="brand-lockup">
           <img className="brand-logo-image" src={beganiLogo} alt="Begani — Share the load." />
+          <button
+            className="sidebar-collapse-button"
+            type="button"
+            onClick={toggleCollapsed}
+            aria-expanded={!collapsed}
+            aria-controls="sidebar-nav"
+            aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+            title={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+          >
+            {collapsed ? <ChevronRight size={18} aria-hidden="true" /> : <ChevronLeft size={18} aria-hidden="true" />}
+          </button>
         </div>
 
-        <nav className="sidebar-nav" aria-label="Main navigation">
+        <nav className="sidebar-nav" id="sidebar-nav" aria-label="Main navigation">
           {isAdmin ? (
             <>
               <NavItem icon={<HomeIcon size={20} />} label="Admin Portal" to="/admin-dashboard" active={location.pathname === '/admin-dashboard'} />
@@ -78,7 +118,7 @@ export default function Sidebar() {
               <small>{user?.alias ? `${user.role} · alias` : user?.role}</small>
             </div>
           </div>
-          <button className="logout-button" type="button" onClick={logout} aria-label="Log out" title="Log out">
+          <button className="logout-button" type="button" onClick={handleLogout} aria-label="Log out" title="Log out">
             <LogOut size={17} />
             <span>Log out</span>
           </button>

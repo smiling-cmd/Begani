@@ -11,7 +11,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
-import api from '../api';
+import api, { API_BASE_URL } from '../api';
 import beganiLogo from '../assets/logo1.png';
 import campusBackground from '../assets/Sunlit Campus Clock Tower Landscape.png';
 import campusStudentArt from '../assets/student signup.jpeg';
@@ -103,14 +103,14 @@ export default function Register() {
     let accountCreated = false;
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/auth/register/', {
+      await axios.post(`${API_BASE_URL}/api/auth/register/`, {
         email,
         password: formData.password,
         phone: '',
       });
       accountCreated = true;
 
-      const { data: tokens } = await axios.post('http://127.0.0.1:8000/api/token/', {
+      const { data: tokens } = await axios.post(`${API_BASE_URL}/api/token/`, {
         email,
         password: formData.password,
       });

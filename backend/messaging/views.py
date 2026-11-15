@@ -1,7 +1,10 @@
 from typing import cast
 
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -20,6 +23,17 @@ def visible_threads(user):
     if user.role == "therapist":
         return ChatThread.objects.filter(therapist__user=user)
     return ChatThread.objects.none()
+
+
+def thread_queryset(user, since=None):
+    messages = ChatMessage.objects.select_related("sender").order_by("sent_at")
+    if since is not None:
+        messages = messages.filter(sent_at__gt=since)
+    return (
+        visible_threads(user)
+        .select_related("student", "therapist")
+        .prefetch_related(Prefetch("messages", queryset=messages))
+    )
 
 
 class StartChatView(APIView):
@@ -44,7 +58,7 @@ class ChatThreadListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return visible_threads(self.request.user).select_related("student", "therapist").prefetch_related("messages")
+        return thread_queryset(self.request.user)
 
 
 class ChatDetailView(generics.RetrieveAPIView):
@@ -53,7 +67,19 @@ class ChatDetailView(generics.RetrieveAPIView):
     lookup_url_kwarg = "pk"
 
     def get_queryset(self):
-        return visible_threads(self.request.user).select_related("student", "therapist").prefetch_related("messages")
+        return thread_queryset(self.request.user, since=self.get_since())
+
+    def get_since(self):
+        """Allow polling clients to request only messages newer than a timestamp."""
+        raw = self.request.query_params.get("after")
+        if not raw:
+            return None
+        parsed = parse_datetime(raw)
+        if parsed is None:
+            return None
+        if timezone.is_naive(parsed):
+            parsed = timezone.make_aware(parsed)
+        return parsed
 
 
 class SendMessageView(APIView):

@@ -16,6 +16,7 @@ export default function TherapistProfile() {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [error, setError] = useState('');
+  const [bookingError, setBookingError] = useState('');
 
   useEffect(() => {
     const fetchTherapist = async () => {
@@ -39,9 +40,12 @@ export default function TherapistProfile() {
       alert("Booking requested! The therapist will confirm shortly.");
       navigate('/home');
     } catch (err) {
-      // THIS WILL SHOW THE EXACT DJANGO ERROR
-      const exactError = JSON.stringify(err.response?.data || err.message);
-      alert("BOOKING ERROR: " + exactError);
+      // Keep the raw API detail out of the UI; show a readable message instead.
+      const detail = err.response?.data;
+      const message = typeof detail === 'string'
+        ? detail
+        : detail?.error || detail?.detail || 'Could not request this booking. Please try again.';
+      setBookingError(message);
     } finally {
       setBookingLoading(false);
     }
@@ -72,7 +76,9 @@ export default function TherapistProfile() {
                 <p>{therapist.title}</p>
                 <div className="therapist-profile-badges">
                   <span className="therapist-profile-badge">
-                    {therapist.type === 'private' ? `KES ${therapist.fee_kes} / session` : 'Free (School)'}
+                    {therapist.type === 'private'
+                      ? (therapist.fee_kes != null ? `KES ${therapist.fee_kes} / session` : 'Fee shared before booking')
+                      : 'Free (School)'}
                   </span>
                   <span className="therapist-profile-badge secondary">
                     {therapist.session_length_minutes} mins
@@ -109,6 +115,7 @@ export default function TherapistProfile() {
                   <Calendar size={20} /> Book a Session
                 </h2>
                 <p className="muted-copy therapist-booking-copy">Select an available time below.</p>
+                {bookingError && <p className="form-message error" role="alert">{bookingError}</p>}
                 
                 <div className="therapist-slot-list">
                   {!therapist.slots || therapist.slots.length === 0 ? (
