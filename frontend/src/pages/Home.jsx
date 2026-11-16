@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import tuaImage from '../assets/TUA-transparent.png';
 import PriorityRequestDialog from '../components/PriorityRequestDialog';
 import MoodWheel from '../components/MoodWheel';
-import MobileHeader from '../components/MobileHeader';
+import Sidebar from '../components/Sidebar';
 import focusShiftVideo from '../assets/animo-focus-shift-720p.mp4';
 
 function getTimeGreeting() {
@@ -143,9 +143,9 @@ export default function Home() {
 
   // Home is the student dashboard; therapist accounts use TherapistDashboard.
   return (
-    <div className="app-shell home-scroll-app">
-      <MobileHeader />
-      <main className="page-content home-page-content home-scroll-page">
+    <div className="app-shell">
+      <Sidebar />
+      <main className="page-content home-page-content">
         <nav className="home-scroll-nav" aria-label="Home sections">
           <a href="#welcome">Welcome</a><a href="#tua">TUA</a><a href="#check-in">Check-in</a><a href="#support">Support</a>
         </nav>

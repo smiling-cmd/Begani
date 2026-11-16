@@ -12,8 +12,7 @@ import {
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import api, { API_BASE_URL } from '../api';
-import beganiLogo from '../assets/logo1.png';
-import campusBackground from '../assets/campus.jpg';
+import beganiLogo from '../assets/logo-light.png';
 import happyStudents from '../assets/happy students.jpg';
 import './Register.css';
 
@@ -43,8 +42,6 @@ function GoogleMark() {
 export default function Register() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  // Sign-up is student-only. Therapist accounts come from the application and
-  // admin-approval flow, so there is no role picker and no ?role= override.
 
   const [formData, setFormData] = useState({
     name: '',
@@ -133,55 +130,64 @@ export default function Register() {
   };
 
   return (
-    <main
-      className="begani-signup-page"
-      style={{ '--signup-campus-background': `url("${campusBackground}")` }}
-    >
-      <section className="begani-signup-art" aria-label="Begani campus illustration">
-        <img
-          className="begani-signup-girl"
-          src={happyStudents}
-          alt="Happy students spending time together"
-        />
-        <img className="begani-signup-logo" src={beganiLogo} alt="Begani — Share the load." />
-      </section>
+    <div className="begani-auth-wrapper">
+      <header className="begani-auth-top-bar">
+        <Link to="/register" className="begani-auth-brand" aria-label="Begani Home">
+          <img src={beganiLogo} alt="Begani — Share the load." className="begani-auth-logo" />
+        </Link>
+        <div className="begani-auth-top-link">
+          Already a member? <Link to="/login">Log in</Link>
+        </div>
+      </header>
 
-      <section className="begani-signup-panel" aria-label="Create your Begani account">
-        <img className="begani-signup-mobile-logo" src={beganiLogo} alt="Begani — Share the load." />
-        <div className="begani-signup-glass">
-          <header className="begani-signup-heading">
+      <main className="begani-auth-container" aria-label="Create your space">
+        {/* Left Block: Happy students image inside glass panel */}
+        <section className="begani-auth-glass-block begani-auth-image-block" aria-label="Campus community">
+          <div className="begani-auth-image-frame">
+            <img
+              src={happyStudents}
+              alt="Happy university students together on campus"
+              className="begani-auth-happy-img"
+            />
+            <div className="begani-auth-image-overlay">
+              <span className="begani-auth-image-tag">Community & Care</span>
+              <h2>A safe space designed for students.</h2>
+              <p>Connect with licensed counsellors, explore wellbeing practices, and share the load at your own pace.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Right Block: Registration form inside matching glass panel (Velora/Begani Soft Glass) */}
+        <section className="begani-auth-glass-block begani-auth-form-block" aria-label="Register form">
+          <div className="begani-card-brand-lockup">
+            <img src={beganiLogo} alt="Begani — Share the load." className="begani-card-brand-logo" />
+          </div>
+
+          <header className="begani-form-header">
             <h1>Sign up</h1>
             <p>Use your university email to get started.</p>
           </header>
 
-          <div className="begani-signup-social-row">
-            <button
-              className="begani-google-button"
-              type="button"
-              onClick={() => setNotice('Google sign-up is not connected yet. Please use your university email below.')}
-            >
-              <GoogleMark />
-              <span>Sign up with Google</span>
-            </button>
-            <span className="begani-signup-social-divider" aria-hidden="true" />
-            <span className="begani-signup-social-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.6V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.2V13h2.8v8z" /></svg>
-            </span>
-            <span className="begani-signup-social-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H9.08l4.713 6.231zm-1.16 17.52h1.833L7.36 4.126H5.393z" /></svg>
-            </span>
-          </div>
+          <button
+            className="begani-auth-google-btn"
+            type="button"
+            onClick={() => setNotice('Google sign-up is not connected yet. Please use your university email below.')}
+          >
+            <GoogleMark />
+            <span>Sign up with Google</span>
+          </button>
 
-          <div className="begani-signup-divider" aria-hidden="true">
-            <span />
+          <div className="begani-auth-divider" aria-hidden="true">
+            <span></span>
             <b>Or</b>
-            <span />
+            <span></span>
           </div>
 
-          <form className="begani-signup-form" onSubmit={handleSubmit}>
-            <label className="begani-signup-field">
-              <span className="begani-signup-input-icon"><UserRound size={24} strokeWidth={1.75} /></span>
+          <form className="begani-auth-form" onSubmit={handleSubmit}>
+            <div className="begani-input-wrapper">
+              <UserRound size={19} className="begani-field-icon" aria-hidden="true" />
               <input
+                id="reg-name"
                 type="text"
                 name="name"
                 autoComplete="name"
@@ -192,11 +198,12 @@ export default function Register() {
                 maxLength={150}
                 required
               />
-            </label>
+            </div>
 
-            <label className="begani-signup-field">
-              <span className="begani-signup-input-icon"><Mail size={24} strokeWidth={1.75} /></span>
+            <div className="begani-input-wrapper">
+              <Mail size={19} className="begani-field-icon" aria-hidden="true" />
               <input
+                id="reg-email"
                 type="email"
                 name="email"
                 autoComplete="email"
@@ -207,11 +214,12 @@ export default function Register() {
                 aria-label="Email Address"
                 required
               />
-            </label>
+            </div>
 
-            <label className="begani-signup-field">
-              <span className="begani-signup-input-icon"><LockKeyhole size={24} strokeWidth={1.75} /></span>
+            <div className="begani-input-wrapper">
+              <LockKeyhole size={19} className="begani-field-icon" aria-hidden="true" />
               <input
+                id="reg-password"
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 autoComplete="new-password"
@@ -223,18 +231,19 @@ export default function Register() {
                 required
               />
               <button
-                className="begani-signup-eye"
+                className="begani-eye-toggle"
                 type="button"
                 onClick={() => setShowPassword((visible) => !visible)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
-            </label>
+            </div>
 
-            <label className="begani-signup-field">
-              <span className="begani-signup-input-icon"><LockKeyhole size={24} strokeWidth={1.75} /></span>
+            <div className="begani-input-wrapper">
+              <LockKeyhole size={19} className="begani-field-icon" aria-hidden="true" />
               <input
+                id="reg-confirm"
                 type={showConfirmPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 value={confirmPassword}
@@ -248,16 +257,16 @@ export default function Register() {
                 required
               />
               <button
-                className="begani-signup-eye"
+                className="begani-eye-toggle"
                 type="button"
                 onClick={() => setShowConfirmPassword((visible) => !visible)}
                 aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
               >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
-            </label>
+            </div>
 
-            <label className="begani-signup-terms">
+            <label className="begani-auth-terms">
               <input
                 type="checkbox"
                 checked={acceptedTerms}
@@ -266,25 +275,20 @@ export default function Register() {
               <span>I agree to the <u>Terms of Service</u> and <u>Privacy Policy</u></span>
             </label>
 
-            {notice && <p className="begani-signup-notice" role="status">{notice}</p>}
-            {error && <p className="begani-signup-error" role="alert">{error}</p>}
+            {notice && <p className="begani-auth-notice" role="status">{notice}</p>}
+            {error && <p className="begani-auth-error" role="alert">{error}</p>}
 
-            <button className="begani-signup-submit" type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
-              <span>{isSubmitting ? 'Creating account…' : 'Create account'}</span>
-              {isSubmitting
-                ? <LoaderCircle className="begani-signup-spinner" size={22} aria-hidden="true" />
-                : <ArrowRight size={26} strokeWidth={2.5} aria-hidden="true" />}
+            <button className="begani-auth-submit-btn" type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+              <span>{isSubmitting ? 'Creating account…' : 'Create account →'}</span>
+              {isSubmitting && <LoaderCircle className="begani-spin" size={20} aria-hidden="true" />}
             </button>
           </form>
 
-          <p className="begani-signup-login">
-            Already have an account? <Link to="/login">Log in</Link>
-          </p>
-        </div>
-        <p className="begani-signup-login-mobile">
-          Already have an account? <Link to="/login">Log in</Link>
-        </p>
-      </section>
-    </main>
+          <footer className="begani-form-footer">
+            <p>Already have an account? <Link to="/login" className="begani-footer-link">Log in</Link></p>
+          </footer>
+        </section>
+      </main>
+    </div>
   );
 }
