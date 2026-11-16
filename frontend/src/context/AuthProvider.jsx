@@ -18,10 +18,7 @@ export default function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    if (!token) {
-      setInitializing(false);
-      return undefined;
-    }
+    if (!token) return undefined;
 
     let active = true;
     const requestVersion = profileRequestVersion.current;

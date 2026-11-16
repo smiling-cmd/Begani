@@ -7,7 +7,11 @@ import tuaImage from '../assets/TUA-transparent.png';
 import PriorityRequestDialog from '../components/PriorityRequestDialog';
 import MoodWheel from '../components/MoodWheel';
 import Sidebar from '../components/Sidebar';
-import focusShiftVideo from '../assets/animo-focus-shift-720p.mp4';
+import heroImage from '../assets/home/hero-campus.webp';
+import thumbSocial from '../assets/home/thumb-social.webp';
+import thumbPlaying from '../assets/home/thumb-playing.webp';
+import thumbStudents from '../assets/home/thumb-students.webp';
+import './Home.css';
 
 function getTimeGreeting() {
   const hour = new Date().getHours();
@@ -156,13 +160,17 @@ export default function Home() {
             <p>Take a slow breath, notice where you are, and choose the next small thing that supports you.</p>
             <a href="#tua">Meet TUA <ArrowRight size={16} /></a>
           </div>
-          <video className="home-focus-film-video" autoPlay muted loop playsInline controls preload="metadata" aria-label="A calming focus and reset video">
-            <source src={focusShiftVideo} type="video/mp4" />
-            Your browser does not support this video.
-          </video>
+          <div className="home-hero-media">
+            <img className="home-hero-main" src={heroImage} alt="A group of students posing together on campus in colourful outfits" width="1600" height="1200" fetchPriority="high" />
+            <div className="home-hero-thumbs" aria-hidden="true">
+              <img src={thumbSocial} alt="" loading="lazy" width="600" height="450" />
+              <img src={thumbPlaying} alt="" loading="lazy" width="600" height="400" />
+              <img src={thumbStudents} alt="" loading="lazy" width="600" height="599" />
+            </div>
+          </div>
         </section>
 
-        <div id="tua" className="home-dashboard-grid home-scroll-slide scroll-reveal scroll-reveal-delay-2">
+        <div className="home-dashboard-grid home-scroll-slide scroll-reveal scroll-reveal-delay-2">
 
           {/* Mood Check-in Card */}
           <section id="check-in" className="card home-card">
@@ -233,7 +241,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="home-tua-card">
+          <section id="tua" className="home-tua-card">
             <div className="home-tua-copy">
               <h3>Want to chat with TUA?</h3>
               <p>A friendly companion is here whenever you need a listening ear.</p>

@@ -1,0 +1,51 @@
+/* Home hero: a campus photo with a row of community photos beneath it.
+   Replaces the old video block. Sits beside the .home-focus-film rules in index.css. */
+
+.home-hero-media {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  min-width: 0;
+  padding: clamp(14px, 2vw, 24px);
+}
+
+.home-hero-main,
+.home-hero-thumbs img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  background: #0b2922;
+}
+
+.home-hero-main {
+  aspect-ratio: 3 / 2;
+  height: auto;
+  border-radius: 22px;
+  object-position: 50% 70%;
+}
+
+.home-hero-thumbs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-hero-thumbs img {
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border-radius: 16px;
+  opacity: .92;
+}
+
+@media (max-width: 760px) {
+  .home-hero-media {
+    padding: 0 16px 20px;
+  }
+  .home-hero-main {
+    aspect-ratio: 4 / 3;
+    object-position: 50% 55%;
+  }
+  .home-hero-thumbs img {
+    aspect-ratio: 1 / 1;
+  }
+}
