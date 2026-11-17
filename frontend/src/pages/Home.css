@@ -1,51 +1,47 @@
-/* Home hero: a campus photo with a row of community photos beneath it.
-   Replaces the old video block. Sits beside the .home-focus-film rules in index.css. */
+/* Home hero: greeting on the left, one campus photo on the right.
+   The card is as tall as the photo, so the greeting and picture fit on one
+   screen and the next section peeks in underneath. */
 
 .home-hero-media {
-  display: grid;
-  align-content: center;
-  gap: 12px;
+  display: flex;
+  align-items: center;
   min-width: 0;
   padding: clamp(14px, 2vw, 24px);
 }
 
-.home-hero-main,
-.home-hero-thumbs img {
+.home-hero-main {
   display: block;
   width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  max-height: calc(100svh - 160px);
+  border-radius: 22px;
   object-fit: cover;
+  object-position: 50% 60%;
   background: #0b2922;
 }
 
-.home-hero-main {
-  aspect-ratio: 3 / 2;
-  height: auto;
-  border-radius: 22px;
-  object-position: 50% 70%;
-}
-
-.home-hero-thumbs {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.home-hero-thumbs img {
-  aspect-ratio: 16 / 9;
-  height: auto;
-  border-radius: 16px;
-  opacity: .92;
-}
-
 @media (max-width: 760px) {
-  .home-hero-media {
-    padding: 0 16px 20px;
-  }
-  .home-hero-main {
-    aspect-ratio: 4 / 3;
-    object-position: 50% 55%;
-  }
-  .home-hero-thumbs img {
-    aspect-ratio: 1 / 1;
-  }
+  .home-hero-media { padding: 0 16px 20px; }
+  .home-hero-main { max-height: none; }
+}
+
+/* ---- Dashboard layout: fill the width, no dead space between sections ----
+   Two equal columns (Mood check-in | At a Glance). TUA banner spans both.
+   The urgent-help strip sits right underneath, compact. */
+:root .home-dashboard-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: 0;
+  align-content: start;
+  gap: 20px;
+  margin-top: 20px;
+}
+:root .home-dashboard-grid .home-tua-card { grid-column: 1 / -1; min-height: 280px; }
+:root .home-urgent-banner { min-height: 0; margin-top: 20px; padding: 18px 24px; }
+:root .home-focus-film { min-height: 0; }
+:root .page-content { max-width: 1760px; margin-inline: auto; }
+
+@media (max-width: 900px) {
+  :root .home-dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+  :root .home-dashboard-grid .home-tua-card { min-height: 220px; }
 }

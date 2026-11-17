@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { Bell, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
-import beganiLogo from '../assets/logo-light.png';
+import logoOnLight from '../assets/logo1.png';
+import logoOnDark from '../assets/logo-light.png';
 
 function formatDate(value) {
   const date = new Date(value);
@@ -73,7 +74,8 @@ export default function MobileHeader() {
   return (
     <header className="mobile-topbar">
       <Link className="mobile-topbar-brand" to={homePath} aria-label="Begani home">
-        <img className="mobile-topbar-logo" src={beganiLogo} alt="" />
+        <img className="mobile-topbar-logo mobile-topbar-logo--on-light" src={logoOnLight} alt="" />
+        <img className="mobile-topbar-logo mobile-topbar-logo--on-dark" src={logoOnDark} alt="" />
       </Link>
       <div className="mobile-topbar-actions">
         <div className="mobile-notifications">
