@@ -1,25 +1,82 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
+import { Eye, EyeOff, Heart, LockKeyhole, ShieldCheck, Users } from 'lucide-react';
 import beganiLogo from '../assets/logo1.png';
+import sidePhoto from '../assets/students.jpeg';
 import './AuthLayout.css';
 
-/* Shared shell for Login and Register: blurred campus photo, logo top-left,
-   "switch page" link top-right, and a frosted glass card.
-   align="right" puts the card on the right on wide screens (Login). */
-export default function AuthLayout({ switchText, switchLabel, switchTo, align = 'center', label, children }) {
+/* Shared shell for Login and Register:
+   Two-column responsive layout with background.jpg.
+   Left side: Either heroText overlay (Sign Up) or community photo card (Login).
+   Right side: Frosted glass authentication card. */
+export default function AuthLayout({
+  switchText,
+  switchLabel,
+  switchTo,
+  align = 'center',
+  showPhoto = false,
+  heroText = null,
+  label,
+  children,
+}) {
   return (
     <div className="auth-page">
       <header className="auth-topbar">
         <Link to="/login" className="auth-brand" aria-label="Begani">
-          <img src={beganiLogo} alt="Begani — Share the load." width="245" height="101" />
+          <img src={beganiLogo} alt="Begani — Share the load." width="220" height="90" />
         </Link>
-        <p className="auth-switch">
-          {switchText} <Link to={switchTo}>{switchLabel} →</Link>
-        </p>
+        <div className="auth-switch">
+          <span className="auth-switch-text">{switchText}</span>
+          <Link to={switchTo} className="auth-switch-pill">
+            {switchLabel} <span aria-hidden="true">→</span>
+          </Link>
+        </div>
       </header>
 
       <main className={`auth-stage auth-stage--${align}`}>
+        {heroText && (
+          <aside className="auth-hero-text" aria-label="Begani mission">
+            <h1 className="auth-hero-title">{heroText.title}</h1>
+            <p className="auth-hero-desc">{heroText.desc}</p>
+            {heroText.accent !== false && <span className="auth-hero-accent" aria-hidden="true" />}
+          </aside>
+        )}
+
+        {showPhoto && !heroText && (
+          <aside className="auth-photo-card" aria-label="Student community">
+            <div className="auth-photo-media">
+              <img
+                src={sidePhoto}
+                alt="Smiling university students sharing experiences on campus"
+                width="736"
+                height="736"
+                fetchPriority="high"
+              />
+              <div className="auth-photo-gradient" />
+            </div>
+            <div className="auth-photo-content">
+              <h2 className="auth-photo-title">Share the load with someone who listens.</h2>
+              <p className="auth-photo-desc">
+                A safe space to express yourself, find support and take things one step at a time.
+              </p>
+              <div className="auth-photo-badges">
+                <div className="auth-badge-pill">
+                  <ShieldCheck size={18} className="auth-badge-icon" />
+                  <span>Talk Freely and Safely</span>
+                </div>
+                <div className="auth-badge-pill">
+                  <Users size={18} className="auth-badge-icon" />
+                  <span>Get Support from Peers</span>
+                </div>
+                <div className="auth-badge-pill">
+                  <Heart size={18} className="auth-badge-icon" />
+                  <span>Prioritize Your Wellbeing</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        )}
+
         <section className="auth-card" aria-label={label}>{children}</section>
       </main>
     </div>
@@ -37,31 +94,45 @@ export function GoogleMark() {
   );
 }
 
-export function AuthDivider() {
+export function AuthDivider({ text = 'or' }) {
   return (
-    <div className="auth-divider" aria-hidden="true"><span /><b>or</b><span /></div>
-  );
-}
-
-/* One input row: icon on the left, optional trailing slot (show/hide eye, "@"). */
-export function AuthField({ icon, trailing, ...inputProps }) {
-  return (
-    <div className="auth-field">
-      <span className="auth-field-icon" aria-hidden="true">{icon}</span>
-      <input {...inputProps} />
-      {trailing}
+    <div className="auth-divider" aria-hidden="true">
+      <span />
+      <b>{text}</b>
+      <span />
     </div>
   );
 }
 
-/* Password input with its own show/hide button. */
-export function PasswordField({ hideLabel = 'Hide password', showLabel = 'Show password', ...inputProps }) {
+/* Form field with optional label above, icon on left, trailing button on right */
+export function AuthField({ label, id, icon, trailing, ...inputProps }) {
+  return (
+    <div className="auth-field-group">
+      {label && <label htmlFor={id} className="auth-field-label">{label}</label>}
+      <div className="auth-field">
+        {icon && <span className="auth-field-icon" aria-hidden="true">{icon}</span>}
+        <input id={id} {...inputProps} />
+        {trailing}
+      </div>
+    </div>
+  );
+}
+
+/* Password input with show/hide toggle and visible label */
+export function PasswordField({
+  label,
+  id,
+  hideLabel = 'Hide password',
+  showLabel = 'Show password',
+  ...inputProps
+}) {
   const [visible, setVisible] = useState(false);
   return (
-    <AuthField
-      icon={<LockKeyhole size={19} />}
-      type={visible ? 'text' : 'password'}
-      trailing={(
+    <div className="auth-field-group">
+      {label && <label htmlFor={id} className="auth-field-label">{label}</label>}
+      <div className="auth-field">
+        <span className="auth-field-icon" aria-hidden="true"><LockKeyhole size={18} /></span>
+        <input id={id} type={visible ? 'text' : 'password'} {...inputProps} />
         <button
           className="auth-eye"
           type="button"
@@ -71,8 +142,7 @@ export function PasswordField({ hideLabel = 'Hide password', showLabel = 'Show p
         >
           {visible ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
-      )}
-      {...inputProps}
-    />
+      </div>
+    </div>
   );
 }

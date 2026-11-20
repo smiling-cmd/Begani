@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../api';
-import { LoaderCircle, Mail } from 'lucide-react';
+import { ArrowRight, LoaderCircle, Mail } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import AuthLayout, { AuthDivider, AuthField, GoogleMark, PasswordField } from '../components/AuthLayout';
 
@@ -49,14 +49,20 @@ export default function Login() {
 
   return (
     <AuthLayout
-      align="right"
+      align="center"
+      showPhoto={true}
       label="Sign in to Begani"
-      switchText="Don’t have an account?"
+      switchText="Don't have an account?"
       switchLabel="Sign up"
       switchTo="/register"
     >
-      <h1>Welcome back</h1>
-      <p className="auth-lede">Sign in to continue to your account.</p>
+      <div className="auth-header-block">
+        <h1 className="auth-card-title">Welcome back</h1>
+        <p className="auth-lede">
+          <span className="auth-accent-pill" aria-hidden="true" />
+          Sign in to continue to your account.
+        </p>
+      </div>
 
       <button
         className="auth-google auth-google--primary"
@@ -67,41 +73,59 @@ export default function Login() {
         <span>Sign in with Google</span>
       </button>
 
-      <AuthDivider />
+      <AuthDivider text="or" />
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <AuthField
-          icon={<Mail size={19} />}
+          label="Email address"
+          icon={<Mail size={18} />}
           id="login-email"
           type="email"
           autoComplete="email"
           inputMode="email"
           value={email}
           onChange={(event) => { setEmail(event.target.value); setError(''); }}
-          placeholder="Email address"
+          placeholder="you@example.com"
           aria-label="Email address"
           required
         />
+
         <PasswordField
+          label="Password"
           id="login-password"
           autoComplete="current-password"
           value={password}
           onChange={(event) => { setPassword(event.target.value); setError(''); }}
-          placeholder="Password"
+          placeholder="Enter your password"
           aria-label="Password"
           required
         />
+
+        <div className="auth-forgot-row">
+          <Link to="/forgot-password" className="auth-forgot-link">Forgot password?</Link>
+        </div>
 
         {notice && <p className="auth-message auth-message--notice" role="status">{notice}</p>}
         {error && <p className="auth-message auth-message--error" role="alert">{error}</p>}
 
         <button className="auth-submit" type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
-          <span>{isSubmitting ? 'Signing in…' : 'Log in →'}</span>
-          {isSubmitting && <LoaderCircle className="auth-spin" size={20} aria-hidden="true" />}
+          {isSubmitting ? (
+            <>
+              <span>Signing in…</span>
+              <LoaderCircle className="auth-spin" size={19} aria-hidden="true" />
+            </>
+          ) : (
+            <>
+              <ArrowRight size={18} aria-hidden="true" />
+              <span>Log in</span>
+            </>
+          )}
         </button>
       </form>
 
-      <p className="auth-foot">Don’t have an account?<Link to="/register">Sign up</Link></p>
+      <p className="auth-foot">
+        New to BEGANI? <Link to="/register">Create your account.</Link>
+      </p>
     </AuthLayout>
   );
 }

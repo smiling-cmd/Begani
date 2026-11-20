@@ -48,6 +48,7 @@ function App() {
           <Routes>
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
           {/* AUTHENTICATED ROUTES */}

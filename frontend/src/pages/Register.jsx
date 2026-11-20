@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AtSign, LoaderCircle, Mail, UserRound } from 'lucide-react';
+import { LoaderCircle, Mail, UserRound } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import api, { API_BASE_URL } from '../api';
 import AuthLayout, { AuthDivider, AuthField, GoogleMark, PasswordField } from '../components/AuthLayout';
@@ -28,7 +28,6 @@ export default function Register() {
     password: '',
   });
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,10 +67,6 @@ export default function Register() {
       setError('Your passwords do not match.');
       return;
     }
-    if (!acceptedTerms) {
-      setError('Please agree to the Terms of Service and Privacy Policy.');
-      return;
-    }
 
     setIsSubmitting(true);
     let accountCreated = false;
@@ -108,31 +103,41 @@ export default function Register() {
 
   return (
     <AuthLayout
+      align="center"
+      heroText={{
+        title: 'A little support goes a long way.',
+        desc: 'Join BEGANI and be part of a community that cares about your wellbeing.',
+        accent: true,
+      }}
       label="Create your Begani account"
       switchText="Already have an account?"
       switchLabel="Sign in"
       switchTo="/login"
     >
-      <h1>Create your account</h1>
-      <p className="auth-lede">Join BEGANI and take a step towards better mental wellbeing.</p>
+      <div className="auth-header-block auth-header-block--center">
+        <h1 className="auth-card-title">Create an Account</h1>
+        <p className="auth-card-subtitle">Let's get you started.</p>
+      </div>
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <AuthField
-          icon={<UserRound size={19} />}
+          label="Full Name *"
+          icon={<UserRound size={18} />}
           id="reg-name"
           type="text"
           name="name"
           autoComplete="name"
           value={formData.name}
           onChange={handleChange}
-          placeholder="Full name"
-          aria-label="Full name"
+          placeholder="Enter your full name"
+          aria-label="Full Name"
           maxLength={150}
           required
         />
+
         <AuthField
-          icon={<Mail size={19} />}
-          trailing={<AtSign size={18} className="auth-field-trailing" aria-hidden="true" />}
+          label="University Email *"
+          icon={<Mail size={18} />}
           id="reg-email"
           type="email"
           name="email"
@@ -140,52 +145,57 @@ export default function Register() {
           inputMode="email"
           value={formData.email}
           onChange={handleChange}
-          placeholder="Student email address (.ac.ke)"
-          aria-label="Student email address"
+          placeholder="you@students.jkuat.ac.ke"
+          aria-label="University Email"
           required
         />
+
         <PasswordField
+          label="Password *"
           id="reg-password"
           name="password"
           autoComplete="new-password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="Password (8+ characters)"
+          placeholder="Create a password"
           aria-label="Password"
           minLength={8}
           required
         />
+
         <PasswordField
+          label="Confirm Password *"
           id="reg-confirm"
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(event) => { setConfirmPassword(event.target.value); setError(''); }}
-          placeholder="Confirm password"
-          aria-label="Confirm password"
+          placeholder="Confirm your password"
+          aria-label="Confirm Password"
           hideLabel="Hide confirm password"
           showLabel="Show confirm password"
           minLength={8}
           required
         />
 
-        <label className="auth-terms">
-          <input type="checkbox" checked={acceptedTerms} onChange={(event) => setAcceptedTerms(event.target.checked)} />
-          <span>I agree to the <b>Terms of Service</b> and <b>Privacy Policy</b></span>
-        </label>
-
         {notice && <p className="auth-message auth-message--notice" role="status">{notice}</p>}
         {error && <p className="auth-message auth-message--error" role="alert">{error}</p>}
 
         <button className="auth-submit" type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
-          <span>{isSubmitting ? 'Creating account…' : 'Sign up →'}</span>
-          {isSubmitting && <LoaderCircle className="auth-spin" size={20} aria-hidden="true" />}
+          {isSubmitting ? (
+            <>
+              <span>Creating account…</span>
+              <LoaderCircle className="auth-spin" size={19} aria-hidden="true" />
+            </>
+          ) : (
+            <span>Create My Account →</span>
+          )}
         </button>
       </form>
 
-      <AuthDivider />
+      <AuthDivider text="or" />
 
       <button
-        className="auth-google"
+        className="auth-google auth-google--secondary"
         type="button"
         onClick={() => setNotice('Google sign-up is not connected yet. Please use your university email above.')}
       >
@@ -193,7 +203,9 @@ export default function Register() {
         <span>Continue with Google</span>
       </button>
 
-      <p className="auth-foot">Already have an account?<Link to="/login">Sign in →</Link></p>
+      <p className="auth-foot">
+        Already have an account? <Link to="/login">Sign in</Link>
+      </p>
     </AuthLayout>
   );
 }
