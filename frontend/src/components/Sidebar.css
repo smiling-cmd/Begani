@@ -141,49 +141,11 @@
   .app-shell > main { flex: 1 1 0; min-width: 0; width: auto; }
 }
 
-/* ---- Mobile and tablet: bottom strip ---- */
+/* ---- Mobile and tablet: completely hidden — MobileBottomNav handles navigation ---- */
 @media (max-width: 900px) {
   .sidebar {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-    border-top: 1px solid rgba(255, 255, 255, .15);
-    background: linear-gradient(180deg, #1d4131, #173b2c);
-    box-shadow: 0 -8px 24px rgba(0, 0, 0, .16);
+    display: none !important;
   }
-  .sidebar-brand, .sidebar-footer { display: none; }
-  .sidebar-nav {
-    min-width: 0;
-    flex: 1;
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 4px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-  }
-  .sidebar-link {
-    min-width: 62px;
-    min-height: 52px;
-    flex: 0 0 auto;
-    flex-direction: column;
-    justify-content: center;
-    gap: 3px;
-    padding: 5px 6px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 1;
-    text-align: center;
-    scroll-snap-align: start;
-  }
-  .mobile-only-nav-item { display: flex; }
 }
 
 /* ---- Mobile top bar logo: dark text on light, cream text on dark theme ---- */

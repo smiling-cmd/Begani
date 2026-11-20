@@ -6,6 +6,8 @@ import Sidebar from '../components/Sidebar';
 import MoodWheel from '../components/MoodWheel';
 import { AuthContext } from '../context/AuthContext';
 
+import wellbeingPhoto from '../assets/pages/wellbeing-reading.webp';
+import './PageHeadingPhoto.css';
 // Legacy moods array kept for check-in history display only
 const moods = [
   { score: 2, label: 'Very low', face: '☹' },
@@ -181,10 +183,11 @@ export default function Wellbeing() {
     <div className="app-shell">
       <Sidebar />
       <main className="page-content">
-        <header className="page-heading">
+        <header className="page-heading page-heading--photo">
           <div className="eyebrow"><Sprout size={16} /> Your daily reset</div>
           <h1>Make space for calm.</h1>
           <p>A small pause can change the shape of your day. Check in, breathe, and take what you need.</p>
+          <img className="page-heading-photo" src={wellbeingPhoto} alt="" width="640" height="400" loading="lazy" />
         </header>
 
         <div className="wellbeing-grid">

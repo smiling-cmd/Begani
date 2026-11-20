@@ -1,0 +1,163 @@
+/* ==========================================================================
+   theme-contrast.css  (imported last, after every page stylesheet)
+
+   Text visibility for light mode and night mode. Two kinds of fix live here:
+
+   1. Several "polish" rules in index.css and Calendar.css hardcode pale
+      backgrounds (#e3f1e6, rgba(255,253,248,.9) ...) with no night-mode
+      version, so night-mode text (which is light) lands on a light surface.
+      Each one is restated below for night mode using the theme tokens.
+   2. Brand terracotta and teal are too faint for small text, so text and
+      buttons use deeper (light mode) or brighter (night mode) shades.
+
+   Every ratio quoted is WCAG contrast; 4.5 is the AA target for body text.
+   When you add a new light surface, give it a night-mode rule here (or better,
+   use var(--card) / var(--surface-raised) so it flips by itself).
+   ========================================================================== */
+
+:root {
+  --terracotta-text: #9a4631;   /* terracotta as text on pale backgrounds   (5.4 on pink) */
+  --terracotta-solid: #a94f38;  /* terracotta behind white text             (5.4)         */
+  --eyebrow-ink: #0b6a5d;       /* small teal labels on pale pills          (5.4)         */
+  --on-brand-green: #ffffff;    /* text on a --brand-green button                         */
+}
+
+:root[data-theme='dark'] {
+  --terracotta-text: #f2a891;
+  --terracotta-solid: #b4563e;
+  --eyebrow-ink: #6fe3d0;
+  --on-brand-green: #04302a;    /* --brand-green is bright teal at night: use dark text */
+}
+
+/* ---- Small labels: bigger and darker (light) / brighter (night) ---------- */
+:root .eyebrow { color: var(--eyebrow-ink); font-size: 11.5px; }
+:root .home-community-eyebrow,
+:root .wellbeing-practice-kicker { font-size: 11.5px; }
+:root .mood-wheel-label,
+:root .mood-wheel-range,
+:root .therapist-priority-badge,
+:root .calendar-day-count { font-size: 10.5px; }
+
+/* ---- Terracotta text ------------------------------------------------------ */
+:root .home-urgent-title,
+:root .settings-logout h2 { color: var(--terracotta-text); }
+
+/* ---- Buttons --------------------------------------------------------------
+   Primary: light mode = white on deep green, night mode = dark on bright teal. */
+:root[data-theme='dark'] .button:not(.button-secondary):not(.button-light):not(.button-warning):not(.button-danger),
+:root[data-theme='dark'] .btn-primary {
+  color: #04302a;
+  border-color: #25c5ae;
+  background: linear-gradient(180deg, #46dcc6, #25c5ae);
+}
+:root .button:not(.button-secondary):not(.button-light):not(.button-warning):not(.button-danger):hover:not(:disabled),
+:root .btn-primary:hover:not(:disabled) { color: #fff; background: #0f7a6c; }
+:root[data-theme='dark'] .button:not(.button-secondary):not(.button-light):not(.button-warning):not(.button-danger):hover:not(:disabled),
+:root[data-theme='dark'] .btn-primary:hover:not(:disabled) { color: #04302a; background: linear-gradient(180deg, #7aeedc, #46dcc6); }
+
+/* Warning / danger / urgent: white text on deep terracotta in both themes. */
+:root .button-warning,
+:root .button-danger,
+:root .home-urgent-cta {
+  color: #fff;
+  border-color: var(--terracotta-solid);
+  background: var(--terracotta-solid);
+}
+:root .button-warning:hover:not(:disabled),
+:root .button-danger:hover:not(:disabled),
+:root .home-urgent-cta:hover { color: #fff; background: #8f4330; }
+
+/* Disabled buttons: clearly disabled, but the label is still readable. */
+:root .button:disabled,
+:root .btn-primary:disabled,
+:root .btn-secondary:disabled,
+:root .home-mood-submit:disabled,
+:root .tua-composer > button:disabled {
+  opacity: 1 !important;
+  color: #55665c !important;
+  border-color: #cbd8cf !important;
+  background: #dfe8e1 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+:root[data-theme='dark'] .button:disabled,
+:root[data-theme='dark'] .btn-primary:disabled,
+:root[data-theme='dark'] .btn-secondary:disabled,
+:root[data-theme='dark'] .home-mood-submit:disabled,
+:root[data-theme='dark'] .tua-composer > button:disabled {
+  color: #b7c9be !important;
+  border-color: #3a574f !important;
+  background: #27403a !important;
+}
+
+/* ---- Placeholders ---------------------------------------------------------- */
+:root input::placeholder,
+:root textarea::placeholder { color: var(--muted); opacity: 1; }
+:root .auth-input::placeholder { color: #c6d6c9; }
+
+/* ==========================================================================
+   Night mode surfaces that were hardcoded light
+   ========================================================================== */
+
+/* Urgent help banner on Home (message text was invisible: 1.0 : 1) */
+:root[data-theme='dark'] .home-urgent-banner { border-color: #7a4a3c; background: #33231f; }
+:root[data-theme='dark'] .home-urgent-message,
+:root[data-theme='dark'] .home-emergency-link { color: var(--ink); }
+:root[data-theme='dark'] .home-emergency-link svg { color: var(--terracotta-text); }
+
+/* "Need a little more support?" strip on Wellbeing */
+:root[data-theme='dark'] .support-nudge { border-color: #7a4a3c; background: var(--surface-raised); }
+
+/* Activities: registrations count tile */
+:root[data-theme='dark'] .activity-count { color: var(--green); background: var(--surface-raised); }
+:root[data-theme='dark'] .activity-count span { color: var(--muted); }
+
+/* Search boxes and chat composers */
+:root[data-theme='dark'] .search-field,
+:root[data-theme='dark'] .tua-composer,
+:root[data-theme='dark'] .chat-composer { border-color: var(--line); background: var(--surface-raised); }
+:root[data-theme='dark'] .search-field input,
+:root[data-theme='dark'] .tua-composer input,
+:root[data-theme='dark'] .chat-composer textarea { color: var(--ink); }
+
+/* Form fields */
+:root[data-theme='dark'] .journal-form textarea,
+:root[data-theme='dark'] .settings-form input,
+:root[data-theme='dark'] .admin-form-field input,
+:root[data-theme='dark'] .admin-form-field select,
+:root[data-theme='dark'] .admin-form-field textarea {
+  color: var(--ink);
+  border-color: var(--line);
+  background: #142a24;
+}
+:root[data-theme='dark'] .settings-form input:disabled { color: var(--muted); background: var(--surface-subtle); }
+
+/* Cards that appear once a student has data (mood history, journal, therapist rows) */
+:root[data-theme='dark'] .mood-summary,
+:root[data-theme='dark'] .mood-tracker,
+:root[data-theme='dark'] .journal-entry,
+:root[data-theme='dark'] .admin-therapist-row { border-color: var(--line); background: var(--surface-raised); }
+:root[data-theme='dark'] .checkin-face { background: var(--surface-subtle); }
+:root[data-theme='dark'] .score-pill { color: var(--ink-success); background: var(--surface-success); }
+:root[data-theme='dark'] .home-quick-access-icon,
+:root[data-theme='dark'] .resource-icon,
+:root[data-theme='dark'] .resource-hero-icon { color: var(--green); background: var(--surface-subtle); }
+
+/* Calendar */
+:root[data-theme='dark'] .calendar-month,
+:root[data-theme='dark'] .calendar-agenda { background: var(--card); }
+:root[data-theme='dark'] .calendar-days { background: #12261f; }
+:root[data-theme='dark'] .calendar-day { color: var(--ink); background: var(--surface-raised); }
+:root[data-theme='dark'] .calendar-day:hover { background: var(--surface-subtle); }
+:root[data-theme='dark'] .calendar-day.is-outside { color: #8da398; background: rgba(28, 53, 45, .45); }
+:root[data-theme='dark'] .calendar-day.is-today { background: #1d4a3f; }
+:root[data-theme='dark'] .calendar-day.is-selected { background: #20594b; }
+:root[data-theme='dark'] .calendar-day.is-selected .calendar-day-number { color: var(--ink); }
+:root[data-theme='dark'] .calendar-event { border-color: var(--line); background: var(--surface-raised); }
+
+/* Calendar days from the neighbouring month: still dimmer, but readable (5.0) */
+:root .calendar-day.is-outside { color: #5f6e65; }
+:root[data-theme='dark'] .calendar-day.is-outside { color: #8da398; }
+
+/* Breathing orb label on its mid-green gradient (was 4.3) */
+:root .breath-orb span { color: #0c2a22; }

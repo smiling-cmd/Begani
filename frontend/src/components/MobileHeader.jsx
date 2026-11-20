@@ -4,7 +4,6 @@ import api from '../api';
 import { Bell, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import logoOnLight from '../assets/logo1.png';
-import logoOnDark from '../assets/logo-light.png';
 
 function formatDate(value) {
   const date = new Date(value);
@@ -42,7 +41,7 @@ export default function MobileHeader() {
     };
   }, [token]);
 
-  const unreadCount = notifications.filter((notification) => !notification.read_at).length;
+  const unreadCount = notifications.filter((n) => !n.read_at).length;
   const profileName = user?.full_name || user?.alias || user?.email || 'Profile';
   const profileInitial = profileName.charAt(0).toUpperCase();
   const homePath = user?.role === 'admin'
@@ -62,7 +61,6 @@ export default function MobileHeader() {
         return;
       }
     }
-
     setOpen(false);
     if (notification.type === 'new_message') {
       navigate(user?.role === 'therapist' ? '/therapist-chats' : '/chats');
@@ -74,8 +72,7 @@ export default function MobileHeader() {
   return (
     <header className="mobile-topbar">
       <Link className="mobile-topbar-brand" to={homePath} aria-label="Begani home">
-        <img className="mobile-topbar-logo mobile-topbar-logo--on-light" src={logoOnLight} alt="" />
-        <img className="mobile-topbar-logo mobile-topbar-logo--on-dark" src={logoOnDark} alt="" />
+        <img className="mobile-topbar-logo" src={logoOnLight} alt="" />
       </Link>
       <div className="mobile-topbar-actions">
         <div className="mobile-notifications">
@@ -102,7 +99,7 @@ export default function MobileHeader() {
               {loading ? (
                 <p className="mobile-notification-empty" role="status">Loading notifications…</p>
               ) : notifications.length === 0 ? (
-                <p className="mobile-notification-empty">You’re all caught up.</p>
+                <p className="mobile-notification-empty">You're all caught up.</p>
               ) : (
                 <div className="mobile-notification-list">
                   {notifications.map((notification) => (

@@ -5,6 +5,8 @@ import { MessageCircle, RefreshCw } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 
+import messagesPhoto from '../assets/pages/messages-friends.webp';
+import './PageHeadingPhoto.css';
 function formatDate(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
@@ -40,10 +42,11 @@ export default function ChatInbox() {
     <div className="app-shell">
       <Sidebar />
       <main className="page-content">
-        <header className="page-heading">
+        <header className="page-heading page-heading--photo">
           <div className="eyebrow"><MessageCircle size={16} /> Messaging</div>
           <h1>Your chats</h1>
           <p>Continue a conversation with a counsellor or student.</p>
+          <img className="page-heading-photo" src={messagesPhoto} alt="" width="640" height="400" loading="lazy" />
         </header>
 
         {loading ? (

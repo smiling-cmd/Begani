@@ -264,7 +264,7 @@ export default function TherapistDashboard() {
 
 const labelStyle = { display: 'grid', gap: 6, color: 'var(--ink)', fontSize: '0.85rem', fontWeight: 600 };
 const inputStyle = { boxSizing: 'border-box', width: '100%', padding: '0.75rem', borderRadius: 8, border: '1px solid var(--line)', color: 'var(--ink)', background: 'var(--card)', font: 'inherit' };
-const buttonStyle = { background: 'var(--brand-green)', color: 'white', border: 0, padding: '0.65rem 0.9rem', borderRadius: 8, cursor: 'pointer', fontWeight: 600 };
+const buttonStyle = { background: 'var(--brand-green)', color: 'var(--on-brand-green, #fff)', border: 0, padding: '0.65rem 0.9rem', borderRadius: 8, cursor: 'pointer', fontWeight: 600 };
 const muted = { color: 'var(--muted)', fontSize: '0.9rem' };
 
 function StatCard({ title, value, icon }) {

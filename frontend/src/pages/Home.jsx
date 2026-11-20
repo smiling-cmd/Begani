@@ -6,11 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import tuaImage from '../assets/TUA-transparent.png';
 import PriorityRequestDialog from '../components/PriorityRequestDialog';
 import MoodWheel from '../components/MoodWheel';
-import Sidebar from '../components/Sidebar';
 import heroImage from '../assets/home/hero-campus.webp';
-import thumbSocial from '../assets/home/thumb-social.webp';
-import thumbPlaying from '../assets/home/thumb-playing.webp';
-import thumbStudents from '../assets/home/thumb-students.webp';
 import './Home.css';
 
 function getTimeGreeting() {
@@ -147,12 +143,7 @@ export default function Home() {
 
   // Home is the student dashboard; therapist accounts use TherapistDashboard.
   return (
-    <div className="app-shell">
-      <Sidebar />
-      <main className="page-content home-page-content">
-        <nav className="home-scroll-nav" aria-label="Home sections">
-          <a href="#welcome">Welcome</a><a href="#tua">TUA</a><a href="#check-in">Check-in</a><a href="#support">Support</a>
-        </nav>
+    <main className="page-content home-page-content">
         <section id="welcome" className="home-focus-film home-scroll-slide scroll-reveal scroll-reveal-delay-1" aria-labelledby="focus-film-title">
           <div className="home-focus-film-copy">
             <span className="home-community-eyebrow">A moment to reset</span>
@@ -162,11 +153,6 @@ export default function Home() {
           </div>
           <div className="home-hero-media">
             <img className="home-hero-main" src={heroImage} alt="A group of students posing together on campus in colourful outfits" width="1600" height="1200" fetchPriority="high" />
-            <div className="home-hero-thumbs" aria-hidden="true">
-              <img src={thumbSocial} alt="" loading="lazy" width="600" height="450" />
-              <img src={thumbPlaying} alt="" loading="lazy" width="600" height="400" />
-              <img src={thumbStudents} alt="" loading="lazy" width="600" height="599" />
-            </div>
           </div>
         </section>
 
@@ -277,14 +263,13 @@ export default function Home() {
             </div>
         </div>
 
-      </main>
       {urgentHelpOpen && <PriorityRequestDialog
         hasPhone={Boolean(user?.phone)}
         source="find_support"
         onClose={() => setUrgentHelpOpen(false)}
         onCreated={(request) => navigate(`/chat/${request.thread_id}`, { state: { priorityRequestSent: true } })}
       />}
-    </div>
+    </main>
   );
 }
 

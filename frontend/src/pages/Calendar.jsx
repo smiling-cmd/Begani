@@ -6,6 +6,8 @@ import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import './Calendar.css';
 
+import calendarPhoto from '../assets/pages/calendar-planning.webp';
+import './PageHeadingPhoto.css';
 const TIME_ZONE = 'Africa/Nairobi';
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -194,10 +196,11 @@ export default function CalendarPage() {
     <div className="app-shell">
       <Sidebar />
       <main className="page-content begani-calendar-page">
-        <header className="page-heading">
+        <header className="page-heading page-heading--photo">
           <div className="eyebrow"><CalendarDays size={16} /> Your plans and check-ins</div>
           <h1>Calendar</h1>
           <p>See your appointments, registered activities, and mood check-ins together.</p>
+          <img className="page-heading-photo" src={calendarPhoto} alt="" width="640" height="400" loading="lazy" />
         </header>
 
         <div className="calendar-layout">
