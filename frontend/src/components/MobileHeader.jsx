@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
-import { Bell, X } from 'lucide-react';
+import { Bell, Moon, Sun, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import ThemeContext from '../context/ThemeContextValue';
 import logoOnLight from '../assets/logo1.png';
 
 function formatDate(value) {
@@ -12,6 +13,9 @@ function formatDate(value) {
 
 export default function MobileHeader() {
   const { user, token } = useContext(AuthContext);
+  const themeContext = useContext(ThemeContext);
+  const theme = themeContext?.theme || 'light';
+  const toggleTheme = themeContext?.toggleTheme || (() => {});
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +79,15 @@ export default function MobileHeader() {
         <img className="mobile-topbar-logo" src={logoOnLight} alt="" />
       </Link>
       <div className="mobile-topbar-actions">
+        <button
+          className="mobile-icon-button"
+          type="button"
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          onClick={toggleTheme}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
         <div className="mobile-notifications">
           <button
             className="mobile-icon-button"

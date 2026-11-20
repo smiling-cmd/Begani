@@ -125,7 +125,32 @@
     overflow: hidden;
     box-shadow: 8px 0 28px -20px rgba(10, 35, 28, .55);
   }
-  .sidebar-brand { padding: 2px 10px 24px; }
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 2px 6px 24px;
+  }
+  .sidebar-theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, .82);
+    background: rgba(255, 255, 255, .08);
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .sidebar-theme-toggle:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, .18);
+    border-color: var(--brand-teal, #20c9b3);
+    transform: scale(1.05);
+  }
   .sidebar-nav {
     flex: 1 1 auto;
     min-height: 0;

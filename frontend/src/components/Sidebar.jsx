@@ -11,11 +11,14 @@ import {
   Leaf,
   LogOut,
   MessageCircle,
+  Moon,
   Mountain,
   Settings,
+  Sun,
   UserRound,
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import ThemeContext from '../context/ThemeContextValue';
 import beganiLogo from '../assets/logo-light.png';
 import tuaImage from '../assets/TUA.png';
 import MobileHeader from './MobileHeader';
@@ -24,6 +27,9 @@ import './Sidebar.css';
 
 export default function Sidebar() {
   const { user, logout } = useContext(AuthContext);
+  const themeContext = useContext(ThemeContext);
+  const theme = themeContext?.theme || 'light';
+  const toggleTheme = themeContext?.toggleTheme || (() => {});
   const location = useLocation();
   const navigate = useNavigate();
   const isTherapist = user?.role === 'therapist';
@@ -58,6 +64,15 @@ export default function Sidebar() {
               height="101"
             />
           </Link>
+          <button
+            type="button"
+            className="sidebar-theme-toggle"
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            onClick={toggleTheme}
+          >
+            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
         </div>
 
       <nav className="sidebar-nav" id="sidebar-nav" aria-label="Pages">

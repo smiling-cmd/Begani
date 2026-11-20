@@ -5,8 +5,6 @@ import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import ThemeContext from '../context/ThemeContextValue';
 
-import settingsPhoto from '../assets/pages/settings-relax.webp';
-import './PageHeadingPhoto.css';
 function getErrorMessage(error) {
   const detail = error.response?.data?.detail || error.response?.data;
   if (typeof detail === 'string') return detail;
@@ -20,7 +18,9 @@ function getErrorMessage(error) {
 
 export default function Settings() {
   const { user, token, login, logout } = useContext(AuthContext);
-  const { theme, toggleTheme } = useContext(ThemeContext);
+  const themeContext = useContext(ThemeContext);
+  const theme = themeContext?.theme || 'light';
+  const toggleTheme = themeContext?.toggleTheme || (() => {});
   const [phoneDraft, setPhoneDraft] = useState(null);
   const [aliasDraft, setAliasDraft] = useState(null);
   const phone = phoneDraft ?? user?.phone ?? '';
@@ -54,11 +54,10 @@ export default function Settings() {
     <div className="app-shell">
       <Sidebar />
       <main className="page-content">
-        <header className="page-header page-heading--photo">
+        <header className="page-header">
           <div className="eyebrow"><UserRound size={16} /> Your account</div>
           <h1 className="page-title">Settings</h1>
           <p className="page-subtitle">Manage your account details and sign-in preferences.</p>
-          <img className="page-heading-photo" src={settingsPhoto} alt="" width="640" height="400" loading="lazy" />
         </header>
 
         <section className="card settings-appearance">

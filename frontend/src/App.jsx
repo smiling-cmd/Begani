@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useContext } from 'react';
 import AuthProvider from './context/AuthProvider';
 import { AuthContext } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Pages
 import Login from './pages/Login';
@@ -34,9 +35,10 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <Routes>
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -66,6 +68,7 @@ function App() {
         </Routes>
       </Router>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 
