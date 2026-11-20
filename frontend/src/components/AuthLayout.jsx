@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Heart, LockKeyhole, ShieldCheck, Users } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import beganiLogo from '../assets/logo1.png';
 import sidePhoto from '../assets/students.jpeg';
 import './AuthLayout.css';
@@ -33,7 +33,7 @@ export default function AuthLayout({
         </div>
       </header>
 
-      <main className={`auth-stage auth-stage--${align}`}>
+      <main className={`auth-stage auth-stage--${align}${showPhoto && !heroText ? ' auth-stage--split' : ''}`}>
         {heroText && (
           <aside className="auth-hero-text" aria-label="Begani mission">
             <h1 className="auth-hero-title">{heroText.title}</h1>
@@ -55,23 +55,14 @@ export default function AuthLayout({
               <div className="auth-photo-gradient" />
             </div>
             <div className="auth-photo-content">
-              <h2 className="auth-photo-title">Share the load with someone who listens.</h2>
+              <h2 className="auth-photo-title">Share the load.</h2>
               <p className="auth-photo-desc">
-                A safe space to express yourself, find support and take things one step at a time.
+                A safe space to find support, one step at a time.
               </p>
               <div className="auth-photo-badges">
-                <div className="auth-badge-pill">
-                  <ShieldCheck size={18} className="auth-badge-icon" />
-                  <span>Talk Freely and Safely</span>
-                </div>
-                <div className="auth-badge-pill">
-                  <Users size={18} className="auth-badge-icon" />
-                  <span>Get Support from Peers</span>
-                </div>
-                <div className="auth-badge-pill">
-                  <Heart size={18} className="auth-badge-icon" />
-                  <span>Prioritize Your Wellbeing</span>
-                </div>
+                <div className="auth-badge-pill"><span>Talk freely</span></div>
+                <div className="auth-badge-pill"><span>Peer support</span></div>
+                <div className="auth-badge-pill"><span>Your wellbeing</span></div>
               </div>
             </div>
           </aside>

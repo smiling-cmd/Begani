@@ -65,7 +65,7 @@ export default function Login() {
       </div>
 
       <button
-        className="auth-google auth-google--primary"
+        className="auth-google auth-google--secondary"
         type="button"
         onClick={() => setNotice('Google sign-in is not connected yet. Please use your email below.')}
       >
@@ -124,7 +124,7 @@ export default function Login() {
       </form>
 
       <p className="auth-foot">
-        New to BEGANI? <Link to="/register">Create your account.</Link>
+        New to BEGANI? <Link to="/register">Create an account</Link>
       </p>
     </AuthLayout>
   );

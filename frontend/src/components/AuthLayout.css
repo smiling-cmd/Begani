@@ -24,10 +24,9 @@
   color: var(--auth-ink);
   font-family: var(--font-body, 'Manrope', system-ui, sans-serif);
   background:
-    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.18) 0%, rgba(20, 60, 40, 0.22) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(236, 243, 233, 0.42) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.55) 55%, rgba(255, 255, 255, 0.35) 100%),
     url('../assets/background.jpg') center center / cover no-repeat,
-    #cfded0;
+    #e6efe6;
 }
 
 /* Prevent extra scroll on standard desktop viewports */
@@ -57,26 +56,21 @@
   align-items: center;
   line-height: 0;
   text-decoration: none;
-  padding: 8px 20px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 6px 20px -4px rgba(16, 50, 35, 0.15);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  transition: all 0.2s ease;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  transition: opacity 0.2s ease;
 }
 
 .auth-brand:hover {
-  background: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px -4px rgba(16, 50, 35, 0.2);
+  opacity: 0.85;
 }
 
 .auth-brand img {
   display: block;
   width: auto;
-  height: clamp(52px, 6.2vh, 68px);
+  height: clamp(62px, 8.2vh, 88px);
 }
 
 .auth-switch {
@@ -130,14 +124,57 @@
   min-height: 0;
 }
 
+/* Login: photo card and form card share the same height */
+.auth-stage--split {
+  align-items: stretch;
+  padding-top: clamp(8px, 2vh, 24px);
+}
+
+.auth-stage--split .auth-card {
+  transform: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 /* ---- Left Hero Text (Sign-Up Page) ---- */
 .auth-hero-text {
   flex: 1 1 500px;
   max-width: 580px;
-  padding: 12px 8px;
+  padding: clamp(22px, 3.4vh, 36px) clamp(24px, 2.8vw, 40px);
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  transform: translateY(clamp(-64px, -7vh, -20px));
+}
+
+/* Soft white fade behind the text so it stays readable on the busy photo */
+.auth-hero-text::before {
+  content: '';
+  position: absolute;
+  inset: -40px -70px;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 75%
+  );
+}
+
+/* Sign up: line the headline up with the logo and the card with the Sign in pill */
+@media (min-width: 961px) {
+  .auth-stage:not(.auth-stage--split) {
+    max-width: none;
+    padding-left: clamp(20px, 4.5vw, 64px);
+    padding-right: clamp(20px, 4.5vw, 64px);
+  }
+
+  .auth-stage:not(.auth-stage--split) .auth-hero-text {
+    padding-left: 0;
+  }
 }
 
 .auth-hero-title {
@@ -148,15 +185,14 @@
   font-weight: 400;
   line-height: 1.12;
   letter-spacing: -0.025em;
-  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.6);
 }
 
 .auth-hero-desc {
   margin: 0 0 20px;
-  color: #173f2c;
+  color: #0f3323;
   font-size: clamp(1rem, 1.3vw, 1.2rem);
   line-height: 1.5;
-  font-weight: 500;
+  font-weight: 600;
   max-width: 480px;
 }
 
@@ -205,13 +241,16 @@
 .auth-photo-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(20, 84, 58, 0) 25%,
-    rgba(20, 84, 58, 0.6) 55%,
-    rgba(18, 72, 49, 0.92) 75%,
-    rgba(14, 58, 39, 0.98) 100%
-  );
+  background:
+    /* soft green tint on top so the grey photo backdrop blends in */
+    linear-gradient(180deg, rgba(190, 220, 196, 0.55) 0%, rgba(190, 220, 196, 0) 38%),
+    linear-gradient(
+      180deg,
+      rgba(20, 84, 58, 0) 25%,
+      rgba(20, 84, 58, 0.6) 55%,
+      rgba(18, 72, 49, 0.92) 75%,
+      rgba(14, 58, 39, 0.98) 100%
+    );
 }
 
 .auth-photo-content {
@@ -263,22 +302,18 @@
   letter-spacing: 0.01em;
 }
 
-.auth-badge-icon {
-  color: #55e69e;
-  flex-shrink: 0;
-}
-
 /* ---- Right Glass Card ---- */
 .auth-card {
   position: relative;
   z-index: 2;
-  flex: 0 1 470px;
-  max-width: 470px;
+  flex: 0 1 510px;
+  max-width: 510px;
   width: 100%;
-  padding: clamp(18px, 2.2vh, 26px) clamp(20px, 2.8vw, 34px);
+  padding: clamp(20px, 2.8vh, 32px) clamp(22px, 3vw, 40px);
+  transform: translateY(clamp(-26px, -2.6vh, -8px));
   border-radius: 26px;
   border: 1px solid rgba(255, 255, 255, 0.85);
-  background: rgba(247, 250, 243, 0.84);
+  background: rgba(247, 250, 243, 0.62);
   box-shadow: 0 20px 50px -16px rgba(16, 50, 35, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(24px) saturate(1.15);
   -webkit-backdrop-filter: blur(24px) saturate(1.15);
@@ -630,6 +665,7 @@
 
 /* ---- Responsive Adjustments ---- */
 @media (max-width: 960px) {
+  .auth-hero-text, .auth-card { transform: none; }
   .auth-stage {
     flex-direction: column;
     padding: 10px 20px 32px;
