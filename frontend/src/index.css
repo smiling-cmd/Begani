@@ -1134,7 +1134,6 @@ select:focus,
 .admin-therapist-status.is-suspended, .admin-therapist-status.is-left { color: #991b1b; background: #fee2e2; }
 .admin-approve-button { min-height: 36px; padding-inline: 12px; }
 .admin-reject-button { min-height: 36px; padding-inline: 12px; border-color: var(--terra); color: var(--terra); }
-.mobile-topbar { display: none; }
 .home-page-content {
   flex: 1;
   min-width: 0;

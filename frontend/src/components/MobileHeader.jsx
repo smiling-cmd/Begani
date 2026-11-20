@@ -5,6 +5,7 @@ import { Bell, Moon, Sun, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import ThemeContext from '../context/ThemeContextValue';
 import logoOnLight from '../assets/logo1.png';
+import logoLight from '../assets/logo-light.png';
 
 function formatDate(value) {
   const date = new Date(value);
@@ -73,10 +74,12 @@ export default function MobileHeader() {
     }
   };
 
+  const currentLogo = theme === 'dark' ? logoLight : logoOnLight;
+
   return (
     <header className="mobile-topbar">
       <Link className="mobile-topbar-brand" to={homePath} aria-label="Begani home">
-        <img className="mobile-topbar-logo" src={logoOnLight} alt="" />
+        <img className="mobile-topbar-logo" src={currentLogo} alt="Begani" />
       </Link>
       <div className="mobile-topbar-actions">
         <button

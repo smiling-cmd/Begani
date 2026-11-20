@@ -26,10 +26,17 @@ import Wellbeing from './pages/Wellbeing';
 import Calendar from './pages/Calendar';
 import ChatInbox from './pages/ChatInbox';
 import ChatRoom from './pages/ChatRoom';
+import NotFound from './pages/NotFound';
 
-const ProtectedRoute = ({ children }) => {
-  const { token } = useContext(AuthContext);
-  if (!token) return <Navigate to="/" />;
+const homeFor = (role) => (role === 'admin' ? '/admin-dashboard' : role === 'therapist' ? '/therapist-dashboard' : '/home');
+
+// Sends signed-out visitors to /login and visitors with the wrong role to their own home page.
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { token, user, initializing } = useContext(AuthContext);
+  if (!token) return <Navigate to="/login" replace />;
+  if (initializing) return <main className="page-content"><p role="status">Loading your account…</p></main>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to={homeFor(user.role)} replace />;
   return children;
 };
 
@@ -50,21 +57,21 @@ function App() {
           <Route path="/tua" element={<ProtectedRoute><Tua /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><FindSupport /></ProtectedRoute>} />
           <Route path="/therapist/:id" element={<ProtectedRoute><TherapistProfile /></ProtectedRoute>} />
-          <Route path="/therapist-dashboard" element={<ProtectedRoute><TherapistDashboard /></ProtectedRoute>} />
-          <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin-resources" element={<ProtectedRoute><AdminResources /></ProtectedRoute>} />
-          <Route path="/admin-activities" element={<ProtectedRoute><AdminActivities /></ProtectedRoute>} />
-          <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
-          <Route path="/earnings" element={<ProtectedRoute><Earnings /></ProtectedRoute>} />
+          <Route path="/therapist-dashboard" element={<ProtectedRoute allowedRoles={['therapist']}><TherapistDashboard /></ProtectedRoute>} />
+          <Route path="/admin-dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin-resources" element={<ProtectedRoute allowedRoles={['admin']}><AdminResources /></ProtectedRoute>} />
+          <Route path="/admin-activities" element={<ProtectedRoute allowedRoles={['admin']}><AdminActivities /></ProtectedRoute>} />
+          <Route path="/insights" element={<ProtectedRoute allowedRoles={['therapist']}><Insights /></ProtectedRoute>} />
+          <Route path="/earnings" element={<ProtectedRoute allowedRoles={['therapist']}><Earnings /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
           <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
           <Route path="/wellbeing" element={<ProtectedRoute><Wellbeing /></ProtectedRoute>} />
-          <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute allowedRoles={['student']}><Calendar /></ProtectedRoute>} />
           <Route path="/chats" element={<ProtectedRoute><ChatInbox /></ProtectedRoute>} />
           <Route path="/therapist-chats" element={<ProtectedRoute><ChatInbox /></ProtectedRoute>} />
           <Route path="/chat/:id" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/home" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AuthProvider>

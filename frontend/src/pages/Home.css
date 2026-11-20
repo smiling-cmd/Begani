@@ -471,6 +471,10 @@
 }
 
 @media (max-width: 900px) {
+  .home-page-content {
+    padding-top: 76px;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
   .home-dashboard-grid {
     grid-template-columns: 1fr;
   }
@@ -484,6 +488,7 @@
   .home-urgent-banner {
     flex-direction: column;
     align-items: stretch;
+    margin-bottom: 24px;
   }
   .home-urgent-actions {
     flex-direction: column;

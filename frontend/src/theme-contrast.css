@@ -20,6 +20,7 @@
   --terracotta-solid: #a94f38;  /* terracotta behind white text             (5.4)         */
   --eyebrow-ink: #0b6a5d;       /* small teal labels on pale pills          (5.4)         */
   --on-brand-green: #ffffff;    /* text on a --brand-green button                         */
+  --brand-green: #14452f;       /* was only defined for night mode, so light-mode buttons using it had no background */
 }
 
 :root[data-theme='dark'] {
@@ -161,3 +162,7 @@
 
 /* Breathing orb label on its mid-green gradient (was 4.3) */
 :root .breath-orb span { color: #0c2a22; }
+
+/* Text links that were dark green on dark surfaces (1.1 : 1) */
+:root[data-theme='dark'] .home-mood-history,
+:root[data-theme='dark'] .text-button { color: var(--eyebrow-ink); }
