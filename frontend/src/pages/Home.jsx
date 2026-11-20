@@ -9,13 +9,8 @@ import MoodWheel from '../components/MoodWheel';
 import Sidebar from '../components/Sidebar';
 import heroImage from '../assets/home/hero-campus.webp';
 import './Home.css';
-
-function getTimeGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-}
+import { getGreeting } from '../utils/greeting';
+import LateNightPrompt from '../components/LateNightPrompt';
 
 const BOOKING_STATUS_LABELS = {
   requested: 'Awaiting confirmation',
@@ -64,6 +59,9 @@ function getStreakSubtitle({ streak, loggedToday }) {
 export default function Home() {
   const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const { greeting, isLateNight } = getGreeting('student');
+
   const [selectedMood, setSelectedMood] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [moodNotice, setMoodNotice] = useState('');
@@ -142,7 +140,6 @@ export default function Home() {
     }
   };
 
-  // Home is the student dashboard; therapist accounts use TherapistDashboard.
   return (
     <div className="app-shell">
       <Sidebar />
@@ -150,7 +147,7 @@ export default function Home() {
         <section id="welcome" className="home-focus-film home-scroll-slide scroll-reveal scroll-reveal-delay-1" aria-labelledby="focus-film-title">
           <div className="home-focus-film-copy">
             <span className="home-community-eyebrow">A moment to reset</span>
-            <h1 id="focus-film-title">{getTimeGreeting()}, {user?.full_name?.trim() || user?.alias || 'friend'}.</h1>
+            <h1 id="focus-film-title">{greeting}, {user?.full_name?.trim() || user?.alias || 'friend'}.</h1>
             <p>Take a slow breath, notice where you are, and choose the next small thing that supports you.</p>
             <a href="#tua">Meet TUA <ArrowRight size={16} /></a>
           </div>
@@ -158,6 +155,8 @@ export default function Home() {
             <img className="home-hero-main" src={heroImage} alt="A group of students posing together on campus in colourful outfits" width="1600" height="1200" fetchPriority="high" />
           </div>
         </section>
+
+        {isLateNight && <LateNightPrompt />}
 
         <div className="home-dashboard-grid home-scroll-slide scroll-reveal scroll-reveal-delay-2">
 

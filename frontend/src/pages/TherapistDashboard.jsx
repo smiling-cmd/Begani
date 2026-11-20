@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import api from '../api';
 import { CalendarCheck, CalendarDays, CalendarPlus, Clock3, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getGreeting } from '../utils/greeting';
 
 function loadDashboard() {
   return Promise.all([
@@ -21,8 +22,10 @@ function formatCountdown(value, now) {
 }
 
 export default function TherapistDashboard() {
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { greeting } = getGreeting('therapist');
+
   const [bookings, setBookings] = useState([]);
   const [slots, setSlots] = useState([]);
   const [threads, setThreads] = useState([]);
@@ -66,8 +69,6 @@ export default function TherapistDashboard() {
 
   useEffect(() => {
     if (!token) return undefined;
-    // These callbacks update state only after their API requests resolve.
-    // oxlint-disable-next-line react/set-state-in-effect
     void fetchDashboard();
     void fetchPriorityRequests();
     const dashboardRefresh = window.setInterval(() => void fetchDashboard(), 30000);
@@ -145,7 +146,9 @@ export default function TherapistDashboard() {
     <div className="app-shell">
       <Sidebar />
       <main className="page-content therapist-dashboard-content">
-        <h1 className="therapist-dashboard-title">Welcome to your dashboard</h1>
+        <h1 className="therapist-dashboard-title">
+          {greeting}, {user?.full_name || user?.alias || 'Therapist'}
+        </h1>
         <p className="muted-copy therapist-dashboard-subtitle">Manage your appointments, availability, and chats here.</p>
 
         {notice.text && <div role="status" className={`form-message ${notice.type}`}>{notice.text}</div>}
