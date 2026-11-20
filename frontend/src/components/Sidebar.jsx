@@ -18,6 +18,8 @@ import {
 import { AuthContext } from '../context/AuthContext';
 import beganiLogo from '../assets/logo-light.png';
 import tuaImage from '../assets/TUA.png';
+import MobileHeader from './MobileHeader';
+import MobileBottomNav from './MobileBottomNav';
 import './Sidebar.css';
 
 export default function Sidebar() {
@@ -43,18 +45,20 @@ export default function Sidebar() {
       : '/home';
 
   return (
-    <aside className="sidebar sidebar-desktop" aria-label="Main navigation">
-      <div className="sidebar-brand">
-        <Link to={homePath} className="brand-logo-link" aria-label="Begani Home">
-          <img
-            className="brand-logo-image"
-            src={beganiLogo}
-            alt="Begani — Share the load."
-            width="245"
-            height="101"
-          />
-        </Link>
-      </div>
+    <>
+      <MobileHeader />
+      <aside className="sidebar sidebar-desktop" aria-label="Main navigation">
+        <div className="sidebar-brand">
+          <Link to={homePath} className="brand-logo-link" aria-label="Begani Home">
+            <img
+              className="brand-logo-image"
+              src={beganiLogo}
+              alt="Begani — Share the load."
+              width="245"
+              height="101"
+            />
+          </Link>
+        </div>
 
       <nav className="sidebar-nav" id="sidebar-nav" aria-label="Pages">
         {isAdmin ? (
@@ -119,6 +123,8 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    <MobileBottomNav />
+  </>
   );
 }
 

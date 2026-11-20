@@ -3,11 +3,6 @@ import { useContext } from 'react';
 import AuthProvider from './context/AuthProvider';
 import { AuthContext } from './context/AuthContext';
 
-// Layout Components
-import Sidebar from './components/Sidebar';
-import MobileHeader from './components/MobileHeader';
-import MobileBottomNav from './components/MobileBottomNav';
-
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -47,43 +42,27 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           {/* AUTHENTICATED ROUTES */}
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute>
-                <div className="app-shell">
-                  <MobileHeader />
-                  <MobileBottomNav />
-                  <Sidebar />
-                  <main className="page-content">
-                    <Routes>
-                      <Route path="/onboarding" element={<OnboardingName />} />
-                      <Route path="/welcome" element={<WelcomeScreen />} />
-                      <Route path="/home" element={<Home />} />
-                      <Route path="/tua" element={<Tua />} />
-                      <Route path="/support" element={<FindSupport />} />
-                      <Route path="/therapist/:id" element={<TherapistProfile />} />
-                      <Route path="/therapist-dashboard" element={<TherapistDashboard />} />
-                      <Route path="/admin-dashboard" element={<AdminDashboard />} />
-                      <Route path="/admin-resources" element={<AdminResources />} />
-                      <Route path="/admin-activities" element={<AdminActivities />} />
-                      <Route path="/insights" element={<Insights />} />
-                      <Route path="/earnings" element={<Earnings />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="/resources" element={<Resources />} />
-                      <Route path="/activities" element={<Activities />} />
-                      <Route path="/wellbeing" element={<Wellbeing />} />
-                      <Route path="/calendar" element={<Calendar />} />
-                      <Route path="/chats" element={<ChatInbox />} />
-                      <Route path="/therapist-chats" element={<ChatInbox />} />
-                      <Route path="/chat/:id" element={<ChatRoom />} />
-                      <Route path="*" element={<Navigate to="/home" />} />
-                    </Routes>
-                  </main>
-                </div>
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/onboarding" element={<ProtectedRoute><OnboardingName /></ProtectedRoute>} />
+          <Route path="/welcome" element={<ProtectedRoute><WelcomeScreen /></ProtectedRoute>} />
+          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/tua" element={<ProtectedRoute><Tua /></ProtectedRoute>} />
+          <Route path="/support" element={<ProtectedRoute><FindSupport /></ProtectedRoute>} />
+          <Route path="/therapist/:id" element={<ProtectedRoute><TherapistProfile /></ProtectedRoute>} />
+          <Route path="/therapist-dashboard" element={<ProtectedRoute><TherapistDashboard /></ProtectedRoute>} />
+          <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin-resources" element={<ProtectedRoute><AdminResources /></ProtectedRoute>} />
+          <Route path="/admin-activities" element={<ProtectedRoute><AdminActivities /></ProtectedRoute>} />
+          <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
+          <Route path="/earnings" element={<ProtectedRoute><Earnings /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+          <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
+          <Route path="/wellbeing" element={<ProtectedRoute><Wellbeing /></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+          <Route path="/chats" element={<ProtectedRoute><ChatInbox /></ProtectedRoute>} />
+          <Route path="/therapist-chats" element={<ProtectedRoute><ChatInbox /></ProtectedRoute>} />
+          <Route path="/chat/:id" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/home" />} />
         </Routes>
       </Router>
     </AuthProvider>

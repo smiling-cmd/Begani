@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import tuaImage from '../assets/TUA-transparent.png';
 import PriorityRequestDialog from '../components/PriorityRequestDialog';
 import MoodWheel from '../components/MoodWheel';
+import Sidebar from '../components/Sidebar';
 import heroImage from '../assets/home/hero-campus.webp';
 import './Home.css';
 
@@ -143,7 +144,9 @@ export default function Home() {
 
   // Home is the student dashboard; therapist accounts use TherapistDashboard.
   return (
-    <main className="page-content home-page-content">
+    <div className="app-shell">
+      <Sidebar />
+      <main className="page-content home-page-content">
         <section id="welcome" className="home-focus-film home-scroll-slide scroll-reveal scroll-reveal-delay-1" aria-labelledby="focus-film-title">
           <div className="home-focus-film-copy">
             <span className="home-community-eyebrow">A moment to reset</span>
@@ -263,13 +266,14 @@ export default function Home() {
             </div>
         </div>
 
+      </main>
       {urgentHelpOpen && <PriorityRequestDialog
         hasPhone={Boolean(user?.phone)}
         source="find_support"
         onClose={() => setUrgentHelpOpen(false)}
         onCreated={(request) => navigate(`/chat/${request.thread_id}`, { state: { priorityRequestSent: true } })}
       />}
-    </main>
+    </div>
   );
 }
 
