@@ -135,7 +135,6 @@
 
 /* Cards that appear once a student has data (mood history, journal, therapist rows) */
 :root[data-theme='dark'] .mood-summary,
-:root[data-theme='dark'] .mood-tracker,
 :root[data-theme='dark'] .journal-entry,
 :root[data-theme='dark'] .admin-therapist-row { border-color: var(--line); background: var(--surface-raised); }
 :root[data-theme='dark'] .checkin-face { background: var(--surface-subtle); }

@@ -3,13 +3,21 @@ import api from '../api';
 import { Activity, ArrowRight, BookOpen, Footprints, Hand, Heart, NotebookPen, Pause, Play, Sprout, TrendingDown, TrendingUp, Users, Wind } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import MoodWheel from '../components/MoodWheel';
 import { AuthContext } from '../context/AuthContext';
+import BoundariesTool from '../components/wellbeing/BoundariesTool';
+import GratitudeTool from '../components/wellbeing/GratitudeTool';
+import GroundingTool from '../components/wellbeing/GroundingTool';
+import MeditationCard from '../components/wellbeing/MeditationCard';
+import MovementTool from '../components/wellbeing/MovementTool';
+import SelfCareCard from '../components/wellbeing/SelfCareCard';
+import WeekChart from '../components/wellbeing/WeekChart';
+import { getMoodLabel } from '../components/wellbeing/mood';
 
 import wellbeingPhoto from '../assets/pages/wellbeing-reading.webp';
 import './PageHeadingPhoto.css';
 import './Wellbeing.css';
-// Legacy moods array kept for check-in history display only
+
+// Faces shown next to past check-ins. The daily check-in itself lives on Home.
 const moods = [
   { score: 2, label: 'Very low', face: '☹' },
   { score: 4, label: 'Low', face: '🙁' },
@@ -17,46 +25,14 @@ const moods = [
   { score: 8, label: 'Good', face: '🙂' },
   { score: 10, label: 'Great', face: '😁' },
 ];
-const senseSteps = [
-  { count: 5, label: 'see' },
-  { count: 4, label: 'touch' },
-  { count: 3, label: 'hear' },
-  { count: 2, label: 'smell' },
-  { count: 1, label: 'taste' },
+// Breathing paces are [in, hold, out] in seconds.
+const paces = [
+  { key: 'gentle', label: 'Gentle', seconds: [4, 4, 6] },
+  { key: 'relax', label: 'Relax', seconds: [4, 7, 8] },
+  { key: 'even', label: 'Even', seconds: [4, 4, 4] },
 ];
-const selfCareTools = [
-  {
-    key: 'gratitude',
-    icon: NotebookPen,
-    title: 'Gratitude & Reflection',
-    text: 'Write down a few positive moments or things you appreciate each day to shift focus toward helpful routines and perspective.',
-  },
-  {
-    key: 'movement',
-    icon: Footprints,
-    title: 'Mindfulness & Movement',
-    text: 'Try slow breathing exercises, short walks, stretching, or consistent sleep habits to lower daily tension.',
-  },
-  {
-    key: 'boundaries',
-    icon: Users,
-    title: 'Boundaries & Social Support',
-    text: 'Set clear limits on workload or screen time, and stay connected with supportive friends, family, or groups.',
-  },
-];
-const phases = [
-  { name: 'Breathe in', seconds: 4 },
-  { name: 'Hold', seconds: 4 },
-  { name: 'Breathe out', seconds: 6 },
-];
-
-function getMoodLabel(score) {
-  if (score <= 2) return 'Very low';
-  if (score <= 4) return 'Low';
-  if (score <= 6) return 'Okay';
-  if (score <= 8) return 'Good';
-  return 'Great';
-}
+const cycleOptions = [3, 4, 6];
+const phaseNames = ['Breathe in', 'Hold', 'Breathe out'];
 
 function getErrorMessage(error, fallback) {
   const detail = error.response?.data?.detail || error.response?.data;
@@ -81,15 +57,22 @@ export default function Wellbeing() {
   const [loadingJournal, setLoadingJournal] = useState(true);
   const [moodError, setMoodError] = useState('');
   const [journalError, setJournalError] = useState('');
-  const [selectedMood, setSelectedMood] = useState(null);
-  const [savingMood, setSavingMood] = useState(false);
-  const [moodNotice, setMoodNotice] = useState('');
   const [journalDraft, setJournalDraft] = useState('');
   const [savingJournal, setSavingJournal] = useState(false);
   const [breathing, setBreathing] = useState(false);
+  const [breathNotice, setBreathNotice] = useState('');
+  const [paceKey, setPaceKey] = useState('gentle');
+  const [totalCycles, setTotalCycles] = useState(4);
   const [phaseIndex, setPhaseIndex] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(phases[0].seconds);
+  const [secondsLeft, setSecondsLeft] = useState(paces[0].seconds[0]);
   const [cycles, setCycles] = useState(0);
+
+  const pace = paces.find((item) => item.key === paceKey);
+  const phases = useMemo(
+    () => phaseNames.map((name, index) => ({ name, seconds: pace.seconds[index] })),
+    [pace],
+  );
+  const practiceMinutes = Math.max(1, Math.round((pace.seconds.reduce((sum, value) => sum + value, 0) * totalCycles) / 60));
 
   useEffect(() => {
     if (!token) return undefined;
@@ -128,18 +111,18 @@ export default function Wellbeing() {
 
       const completedCycles = cycles + 1;
       setCycles(completedCycles);
-      if (completedCycles >= 4) {
+      if (completedCycles >= totalCycles) {
         setBreathing(false);
         setPhaseIndex(0);
         setSecondsLeft(phases[0].seconds);
-        setMoodNotice('You completed four gentle breathing cycles. Take a moment before moving on.');
+        setBreathNotice(`You completed ${totalCycles} gentle breathing cycles. Take a moment before moving on.`);
         return;
       }
       setPhaseIndex(0);
       setSecondsLeft(phases[0].seconds);
     }, 1000);
     return () => window.clearTimeout(timeout);
-  }, [breathing, secondsLeft, phaseIndex, cycles]);
+  }, [breathing, secondsLeft, phaseIndex, cycles, phases, totalCycles]);
 
   const average = useMemo(() => {
     if (!checkins.length) return null;
@@ -165,21 +148,15 @@ export default function Wellbeing() {
     return { trend: 'neutral', line: "Your mood has been consistent week over week." };
   }, [checkins]);
 
-  const handleSaveMood = async () => {
-    if (!selectedMood || savingMood) return;
-    setSavingMood(true);
-    setMoodNotice('');
-    setMoodError('');
-    try {
-      const { data } = await api.post('/api/wellbeing/moods/', { score: selectedMood.score, source: 'wellbeing' });
-      setCheckins((current) => [data, ...current]);
-      setSelectedMood(null);
-      setMoodNotice('Your check-in is saved. Thanks for taking a moment for yourself.');
-    } catch (error) {
-      setMoodError(getErrorMessage(error, 'Could not save your check-in. Please try again.'));
-    } finally {
-      setSavingMood(false);
-    }
+  const weekLine = moodInsight
+    ? moodInsight.line
+    : checkins.length
+      ? 'One more check-in and your weekly trend will appear here.'
+      : 'Do a check-in on Home and your week will start to take shape here.';
+
+  const saveJournalBody = async (body) => {
+    const { data } = await api.post('/api/wellbeing/journals/', { body });
+    setJournalEntries((current) => [data, ...current]);
   };
 
   const handleSaveJournal = async (event) => {
@@ -189,8 +166,7 @@ export default function Wellbeing() {
     setSavingJournal(true);
     setJournalError('');
     try {
-      const { data } = await api.post('/api/wellbeing/journals/', { body });
-      setJournalEntries((current) => [data, ...current]);
+      await saveJournalBody(body);
       setJournalDraft('');
     } catch (error) {
       setJournalError(getErrorMessage(error, 'Could not save your entry. Please try again.'));
@@ -199,12 +175,38 @@ export default function Wellbeing() {
     }
   };
 
-  const startBreathing = () => {
+  const handleSaveGratitude = async (items) => {
+    const body = `Grateful for:\n${items.map((item, index) => `${index + 1}. ${item}`).join('\n')}`;
+    try {
+      await saveJournalBody(body);
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'Could not save your gratitude note. Please try again.'));
+    }
+  };
+
+  const resetBreathing = (nextPhases) => {
     setCycles(0);
     setPhaseIndex(0);
-    setSecondsLeft(phases[0].seconds);
-    setMoodNotice('');
+    setSecondsLeft(nextPhases[0].seconds);
+    setBreathNotice('');
+  };
+
+  const startBreathing = () => {
+    resetBreathing(phases);
     setBreathing(true);
+  };
+
+  const choosePace = (key) => {
+    if (breathing) return;
+    const next = paces.find((item) => item.key === key);
+    setPaceKey(key);
+    resetBreathing(phaseNames.map((name, index) => ({ name, seconds: next.seconds[index] })));
+  };
+
+  const chooseCycles = (count) => {
+    if (breathing) return;
+    setTotalCycles(count);
+    resetBreathing(phases);
   };
 
   return (
@@ -214,159 +216,181 @@ export default function Wellbeing() {
         <header className="page-heading page-heading--photo">
           <div className="eyebrow"><Sprout size={16} /> Your daily reset</div>
           <h1>Make space for calm.</h1>
-          <p>A small pause can change the shape of your day. Check in, breathe, and take what you need.</p>
+          <p>A small pause can change the shape of your day. Breathe, meditate, and take what you need.</p>
           <img className="page-heading-photo" src={wellbeingPhoto} alt="" width="640" height="400" loading="lazy" />
         </header>
 
-        <div className="wellbeing-grid">
-          <section className="panel wellbeing-checkins">
-            <div className="section-title-row">
-              <h2><Activity size={21} /> Your check-ins</h2>
-              <span>{checkins.length} total</span>
-            </div>
-            {moodError && <p className="form-message error" role="alert">{moodError}</p>}
-            {moodNotice && <p className="form-message success" role="status">{moodNotice}</p>}
-            {loadingMoods ? <p className="muted-copy">Loading your check-ins…</p> : checkins.length === 0 ? (
-              <p className="muted-copy">Your check-ins will appear here when you start tracking.</p>
-            ) : (
-              <>
-                <div className="mood-summary"><span>Recent average</span><strong>{average} <small>/ 10</small></strong></div>
-                <div className="checkin-list">
-                  {checkins.slice(0, 6).map((checkin) => (
-                    <article className="checkin-row" key={checkin.id}>
-                      <span className="checkin-face" aria-hidden="true">{moods.find((mood) => mood.label === getMoodLabel(checkin.score))?.face || '😁'}</span>
-                      <span className="checkin-copy"><strong>{getMoodLabel(checkin.score)}</strong><small>{formatDate(checkin.checked_in_at)}</small></span>
-                      <span className="score-pill">{checkin.score}/10</span>
-                    </article>
-                  ))}
-                </div>
-              </>
-            )}
-            <Link to="/home" className="text-button">Back to home <ArrowRight size={16} /></Link>
-          </section>
-
-          <section className="panel mood-tracker">
-            <div className="section-title-row">
-              <h2><Heart size={21} /> How are you feeling?</h2>
-            </div>
-            <p className="muted-copy">There's no right answer. Choose what feels closest right now.</p>
-            <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0 16px' }}>
-              <MoodWheel selected={selectedMood} onChange={setSelectedMood} size={270} />
-            </div>
-            <button type="button" className="button mood-save" onClick={handleSaveMood} disabled={!selectedMood || savingMood}>
-              {savingMood ? 'Saving…' : 'Save check-in'}
-            </button>
-          </section>
-
-          <section className="panel breathing-card">
-            <span className="wellbeing-practice-kicker">Today’s practice · 3 minutes</span>
-            <div className="section-title-row">
-              <h2><Wind size={21} /> Deep breath reset</h2>
-              <span className="breathing-pattern">4 · 4 · 6</span>
-            </div>
-            <p>Let your shoulders soften. Follow a gentle pace: breathe in, pause, then breathe out slowly.</p>
-            <div className={`breath-orb${breathing ? ' is-breathing' : ''}`} aria-live="polite">
-              <strong>{breathing ? secondsLeft : 'Ready'}</strong>
-              <span>{breathing ? phases[phaseIndex].name : 'Take a pause'}</span>
-            </div>
-            <p className="breathing-progress">{cycles} of 4 cycles</p>
-            <button type="button" className="button button-light" onClick={breathing ? () => setBreathing(false) : startBreathing}>
-              {breathing ? <><Pause size={16} /> Pause exercise</> : <><Play size={16} /> Start exercise</>}
-            </button>
-          </section>
-
-          {moodInsight && (
-            <section className="panel mood-insight-card">
+        <div className="wellbeing-stack">
+          <div className="wellbeing-grid">
+            <section className="panel wellbeing-checkins" aria-labelledby="checkins-title">
               <div className="section-title-row">
-                <h2>
-                  {moodInsight.trend === 'up' && <TrendingUp size={21} color="var(--sky)" />}
-                  {moodInsight.trend === 'down' && <TrendingDown size={21} color="var(--terra)" />}
-                  {moodInsight.trend === 'neutral' && <Activity size={21} color="var(--sage)" />}
-                  {' '}Your week
+                <h2 id="checkins-title"><Activity size={21} aria-hidden="true" /> Your check-ins</h2>
+                <span>{checkins.length} total</span>
+              </div>
+              {moodError && <p className="form-message error" role="alert">{moodError}</p>}
+              {loadingMoods ? <p className="muted-copy">Loading your check-ins…</p> : checkins.length === 0 ? (
+                <p className="muted-copy">No check-ins yet. Your daily check-in lives on Home, and each one will show up here.</p>
+              ) : (
+                <>
+                  <div className="mood-summary"><span>Recent average</span><strong>{average} <small>/ 10</small></strong></div>
+                  <div className="checkin-list">
+                    {checkins.slice(0, 5).map((checkin) => (
+                      <article className="checkin-row" key={checkin.id}>
+                        <span className="checkin-face" aria-hidden="true">{moods.find((mood) => mood.label === getMoodLabel(checkin.score))?.face || '😁'}</span>
+                        <span className="checkin-copy"><strong>{getMoodLabel(checkin.score)}</strong><small>{formatDate(checkin.checked_in_at)}</small></span>
+                        <span className="score-pill">{checkin.score}/10</span>
+                      </article>
+                    ))}
+                  </div>
+                </>
+              )}
+              <Link to="/home" className="text-button">Do today’s check-in on Home <ArrowRight size={16} aria-hidden="true" /></Link>
+            </section>
+
+            <section className="panel mood-insight-card" aria-labelledby="week-title">
+              <div className="section-title-row">
+                <h2 id="week-title">
+                  {moodInsight?.trend === 'up' && <TrendingUp size={21} color="var(--brand-teal-deep)" aria-hidden="true" />}
+                  {moodInsight?.trend === 'down' && <TrendingDown size={21} color="var(--terra)" aria-hidden="true" />}
+                  {(!moodInsight || moodInsight.trend === 'neutral') && <Activity size={21} color="var(--muted)" aria-hidden="true" />}
+                  Your week
                 </h2>
+                <span>7-day average</span>
               </div>
               <div className="mood-insight-avg">
-                <span className="mood-insight-number">{average}</span>
+                <span className="mood-insight-number">{average ?? '–'}</span>
                 <span className="mood-insight-denom">/ 10</span>
               </div>
-              <p className="mood-insight-line">{moodInsight.line}</p>
-              <div className="mood-insight-bar-wrap">
-                <div
-                  className="mood-insight-bar"
-                  style={{ width: `${(parseFloat(average) / 10) * 100}%` }}
-                  role="progressbar"
-                  aria-valuenow={parseFloat(average)}
-                  aria-valuemin={0}
-                  aria-valuemax={10}
-                />
-              </div>
-              <p className="mood-insight-label">7-day average</p>
+              <p className="mood-insight-line">{weekLine}</p>
+              <WeekChart checkins={checkins} />
             </section>
-          )}
-        </div>
-
-        <section className="panel selfcare-panel" aria-labelledby="selfcare-title">
-          <div className="section-title-row">
-            <div>
-              <h2 id="selfcare-title">Everyday Self-Care &amp; Stress Tools</h2>
-              <p className="muted-copy">Small habits you can use any day, whenever things feel heavy.</p>
-            </div>
-            <Heart size={22} aria-hidden="true" />
           </div>
-          <div className="selfcare-grid">
-            <article className="selfcare-card">
-              <div className="selfcare-card-head">
-                <span className="selfcare-icon" aria-hidden="true"><Hand size={20} /></span>
-                <h3>5 Senses Grounding</h3>
+
+          <div className="wellbeing-grid">
+            <section className="panel practice-card breathing-card" aria-labelledby="breathing-title">
+              <span className="wellbeing-practice-kicker">Today’s practice · about {practiceMinutes} min</span>
+              <div className="section-title-row">
+                <h2 id="breathing-title"><Wind size={21} aria-hidden="true" /> Deep breath reset</h2>
+                <span className="practice-pill">{pace.seconds.join(' · ')}</span>
               </div>
-              <p>Notice 5 things you see, 4 you can touch, 3 you hear, 2 you smell, and 1 you taste to anchor yourself in the present.</p>
-              <ul className="senses-steps" aria-hidden="true">
-                {senseSteps.map((step) => (
-                  <li key={step.count}><b>{step.count}</b>{step.label}</li>
-                ))}
-              </ul>
-            </article>
-            {selfCareTools.map(({ key, icon: Icon, title, text }) => (
-              <article className="selfcare-card" key={key}>
-                <div className="selfcare-card-head">
-                  <span className="selfcare-icon" aria-hidden="true"><Icon size={20} /></span>
-                  <h3>{title}</h3>
+              <p className="practice-lead">Let your shoulders soften. Follow a gentle pace: breathe in, pause, then breathe out slowly.</p>
+              <div className="practice-options">
+                <div className="chip-row" role="group" aria-label="Breathing pace">
+                  {paces.map((item) => (
+                    <button
+                      type="button"
+                      key={item.key}
+                      className="practice-chip"
+                      aria-pressed={paceKey === item.key}
+                      disabled={breathing}
+                      onClick={() => choosePace(item.key)}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
                 </div>
-                <p>{text}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+                <div className="chip-row" role="group" aria-label="Number of cycles">
+                  {cycleOptions.map((count) => (
+                    <button
+                      type="button"
+                      key={count}
+                      className="practice-chip"
+                      aria-pressed={totalCycles === count}
+                      disabled={breathing}
+                      onClick={() => chooseCycles(count)}
+                    >
+                      {count} cycles
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="practice-visual">
+                <div className={`breath-orb${breathing ? ' is-breathing' : ''}`} aria-live="polite">
+                  <strong>{breathing ? secondsLeft : 'Ready'}</strong>
+                  <span>{breathing ? phases[phaseIndex].name : 'Take a pause'}</span>
+                </div>
+                <p className="practice-guide" role="status">{breathNotice || `${cycles} of ${totalCycles} cycles`}</p>
+              </div>
+              <div className="practice-actions">
+                <button type="button" className="button" onClick={breathing ? () => setBreathing(false) : startBreathing}>
+                  {breathing ? <><Pause size={16} aria-hidden="true" /> Pause exercise</> : <><Play size={16} aria-hidden="true" /> Start exercise</>}
+                </button>
+              </div>
+            </section>
 
-        <section className="panel journal-panel">
-          <div className="section-title-row">
-            <div><h2>A little reflection</h2><p className="muted-copy">What would make tomorrow a little easier?</p></div>
-            <BookOpen size={22} aria-hidden="true" />
+            <MeditationCard />
           </div>
-          <form onSubmit={handleSaveJournal} className="journal-form">
-            <label className="sr-only" htmlFor="journal-entry">Write a private journal entry</label>
-            <textarea id="journal-entry" value={journalDraft} onChange={(event) => setJournalDraft(event.target.value)} placeholder="Write whatever is on your mind..." rows="4" maxLength="4000" />
-            <div className="journal-form-footer"><span>{journalDraft.length}/4000</span><button type="submit" className="button" disabled={!journalDraft.trim() || savingJournal}>{savingJournal ? 'Saving…' : 'Save entry'}</button></div>
-          </form>
-          {journalError && <p className="form-message error" role="alert">{journalError}</p>}
-          {loadingJournal ? <p className="muted-copy">Loading your journal…</p> : journalEntries.length === 0 ? (
-            <p className="muted-copy journal-empty">No entries yet. Your writing is private to your account.</p>
-          ) : (
-            <div className="journal-list">
-              {journalEntries.slice(0, 5).map((entry) => (
-                <article className="journal-entry" key={entry.id}>
-                  <p>{entry.body}</p>
-                  <time dateTime={entry.created_at}>{formatDate(entry.created_at)}</time>
-                </article>
-              ))}
+
+          <section className="panel selfcare-panel" aria-labelledby="selfcare-title">
+            <div className="section-title-row">
+              <div>
+                <h2 id="selfcare-title">Everyday Self-Care &amp; Stress Tools</h2>
+                <p className="muted-copy">Small habits you can use any day, whenever things feel heavy.</p>
+              </div>
+              <Heart size={22} aria-hidden="true" />
             </div>
-          )}
-        </section>
+            <div className="selfcare-grid">
+              <SelfCareCard
+                icon={Hand}
+                title="5 Senses Grounding"
+                text="Notice 5 things you see, 4 you can touch, 3 you hear, 2 you smell, and 1 you taste to anchor yourself in the present."
+              >
+                <GroundingTool />
+              </SelfCareCard>
+              <SelfCareCard
+                icon={NotebookPen}
+                title="Gratitude & Reflection"
+                text="Write down a few positive moments or things you appreciate each day to shift focus toward helpful routines and perspective."
+              >
+                <GratitudeTool onSave={handleSaveGratitude} />
+              </SelfCareCard>
+              <SelfCareCard
+                icon={Footprints}
+                title="Mindfulness & Movement"
+                text="Try slow breathing exercises, short walks, stretching, or consistent sleep habits to lower daily tension."
+              >
+                <MovementTool />
+              </SelfCareCard>
+              <SelfCareCard
+                icon={Users}
+                title="Boundaries & Social Support"
+                text="Set clear limits on workload or screen time, and stay connected with supportive friends, family, or groups."
+              >
+                <BoundariesTool />
+              </SelfCareCard>
+            </div>
+          </section>
 
-        <section className="support-nudge">
-          <div><strong>Need a little more support?</strong><p>You don't have to figure everything out on your own.</p></div>
-          <Link to="/support" className="button button-warning">Find support <ArrowRight size={16} /></Link>
-        </section>
+          <section className="panel journal-panel">
+            <div className="section-title-row">
+              <div><h2>A little reflection</h2><p className="muted-copy">What would make tomorrow a little easier?</p></div>
+              <BookOpen size={22} aria-hidden="true" />
+            </div>
+            <form onSubmit={handleSaveJournal} className="journal-form">
+              <label className="sr-only" htmlFor="journal-entry">Write a private journal entry</label>
+              <textarea id="journal-entry" value={journalDraft} onChange={(event) => setJournalDraft(event.target.value)} placeholder="Write whatever is on your mind..." rows="4" maxLength="4000" />
+              <div className="journal-form-footer"><span>{journalDraft.length}/4000</span><button type="submit" className="button" disabled={!journalDraft.trim() || savingJournal}>{savingJournal ? 'Saving…' : 'Save entry'}</button></div>
+            </form>
+            {journalError && <p className="form-message error" role="alert">{journalError}</p>}
+            {loadingJournal ? <p className="muted-copy">Loading your journal…</p> : journalEntries.length === 0 ? (
+              <p className="muted-copy journal-empty">No entries yet. Your writing is private to your account.</p>
+            ) : (
+              <div className="journal-list">
+                {journalEntries.slice(0, 5).map((entry) => (
+                  <article className="journal-entry" key={entry.id}>
+                    <p>{entry.body}</p>
+                    <time dateTime={entry.created_at}>{formatDate(entry.created_at)}</time>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="support-nudge">
+            <div><strong>Need a little more support?</strong><p>You don't have to figure everything out on your own.</p></div>
+            <Link to="/support" className="button button-warning">Find support <ArrowRight size={16} /></Link>
+          </section>
+        </div>
       </main>
     </div>
   );

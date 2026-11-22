@@ -886,53 +886,9 @@ select:focus,
 .activity-art-music { color: #365d4d; background: linear-gradient(145deg, #eff4dc, #ceddb2); }
 .activity-art-reading-club { color: #825e35; background: linear-gradient(145deg, #fff2d6, #ebd5a5); }
 
-.wellbeing-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); gap: 17px; align-items: stretch; }
-.wellbeing-grid > .panel, .journal-panel { padding: 22px; }
-.wellbeing-checkins .text-button { margin-top: 14px; }
-.mood-summary { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 10px; padding: 14px; border-radius: 12px; color: var(--muted); background: var(--surface-subtle); font-size: 12px; }
-.mood-summary strong { color: var(--forest, #163f35); font-family: 'Plus Jakarta Sans', Inter, sans-serif; font-size: 21px; }
-.mood-summary small { color: var(--muted); font-family: Inter, sans-serif; font-size: 11px; }
-.checkin-list { display: grid; gap: 8px; }
-.checkin-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line-subtle); }
-.checkin-face { display: grid; width: 35px; height: 35px; place-items: center; border-radius: 11px; background: var(--surface-subtle); font-size: 19px; }
-.checkin-copy { display: grid; gap: 3px; flex: 1; }
-.checkin-copy strong { color: var(--green); font-size: 12px; }
-.checkin-copy small { color: var(--muted); font-size: 10px; }
-.score-pill { padding: 5px 9px; border-radius: 999px; color: var(--green); background: var(--tint); font-size: 11px; font-weight: 700; }
-.mood-tracker > .muted-copy { margin: 9px 0 14px; }
-.mood-options { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 7px; margin: 14px 0 18px; }
-.mood-option { display: grid; min-height: 75px; justify-items: center; align-content: center; gap: 6px; padding: 7px 3px; border: 1px solid var(--line); border-radius: 13px; color: var(--green); background: var(--card); cursor: pointer; transition: all .17s ease; }
-.mood-option:hover { border-color: var(--sage); transform: translateY(-2px); }
-.mood-option.selected { border-color: var(--forest, #163f35); background: var(--tint); box-shadow: 0 0 0 2px rgba(47,111,105,.08); }
-.mood-option span { font-size: 23px; }
-.mood-option small { font-size: 10px; }
-.mood-save { width: 100%; }
-.breathing-card { color: white; background: linear-gradient(150deg, #28614b, #1b4537); }
-.breathing-card .section-title-row h2, .breathing-card .section-title-row > span { color: white; }
-.breathing-card > p { color: #d5e6da; font-size: 13px; line-height: 1.5; }
-.breathing-pattern { padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,.12); }
-.breath-orb { display: grid; width: 150px; height: 150px; place-content: center; gap: 7px; margin: 18px auto 10px; border: 6px solid rgba(206,236,215,.5); border-radius: 50%; text-align: center; transition: transform 1s ease, background 1s ease; }
-.breath-orb.is-breathing { transform: scale(1.09); background: rgba(255,255,255,.11); }
-.breath-orb strong { font-family: 'Plus Jakarta Sans', Inter, sans-serif; font-size: 22px; }
-.breath-orb span { color: #d5e6da; font-size: 12px; }
-.breathing-progress { text-align: center; }
-.breathing-card .button { display: flex; width: fit-content; margin: 14px auto 0; }
-.journal-panel { margin-top: 17px; }
-.journal-panel .section-title-row { margin-bottom: 16px; color: var(--green); }
-.journal-panel .section-title-row h2 { display: block; margin-bottom: 5px; }
-.journal-panel .section-title-row p { margin: 0; }
-.journal-form textarea { width: 100%; resize: vertical; padding: 13px; border: 1px solid var(--line); border-radius: 13px; color: var(--ink); background: var(--card); line-height: 1.55; }
-.journal-form-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 9px; }
-.journal-form-footer > span { color: var(--muted); font-size: 11px; }
-.journal-empty { margin-bottom: 0; }
-.journal-list { display: grid; gap: 10px; margin-top: 17px; }
-.journal-entry { padding: 13px; border-radius: 12px; background: var(--surface-journal); }
-.journal-entry p { margin: 0 0 8px; color: var(--ink-journal); font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
-.journal-entry time { color: var(--muted); font-size: 10px; }
 .form-message { padding: 10px 12px; border-radius: 10px; font-size: 12px; line-height: 1.45; }
 .form-message.error { border-left: 3px solid var(--terra); color: var(--ink); background: var(--terra-soft); }
 .form-message.success { color: var(--ink-success); background: var(--surface-success); }
-.support-nudge { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 17px; padding: 18px 21px; border: 1px solid var(--terra); border-radius: 17px; background: var(--terra-soft); }
 .support-nudge strong, .support-nudge p { color: var(--ink); }
 .support-nudge p { margin: 4px 0 0; font-size: 12px; }
 
@@ -1405,7 +1361,6 @@ body {
 :root[data-theme='dark'] body { background: radial-gradient(circle at 0 0, rgba(32,201,179,.11), transparent 30rem), radial-gradient(circle at 100% 100%, rgba(113,143,111,.10), transparent 32rem), var(--bg); }
 :root[data-theme='dark'] .panel, :root[data-theme='dark'] .card, :root[data-theme='dark'] .settings-card, :root[data-theme='dark'] .settings-appearance, :root[data-theme='dark'] .settings-logout, :root[data-theme='dark'] .admin-content-panel, :root[data-theme='dark'] .therapist-dashboard-card, :root[data-theme='dark'] .therapist-info-card, :root[data-theme='dark'] .calendar-month, :root[data-theme='dark'] .calendar-agenda, :root[data-theme='dark'] .journal-panel { border-color: rgba(154,211,184,.16); background: rgba(24,47,40,.92); box-shadow: 0 20px 44px -33px rgba(0,0,0,.78), inset 0 1px 0 rgba(255,255,255,.04); }
 :root[data-theme='dark'] .home-community-card, :root[data-theme='dark'] .activity-intro, :root[data-theme='dark'] .resource-hero { background: linear-gradient(125deg, #1b4438, #172e27); }
-:root[data-theme='dark'] .wellbeing-checkins, :root[data-theme='dark'] .mood-insight-card { background: linear-gradient(135deg, #1a3c32, #1b3029); }
 :root[data-theme='dark'] .home-tua-card { background: linear-gradient(135deg, #1d4a3d, #20362d); }
 :root[data-theme='dark'] .button-secondary, :root[data-theme='dark'] .btn-secondary, :root[data-theme='dark'] .button-light, :root[data-theme='dark'] .filter-chip, :root[data-theme='dark'] .icon-button { color: var(--ink); border-color: var(--line); background: var(--surface-raised); }
 :root[data-theme='dark'] .home-community-slideshow { background: #152c25; }
@@ -1473,78 +1428,6 @@ body {
   .home-urgent-banner { min-height: auto; }
 }
 
-/* Wellbeing: a quiet, guided-practice dashboard rather than a clinical tracker. */
-.wellbeing-grid {
-  grid-template-columns: minmax(0, 1.12fr) minmax(300px, .88fr);
-  gap: 20px;
-}
-.wellbeing-grid > .panel { padding: clamp(20px, 2.4vw, 30px); }
-.wellbeing-checkins {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(228,241,229,.94), rgba(255,251,242,.92));
-}
-.wellbeing-checkins::after {
-  position: absolute;
-  top: -95px;
-  right: -76px;
-  width: 235px;
-  height: 235px;
-  border: 1px solid rgba(32,201,179,.22);
-  border-radius: 50%;
-  box-shadow: 0 0 0 32px rgba(32,201,179,.05), 0 0 0 64px rgba(32,201,179,.035);
-  content: '';
-  pointer-events: none;
-}
-.wellbeing-checkins > * { position: relative; z-index: 1; }
-.wellbeing-checkins .section-title-row h2, .mood-tracker .section-title-row h2 { font-size: clamp(1.65rem, 2.2vw, 2.05rem); }
-.mood-summary { margin: 20px 0 14px; padding: 17px 19px; border: 1px solid rgba(22,63,53,.08); border-radius: 18px; background: rgba(255,253,248,.72); }
-.mood-summary strong { font-family: var(--font-heading); font-size: 2.05rem; font-weight: 400; }
-.checkin-list { gap: 5px; }
-.checkin-row { padding: 10px 3px; border-bottom-color: rgba(22,63,53,.08); }
-.checkin-face { width: 40px; height: 40px; border-radius: 50%; background: #fffdf8; }
-.score-pill { color: #0f6b5e; background: #dff5ed; }
-
-.mood-tracker { background: rgba(255,253,248,.92); }
-.mood-tracker > .muted-copy { max-width: 360px; margin: 10px 0 5px; }
-.mood-tracker .mood-wheel { filter: drop-shadow(0 16px 18px rgba(22,63,53,.10)); }
-.mood-save { width: auto; min-width: 180px; margin: 2px auto 0; }
-
-.breathing-card {
-  position: relative;
-  overflow: hidden;
-  color: #f9fbf2;
-  background: linear-gradient(135deg, #1c4a3e 0%, #285f4e 58%, #397462 100%);
-}
-.breathing-card::before, .breathing-card::after { position: absolute; border-radius: 50%; content: ''; pointer-events: none; }
-.breathing-card::before { width: 300px; height: 300px; right: -130px; bottom: -142px; border: 1px solid rgba(236,247,225,.26); box-shadow: 0 0 0 34px rgba(236,247,225,.06), 0 0 0 68px rgba(236,247,225,.04); }
-.breathing-card::after { width: 100px; height: 100px; left: -38px; top: -45px; background: rgba(224,239,188,.11); }
-.breathing-card > * { position: relative; z-index: 1; }
-.wellbeing-practice-kicker { display: block; margin-bottom: 13px; color: #b9e5d7; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-.breathing-card .section-title-row h2 { font-family: var(--font-heading); font-size: clamp(1.8rem, 2.5vw, 2.35rem); font-weight: 400; }
-.breathing-card > p { max-width: 430px; color: rgba(248,253,244,.80); }
-.breathing-pattern { color: #e8f7ef; background: rgba(255,255,255,.13); }
-.breath-orb { width: 142px; height: 142px; margin: 24px auto 12px; border: 1px solid rgba(255,255,255,.32); background: radial-gradient(circle at 33% 25%, #b9e7bd, #71aa83 58%, #44745d); box-shadow: 0 0 0 17px rgba(255,255,255,.07), 0 15px 34px rgba(4,34,25,.22); }
-.breath-orb strong { color: #153e34; font-family: var(--font-heading); font-size: 2.65rem; font-weight: 400; }
-.breath-orb span { color: #164236; font-weight: 700; }
-.breathing-progress { color: #b9e5d7 !important; }
-.breathing-card .button { border-color: #f5f9ee; color: #163f35; background: #f5f9ee; }
-
-.mood-insight-card { background: linear-gradient(145deg, #fff7ea, #f2e7cf); }
-.mood-insight-number { font-family: var(--font-heading); font-size: 4rem; font-weight: 400; }
-.mood-insight-bar { background: linear-gradient(90deg, #20c9b3, #245748); }
-.journal-panel { border-radius: 28px; background: linear-gradient(125deg, rgba(255,253,248,.96), rgba(237,245,237,.86)); }
-.journal-panel .section-title-row h2 { font-family: var(--font-heading); font-size: clamp(1.8rem, 2.5vw, 2.35rem); font-weight: 400; }
-.journal-entry { border: 1px solid rgba(22,63,53,.07); border-radius: 16px; background: rgba(255,253,248,.72); }
-.support-nudge { border-radius: 22px; background: #e3f1e6; }
-
-@media (max-width: 760px) {
-  .wellbeing-grid { grid-template-columns: 1fr; gap: 16px; }
-  .wellbeing-grid > .panel { padding: 20px; }
-  .wellbeing-checkins { order: 1; }.mood-tracker { order: 2; }.breathing-card { order: 3; }.mood-insight-card { order: 4; }
-  .breath-orb { width: 128px; height: 128px; }
-  .journal-panel { border-radius: 22px; }
-}
 
 /* Additional Component Specific Helpers */
 .filter-list { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1553,15 +1436,6 @@ body {
 .therapist-booking-title { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: var(--heading); }
 .therapist-booking-title svg { color: var(--brand-teal); }
 
-/* Mood Insight Widget */
-.mood-insight-card { display: flex; flex-direction: column; gap: 10px; }
-.mood-insight-avg { display: flex; align-items: baseline; gap: 4px; }
-.mood-insight-number { font-size: 48px; font-weight: 800; color: var(--heading); line-height: 1; }
-.mood-insight-denom { font-size: 16px; color: var(--muted); font-weight: 600; }
-.mood-insight-line { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
-.mood-insight-bar-wrap { height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: 4px; }
-.mood-insight-bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--brand-teal), var(--forest)); transition: width .6s ease; }
-.mood-insight-label { margin: 0; font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: .02em; text-transform: uppercase; }
 
 /* Scroll reveal helpers */
 .scroll-reveal { opacity: 1; transform: none; }
