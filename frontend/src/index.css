@@ -896,6 +896,10 @@ select:focus,
 .tua-crisis-actions p { margin: 0; color: #7f1d1d; font-size: 13px; line-height: 1.45; }
 .tua-crisis-links { display: flex; flex-wrap: wrap; gap: 10px; }
 .tua-crisis-links a { display: inline-flex; min-height: 36px; align-items: center; gap: 6px; padding: 0 11px; border: 1px solid #dc2626; border-radius: 999px; color: #991b1b; font-size: 12px; font-weight: 700; text-decoration: none; }
+.tua-urgent { display: grid; justify-items: start; gap: 10px; margin-bottom: 12px; }
+.tua-urgent .tua-crisis-actions { margin-left: 0; max-width: 100%; }
+.tua-urgent-toggle { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: transparent; cursor: pointer; font-size: 12px; font-weight: 600; }
+.tua-urgent-toggle:hover, .tua-urgent-toggle[aria-expanded='true'] { color: var(--heading); background: var(--surface-subtle); }
 .tua-crisis-actions > button { justify-self: start; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; color: #fff; background: #991b1b; cursor: pointer; font-size: 12px; font-weight: 700; }
 .priority-dialog-backdrop { position: fixed; z-index: 60; inset: 0; display: grid; place-items: center; overflow-y: auto; padding: 20px; background: rgba(17, 26, 22, .62); }
 .priority-dialog { position: relative; width: min(100%, 480px); max-height: calc(100dvh - 40px); overflow-y: auto; padding: 28px; border: 1px solid var(--line); border-radius: 20px; color: var(--ink); background: var(--card); box-shadow: 0 22px 60px rgba(0,0,0,.24); }

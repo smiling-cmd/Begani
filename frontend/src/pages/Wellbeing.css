@@ -637,6 +637,7 @@
 /* The interactive part of each card, pinned to the bottom so rows line up */
 .selfcare-tool {
   display: grid;
+  min-width: 0;
   gap: 12px;
   align-content: start;
   margin-top: auto;
@@ -791,11 +792,13 @@
 /* Gratitude */
 .gratitude-fields {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* let the inputs shrink on very small phones */
   gap: 8px;
 }
 
 .gratitude-field {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 10px;
 }

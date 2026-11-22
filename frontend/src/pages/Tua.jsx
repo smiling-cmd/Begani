@@ -1,6 +1,6 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { ArrowRight, Phone, Send } from 'lucide-react';
+import { ArrowRight, LifeBuoy, Phone, Send } from 'lucide-react';
 import api from '../api';
 import Sidebar from '../components/Sidebar';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -20,6 +20,7 @@ export default function Tua() {
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [priorityDialog, setPriorityDialog] = useState(null);
+  const [showUrgent, setShowUrgent] = useState(false);
   
   const chatEndRef = useRef(null);
 
@@ -130,11 +131,24 @@ export default function Tua() {
           </div>
 
           {conversationId && user?.role === 'student' && (
-            <div className="tua-crisis-actions" aria-label="Urgent counsellor request">
-              <p>Need urgent support? Request a chat with an approved school counsellor.</p>
-              <button type="button" onClick={() => setPriorityDialog({ conversationId })}>
-                Connect me with a counsellor now
+            <div className="tua-urgent">
+              <button
+                type="button"
+                className="tua-urgent-toggle"
+                aria-expanded={showUrgent}
+                aria-controls="tua-urgent-panel"
+                onClick={() => setShowUrgent((shown) => !shown)}
+              >
+                <LifeBuoy size={15} aria-hidden="true" /> Need urgent support?
               </button>
+              {showUrgent && (
+                <div className="tua-crisis-actions" id="tua-urgent-panel" aria-label="Urgent counsellor request">
+                  <p>Request a chat with an approved school counsellor.</p>
+                  <button type="button" onClick={() => setPriorityDialog({ conversationId })}>
+                    Connect me with a counsellor now
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
