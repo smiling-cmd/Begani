@@ -1,0 +1,272 @@
+/* Earnings and Insights (therapist). Built on the shared tokens so both
+   themes work, and laid out to hold up from 320px phones to wide desktops. */
+
+.report-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.report-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 18px 20px;
+}
+
+.report-stat strong {
+  color: var(--heading);
+  font-family: var(--font-heading);
+  font-size: clamp(1.45rem, 4.6vw, 1.9rem);
+  font-weight: 400;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.report-stat span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.report-panel {
+  padding: clamp(18px, 2.4vw, 28px);
+}
+
+.report-panel h2 {
+  margin: 0 0 4px;
+  color: var(--heading);
+  font-size: clamp(1.3rem, 2vw, 1.6rem);
+}
+
+.report-panel h3 {
+  margin: 26px 0 12px;
+  color: var(--heading);
+  font-size: 1rem;
+}
+
+.report-note {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.report-empty {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ---------- Earnings table ---------- */
+
+.report-table {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.report-table th {
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--line);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.report-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.report-table td.is-net {
+  color: var(--heading);
+  font-weight: 800;
+}
+
+.report-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--heading);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.report-pill.is-pending {
+  background: var(--surface-warning);
+  color: var(--ink-warning);
+}
+
+.report-pill.is-failed {
+  background: var(--terra-soft);
+  color: #8a2f1c;
+}
+
+:root[data-theme='dark'] .report-pill.is-failed {
+  background: #4a2a22;
+  color: #f1b9a8;
+}
+
+/* ---------- Insights charts ---------- */
+
+.month-chart {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(3px, 1.2vw, 10px);
+  align-items: end;
+  height: 190px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.month-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 0;
+  gap: 4px;
+}
+
+.month-col em {
+  color: var(--heading);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.month-bar {
+  width: 78%;
+  max-width: 44px;
+  border-radius: 6px 6px 0 0;
+  background: var(--brand-teal-deep);
+}
+
+.month-labels {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(3px, 1.2vw, 10px);
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: clamp(9.5px, 2.6vw, 12px);
+  text-align: center;
+}
+
+.school-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.school-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 220px) minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 14px;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.school-name {
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.school-track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-subtle);
+}
+
+.school-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--brand-teal-deep);
+}
+
+.school-count {
+  color: var(--heading);
+  font-weight: 800;
+  text-align: right;
+}
+
+/* ---------- Phones ---------- */
+
+@media (max-width: 640px) {
+  /* Table rows become small cards with a label for each value */
+  .report-table,
+  .report-table tbody,
+  .report-table tr,
+  .report-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .report-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .report-table tr {
+    margin-bottom: 12px;
+    padding: 6px 14px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface-subtle);
+  }
+
+  .report-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+  }
+
+  .report-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .report-table td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .school-row {
+    grid-template-columns: minmax(0, 1fr) 32px;
+    gap: 6px 12px;
+  }
+
+  .school-name { grid-column: 1; }
+  .school-count { grid-column: 2; grid-row: 1; }
+  .school-track { grid-column: 1 / -1; }
+
+  .month-chart { height: 160px; }
+}

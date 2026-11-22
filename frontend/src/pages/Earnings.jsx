@@ -1,7 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
+import { Wallet } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import api from '../api';
+import './TherapistReports.css';
 
 const PAYOUT_STATUS_LABELS = {
   paid: 'Paid out',
@@ -10,6 +12,7 @@ const PAYOUT_STATUS_LABELS = {
 };
 
 const money = (value) => `KES ${Number(value ?? 0).toLocaleString()}`;
+const formatDay = (value) => new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
 export default function Earnings() {
   const { token } = useContext(AuthContext);
@@ -40,58 +43,61 @@ export default function Earnings() {
 
   const items = earnings?.items ?? [];
   const commissionRate = Number(earnings?.commission_rate_percent ?? 0);
-  const showDash = loading ? 'Ã¢â‚¬â€' : undefined;
+  const showDash = loading ? '—' : undefined;
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#F5F0E7', fontFamily: 'Inter, sans-serif' }}>
+    <div className="app-shell">
       <Sidebar />
-      <div style={{ flex: 1, padding: '2rem 3rem', overflowY: 'auto' }}>
-        <h1 style={{ color: '#2F6F69', fontSize: '2rem', margin: 0, fontWeight: '800' }}>Earnings</h1>
-        <p style={{ color: '#666', margin: '0.5rem 0 2rem 0' }}>Students pay BEGANI. After each session you mark it completed, and BEGANI sends your share by M-Pesa, minus the commission.</p>
+      <main className="page-content">
+        <header className="page-heading">
+          <div className="eyebrow"><Wallet size={16} aria-hidden="true" /> Your earnings</div>
+          <h1>Earnings</h1>
+          <p>Students pay BEGANI. After each session you mark it completed, and BEGANI sends your share by M-Pesa, minus the commission.</p>
+        </header>
 
         {error && <p className="form-message error" role="alert">{error}</p>}
         {earnings?.estimated && (
-          <p style={{ color: '#666', fontSize: '0.85rem', margin: '0 0 1.5rem 0' }}>
+          <p className="report-note">
             Some completed sessions do not have a payout record yet. Those figures use the platform commission rate ({commissionRate}%) until the payout is issued.
           </p>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div className="report-stats">
           <SummaryCard label="Paid out to you" value={showDash ?? money(earnings?.paid_kes)} />
           <SummaryCard label="Held until sessions are done" value={showDash ?? money(earnings?.pending_kes)} />
           <SummaryCard label={`Commission deducted (${commissionRate}%)`} value={showDash ?? money(earnings?.commission_kes)} />
           <SummaryCard label="Total session value" value={showDash ?? money(earnings?.gross_kes)} />
         </div>
 
-        <div style={{ background: 'white', padding: '2rem', borderRadius: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
-          <h3 style={{ color: '#2F6F69', marginTop: 0 }}>Payments and payouts</h3>
+        <section className="panel report-panel" aria-labelledby="payments-title">
+          <h2 id="payments-title">Payments and payouts</h2>
 
           {loading ? (
-            <p style={{ color: '#888' }}>Loading your paymentsÃ¢â‚¬Â¦</p>
+            <p className="report-empty">Loading your payments…</p>
           ) : items.length === 0 ? (
-            <p style={{ color: '#888', fontStyle: 'italic' }}>No completed sessions yet.</p>
+            <p className="report-empty">No completed sessions yet.</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem', fontSize: '0.9rem' }}>
+            <table className="report-table">
               <thead>
-                <tr style={{ borderBottom: '2px solid #E5E7EB', textAlign: 'left', color: '#666' }}>
-                  <th style={{ padding: '10px' }}>Date</th>
-                  <th style={{ padding: '10px' }}>Student</th>
-                  <th style={{ padding: '10px' }}>Amount</th>
-                  <th style={{ padding: '10px' }}>Commission</th>
-                  <th style={{ padding: '10px' }}>You Receive</th>
-                  <th style={{ padding: '10px' }}>Status</th>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Student</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Commission</th>
+                  <th scope="col">You receive</th>
+                  <th scope="col">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: '1px solid #E5E7EB' }}>
-                    <td style={{ padding: '10px' }}>{new Date(item.starts_at).toLocaleDateString()}</td>
-                    <td style={{ padding: '10px' }}>{item.student_alias}</td>
-                    <td style={{ padding: '10px' }}>{money(item.gross_kes)}</td>
-                    <td style={{ padding: '10px' }}>{money(item.commission_kes)}</td>
-                    <td style={{ padding: '10px', fontWeight: 'bold', color: '#2F6F69' }}>{money(item.net_kes)}</td>
-                    <td style={{ padding: '10px' }}>
-                      <span style={{ background: '#EAF4F2', color: '#2F6F69', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                  <tr key={item.id}>
+                    <td data-label="Date">{formatDay(item.starts_at)}</td>
+                    <td data-label="Student">{item.student_alias}</td>
+                    <td data-label="Amount">{money(item.gross_kes)}</td>
+                    <td data-label="Commission">{money(item.commission_kes)}</td>
+                    <td data-label="You receive" className="is-net">{money(item.net_kes)}</td>
+                    <td data-label="Status">
+                      <span className={`report-pill${item.status === 'pending' ? ' is-pending' : item.status === 'failed' ? ' is-failed' : ''}`}>
                         {PAYOUT_STATUS_LABELS[item.status] ?? item.status}
                       </span>
                     </td>
@@ -100,15 +106,15 @@ export default function Earnings() {
               </tbody>
             </table>
           )}
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }
 
 const SummaryCard = ({ label, value }) => (
-  <div style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
-    <h2 style={{ fontSize: '1.8rem', color: '#2F6F69', margin: '0 0 5px 0' }}>{value}</h2>
-    <p style={{ color: '#666', fontSize: '0.85rem', margin: 0 }}>{label}</p>
+  <div className="panel report-stat">
+    <strong>{value}</strong>
+    <span>{label}</span>
   </div>
 );

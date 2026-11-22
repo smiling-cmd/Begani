@@ -38,3 +38,76 @@
     padding: 18px;
   }
 }
+
+/* Phone: appointments become cards so nothing hides behind a sideways scroll */
+@media (max-width: 640px) {
+  .page-content .therapist-appointments-table {
+    min-width: 0;
+  }
+
+  .page-content .therapist-appointments-table,
+  .page-content .therapist-appointments-table tbody,
+  .page-content .therapist-appointments-table tr,
+  .page-content .therapist-appointments-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .page-content .therapist-appointments-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .page-content .therapist-appointments-table tr {
+    margin-bottom: 12px;
+    padding: 6px 14px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface-subtle);
+  }
+
+  .page-content .therapist-appointments-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+  }
+
+  .page-content .therapist-appointments-table tbody tr:last-child td {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .page-content .therapist-appointments-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .page-content .therapist-appointments-table td::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .page-content .therapist-booking-time {
+    white-space: normal;
+  }
+
+  .page-content .therapist-booking-actions {
+    justify-content: flex-end;
+  }
+
+  /* No actions for this booking: hide the empty row */
+  .page-content .therapist-appointments-table td.therapist-booking-actions-cell:has(.therapist-booking-actions:empty) {
+    display: none;
+  }
+}

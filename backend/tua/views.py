@@ -63,6 +63,26 @@ def get_active_conversation(profile):
     )
 
 
+class TuaNewChatView(APIView):
+    """Start a fresh TUA conversation. Earlier chats are kept, not deleted."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        profile = getattr(request.user, "student_profile", None)
+        if not profile:
+            return Response({"error": "Student profile not found. Are you a student?"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Reuse an empty conversation instead of piling up blank ones.
+        conversation = get_active_conversation(profile)
+        if conversation is None or conversation.messages.exists():
+            conversation = TuaConversation.objects.create(student=profile, title="New chat")
+        else:
+            conversation.last_message_at = timezone.now()
+            conversation.save(update_fields=["last_message_at"])
+        return Response({"conversation_id": str(conversation.id)}, status=status.HTTP_201_CREATED)
+
+
 class TuaHistoryView(APIView):
     """Return the student's saved TUA conversation so the chat can be restored."""
 

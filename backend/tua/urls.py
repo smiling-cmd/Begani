@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import AcceptPriorityRequestView, CreatePriorityRequestView, TherapistPriorityRequestListView, TuaChatView, TuaHistoryView
+from .views import AcceptPriorityRequestView, CreatePriorityRequestView, TherapistPriorityRequestListView, TuaChatView, TuaHistoryView, TuaNewChatView
 
 urlpatterns = [
     path('chat/', TuaChatView.as_view(), name='tua-chat'),
+    path('new/', TuaNewChatView.as_view(), name='tua-new-chat'),
     path('history/', TuaHistoryView.as_view(), name='tua-history'),
     path('priority/', CreatePriorityRequestView.as_view(), name='priority-request'),
     path('priority/assigned/', TherapistPriorityRequestListView.as_view(), name='assigned-priority-requests'),

@@ -234,17 +234,17 @@ export default function TherapistDashboard() {
                   <tbody>
                     {bookings.map((booking) => (
                       <tr key={booking.id}>
-                        <td>
+                        <td data-label="Student">
                           <span className="therapist-booking-student">{booking.student_alias}</span>
                           {booking.is_priority && <span className="therapist-priority-badge">Priority</span>}
                         </td>
-                        <td className="therapist-booking-time">{new Date(booking.slot_time).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
-                        <td>
+                        <td className="therapist-booking-time" data-label="When">{new Date(booking.slot_time).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
+                        <td data-label="Status">
                           <span className={`therapist-booking-status${booking.status === 'requested' ? ' is-requested' : ''}`}>
                             {booking.status.replace(/_/g, ' ')}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Actions" className="therapist-booking-actions-cell">
                           <div className="therapist-booking-actions">
                             {booking.status === 'requested' && <>
                               <button type="button" onClick={() => handleStatusChange(booking.id, 'confirmed')} style={buttonStyle}>Confirm</button>

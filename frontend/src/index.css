@@ -896,6 +896,11 @@ select:focus,
 .tua-crisis-actions p { margin: 0; color: #7f1d1d; font-size: 13px; line-height: 1.45; }
 .tua-crisis-links { display: flex; flex-wrap: wrap; gap: 10px; }
 .tua-crisis-links a { display: inline-flex; min-height: 36px; align-items: center; gap: 6px; padding: 0 11px; border: 1px solid #dc2626; border-radius: 999px; color: #991b1b; font-size: 12px; font-weight: 700; text-decoration: none; }
+.tua-action-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.tua-new-chat { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--heading); background: var(--surface-subtle); cursor: pointer; font-size: 13px; font-weight: 700; }
+.tua-new-chat:hover:not(:disabled) { background: var(--tint); }
+.tua-new-chat:disabled { cursor: not-allowed; opacity: .5; }
+.tua-new-chat-error { color: var(--terra); font-size: 13px; }
 .tua-urgent { display: grid; justify-items: start; gap: 10px; margin-bottom: 12px; }
 .tua-urgent .tua-crisis-actions { margin-left: 0; max-width: 100%; }
 .tua-urgent-toggle { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: transparent; cursor: pointer; font-size: 12px; font-weight: 600; }

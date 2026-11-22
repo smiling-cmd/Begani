@@ -1,0 +1,138 @@
+/* Design polish: responsive and dark-mode fixes found in the full-app review.
+   Loaded after index.css, so these rules win over the older stacked ones. */
+
+/* ---------- Search fields: a proper, tappable height everywhere ---------- */
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+}
+
+.search-field input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+}
+
+/* ---------- Small links get a comfortable tap area ---------- */
+.home-mood-history,
+.home-emergency-link,
+.therapist-back-link,
+.text-button,
+.therapist-priority-phone a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+.support-chats-link {
+  white-space: nowrap;
+}
+
+/* ---------- Chat inbox: readable names in dark mode ---------- */
+.chat-thread-copy strong {
+  color: var(--heading);
+}
+
+/* ---------- Therapist priority request: dark mode ---------- */
+:root[data-theme='dark'] .therapist-priority-item {
+  border-color: #7a3b3b;
+  background: rgba(185, 28, 28, .16);
+}
+
+:root[data-theme='dark'] .therapist-priority-item-heading strong,
+:root[data-theme='dark'] .therapist-priority-countdown {
+  color: #fecaca;
+}
+
+:root[data-theme='dark'] .therapist-priority-badge {
+  color: #fecaca;
+  background: rgba(185, 28, 28, .4);
+}
+
+:root[data-theme='dark'] .therapist-priority-badge::before {
+  background: #fecaca;
+}
+
+:root[data-theme='dark'] .therapist-priority-phone,
+:root[data-theme='dark'] .therapist-priority-phone a {
+  color: var(--ink);
+}
+
+/* ---------- Tablets and phones ---------- */
+@media (max-width: 900px) {
+  .therapist-profile-content .therapist-profile-grid,
+  .page-content .therapist-dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  /* Admin therapist rows: details on top, actions underneath */
+  .admin-therapist-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-therapist-actions {
+    justify-content: flex-start;
+  }
+
+  /* Activities and Resources intro cards: stack the photo under the text */
+  .activity-intro,
+  .resource-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .resource-hero > div:first-child {
+    max-width: none;
+    padding: 22px 20px 0;
+  }
+
+  .resource-hero-photo,
+  .activity-intro-photo {
+    width: 100%;
+    max-height: 240px;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: 50% 25%;
+  }
+
+  .activity-intro {
+    padding: 20px;
+  }
+
+  /* Therapist profile header */
+  .therapist-profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .therapist-profile-intro {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .settings-logout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settings-logout .button {
+    justify-content: center;
+    white-space: nowrap;
+  }
+}
+
+/* Therapist profile header: top-align the avatar with the name on wide screens */
+@media (min-width: 701px) {
+  .therapist-profile-header {
+    align-items: flex-start;
+  }
+}

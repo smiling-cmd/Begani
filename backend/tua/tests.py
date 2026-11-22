@@ -245,3 +245,29 @@ class TuaHistoryTests(APITestCase):
         old = TuaConversation.objects.create(student=self.student, title="old", deleted_at=timezone.now())
         TuaMessage.objects.create(conversation=old, role=TuaMessage.Role.STUDENT, content="gone")
         self.assertEqual(self.client.get("/api/tua/history/").data["messages"], [])
+
+
+class TuaNewChatTests(APITestCase):
+    def setUp(self):
+        user = User.objects.create_user(
+            email="newchat@example.com", password="test-password", role=User.Role.STUDENT, is_active=True
+        )
+        self.profile = StudentProfile.objects.create(user=user, alias="newchat")
+        self.client.force_authenticate(user=user)
+
+    def test_new_chat_starts_fresh_and_keeps_the_old_one(self):
+        from tua.models import TuaConversation
+
+        old = TuaConversation.objects.create(student=self.profile, title="old")
+        TuaMessage.objects.create(conversation=old, role="student", content="hello")
+        response = self.client.post("/api/tua/new/")
+        self.assertEqual(response.status_code, 201)
+        self.assertNotEqual(response.data["conversation_id"], str(old.id))
+        self.assertTrue(TuaConversation.objects.filter(id=old.id, deleted_at__isnull=True).exists())
+        history = self.client.get("/api/tua/history/")
+        self.assertEqual(history.data["messages"], [])
+
+    def test_new_chat_reuses_an_empty_conversation(self):
+        first = self.client.post("/api/tua/new/").data["conversation_id"]
+        second = self.client.post("/api/tua/new/").data["conversation_id"]
+        self.assertEqual(first, second)

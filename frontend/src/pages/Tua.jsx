@@ -1,11 +1,16 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { ArrowRight, LifeBuoy, Phone, Send } from 'lucide-react';
+import { ArrowRight, LifeBuoy, Phone, Send, SquarePen } from 'lucide-react';
 import api from '../api';
 import Sidebar from '../components/Sidebar';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import tuaImage from '../assets/TUA.png';
 import PriorityRequestDialog from '../components/PriorityRequestDialog';
+
+const welcomeMessage = {
+  role: 'tua',
+  text: "Hi friend, I'm TUA. I can listen, help with small worries, and introduce you to the right counsellor when you're ready.",
+};
 
 export default function Tua() {
   const { user } = useContext(AuthContext);
@@ -13,9 +18,9 @@ export default function Tua() {
   const navigate = useNavigate();
   
   // Chat State
-  const [messages, setMessages] = useState([
-    { role: 'tua', text: "Hi friend, I'm TUA. I can listen, help with small worries, and introduce you to the right counsellor when you're ready." }
-  ]);
+  const [messages, setMessages] = useState([welcomeMessage]);
+  const [isStartingNew, setIsStartingNew] = useState(false);
+  const [newChatError, setNewChatError] = useState('');
   const [input, setInput] = useState(location.state?.initialMessage || '');
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
@@ -84,6 +89,25 @@ export default function Tua() {
     }
   };
 
+  // A new chat is only worth starting once the current one has something in it.
+  const hasConversation = messages.some((message) => message.role === 'user' || message.conversationId);
+
+  const handleNewChat = async () => {
+    if (isTyping || isStartingNew) return;
+    setIsStartingNew(true);
+    setNewChatError('');
+    try {
+      await api.post('/api/tua/new/');
+      setMessages([welcomeMessage]);
+      setInput('');
+      setShowUrgent(false);
+    } catch {
+      setNewChatError('Could not start a new chat. Please try again.');
+    } finally {
+      setIsStartingNew(false);
+    }
+  };
+
   const suggestions = ["I'm feeling stressed", "I can't sleep", "Exam anxiety", "I feel lonely", "I'd like to see a counsellor"];
   const conversationId = messages.reduce((latest, message) => message.conversationId || latest, null);
 
@@ -95,6 +119,7 @@ export default function Tua() {
         <header className="tua-heading">
           <h1>TUA</h1>
           <p>A friendly AI companion for small worries. It helps you find the right counsellor when you're ready.</p>
+          {newChatError && <p className="tua-new-chat-error" role="alert">{newChatError}</p>}
         </header>
 
         <section className="card tua-chat-panel" aria-label="TUA conversation">
@@ -130,18 +155,32 @@ export default function Tua() {
             <div ref={chatEndRef} />
           </div>
 
-          {conversationId && user?.role === 'student' && (
+          {(hasConversation || (conversationId && user?.role === 'student')) && (
             <div className="tua-urgent">
-              <button
-                type="button"
-                className="tua-urgent-toggle"
-                aria-expanded={showUrgent}
-                aria-controls="tua-urgent-panel"
-                onClick={() => setShowUrgent((shown) => !shown)}
-              >
-                <LifeBuoy size={15} aria-hidden="true" /> Need urgent support?
-              </button>
-              {showUrgent && (
+              <div className="tua-action-row">
+                {hasConversation && (
+                  <button
+                    type="button"
+                    className="tua-new-chat"
+                    onClick={handleNewChat}
+                    disabled={isTyping || isStartingNew}
+                  >
+                    <SquarePen size={15} aria-hidden="true" /> {isStartingNew ? 'Starting…' : 'New chat'}
+                  </button>
+                )}
+                {conversationId && user?.role === 'student' && (
+                  <button
+                    type="button"
+                    className="tua-urgent-toggle"
+                    aria-expanded={showUrgent}
+                    aria-controls="tua-urgent-panel"
+                    onClick={() => setShowUrgent((shown) => !shown)}
+                  >
+                    <LifeBuoy size={15} aria-hidden="true" /> Need urgent support?
+                  </button>
+                )}
+              </div>
+              {showUrgent && conversationId && (
                 <div className="tua-crisis-actions" id="tua-urgent-panel" aria-label="Urgent counsellor request">
                   <p>Request a chat with an approved school counsellor.</p>
                   <button type="button" onClick={() => setPriorityDialog({ conversationId })}>
