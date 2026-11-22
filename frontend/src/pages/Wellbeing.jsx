@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import api from '../api';
-import { Activity, ArrowRight, BookOpen, Heart, Pause, Play, Sprout, TrendingDown, TrendingUp, Wind } from 'lucide-react';
+import { Activity, ArrowRight, BookOpen, Footprints, Hand, Heart, NotebookPen, Pause, Play, Sprout, TrendingDown, TrendingUp, Users, Wind } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import MoodWheel from '../components/MoodWheel';
@@ -8,6 +8,7 @@ import { AuthContext } from '../context/AuthContext';
 
 import wellbeingPhoto from '../assets/pages/wellbeing-reading.webp';
 import './PageHeadingPhoto.css';
+import './Wellbeing.css';
 // Legacy moods array kept for check-in history display only
 const moods = [
   { score: 2, label: 'Very low', face: '☹' },
@@ -15,6 +16,33 @@ const moods = [
   { score: 5, label: 'Okay', face: '😐' },
   { score: 8, label: 'Good', face: '🙂' },
   { score: 10, label: 'Great', face: '😁' },
+];
+const senseSteps = [
+  { count: 5, label: 'see' },
+  { count: 4, label: 'touch' },
+  { count: 3, label: 'hear' },
+  { count: 2, label: 'smell' },
+  { count: 1, label: 'taste' },
+];
+const selfCareTools = [
+  {
+    key: 'gratitude',
+    icon: NotebookPen,
+    title: 'Gratitude & Reflection',
+    text: 'Write down a few positive moments or things you appreciate each day to shift focus toward helpful routines and perspective.',
+  },
+  {
+    key: 'movement',
+    icon: Footprints,
+    title: 'Mindfulness & Movement',
+    text: 'Try slow breathing exercises, short walks, stretching, or consistent sleep habits to lower daily tension.',
+  },
+  {
+    key: 'boundaries',
+    icon: Users,
+    title: 'Boundaries & Social Support',
+    text: 'Set clear limits on workload or screen time, and stay connected with supportive friends, family, or groups.',
+  },
 ];
 const phases = [
   { name: 'Breathe in', seconds: 4 },
@@ -276,6 +304,39 @@ export default function Wellbeing() {
             </section>
           )}
         </div>
+
+        <section className="panel selfcare-panel" aria-labelledby="selfcare-title">
+          <div className="section-title-row">
+            <div>
+              <h2 id="selfcare-title">Everyday Self-Care &amp; Stress Tools</h2>
+              <p className="muted-copy">Small habits you can use any day, whenever things feel heavy.</p>
+            </div>
+            <Heart size={22} aria-hidden="true" />
+          </div>
+          <div className="selfcare-grid">
+            <article className="selfcare-card">
+              <div className="selfcare-card-head">
+                <span className="selfcare-icon" aria-hidden="true"><Hand size={20} /></span>
+                <h3>5 Senses Grounding</h3>
+              </div>
+              <p>Notice 5 things you see, 4 you can touch, 3 you hear, 2 you smell, and 1 you taste to anchor yourself in the present.</p>
+              <ul className="senses-steps" aria-hidden="true">
+                {senseSteps.map((step) => (
+                  <li key={step.count}><b>{step.count}</b>{step.label}</li>
+                ))}
+              </ul>
+            </article>
+            {selfCareTools.map(({ key, icon: Icon, title, text }) => (
+              <article className="selfcare-card" key={key}>
+                <div className="selfcare-card-head">
+                  <span className="selfcare-icon" aria-hidden="true"><Icon size={20} /></span>
+                  <h3>{title}</h3>
+                </div>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <section className="panel journal-panel">
           <div className="section-title-row">
