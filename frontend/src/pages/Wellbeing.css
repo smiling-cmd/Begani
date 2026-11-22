@@ -13,6 +13,7 @@
 .wellbeing-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
   gap: 20px;
   align-items: stretch;
 }
@@ -584,6 +585,7 @@
 .selfcare-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr; /* every tool card the same height */
   gap: 16px;
   align-items: stretch;
 }
@@ -1019,4 +1021,33 @@
   .breath-orb {
     transition: none;
   }
+}
+
+/* ---------- Your week: empty state ---------- */
+
+.week-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.week-empty-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 96px;
+  padding: 0 4px;
+}
+
+.week-empty-bars span {
+  flex: 1;
+  border-radius: 8px 8px 4px 4px;
+  background: color-mix(in srgb, var(--heading) 14%, transparent);
+}
+
+.week-empty .mood-insight-line {
+  margin: 0;
 }

@@ -1,0 +1,40 @@
+/* Therapist dashboard: responsive layout for tablets and phones */
+
+.page-content .therapist-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.page-content .therapist-stat-card > span {
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+/* Tablet: stack Add availability above Recent appointments */
+@media (max-width: 900px) {
+  .page-content .therapist-dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Phone: 2 x 2 stat cards with room to read, and full-width cards below */
+@media (max-width: 640px) {
+  .page-content .therapist-dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .page-content .therapist-stat-card {
+    padding: 16px;
+  }
+
+  .page-content .therapist-stat-card-heading {
+    font-size: 26px;
+  }
+
+  .page-content .therapist-dashboard-card {
+    padding: 18px;
+  }
+}

@@ -5,6 +5,7 @@ import api from '../api';
 import { CalendarCheck, CalendarDays, CalendarPlus, Clock3, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getGreeting } from '../utils/greeting';
+import './TherapistDashboard.css';
 
 function loadDashboard() {
   return Promise.all([

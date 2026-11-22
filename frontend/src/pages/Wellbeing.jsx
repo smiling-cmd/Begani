@@ -257,12 +257,23 @@ export default function Wellbeing() {
                 </h2>
                 <span>7-day average</span>
               </div>
-              <div className="mood-insight-avg">
-                <span className="mood-insight-number">{average ?? '–'}</span>
-                <span className="mood-insight-denom">/ 10</span>
-              </div>
-              <p className="mood-insight-line">{weekLine}</p>
-              <WeekChart checkins={checkins} />
+              {average === null ? (
+                <div className="week-empty">
+                  <div className="week-empty-bars" aria-hidden="true">
+                    {[45, 70, 55, 85, 60, 75, 50].map((height, index) => <span key={index} style={{ height: `${height}%` }} />)}
+                  </div>
+                  <p className="mood-insight-line">{loadingMoods ? 'Loading your week…' : weekLine}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="mood-insight-avg">
+                    <span className="mood-insight-number">{average}</span>
+                    <span className="mood-insight-denom">/ 10</span>
+                  </div>
+                  <p className="mood-insight-line">{weekLine}</p>
+                  <WeekChart checkins={checkins} />
+                </>
+              )}
             </section>
           </div>
 

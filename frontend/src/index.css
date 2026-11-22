@@ -645,20 +645,6 @@ select:focus,
   display: none;
 }
 
-.mobile-bottom-nav-wrapper {
-  display: none;
-}
-
-/* Hide scrollbar for the swipeable nav */
-.swipeable-nav::-webkit-scrollbar {
-  display: none;
-}
-
-.swipeable-nav {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
 @media (max-width: 900px) {
 
   /* Hide desktop sidebar */
@@ -764,19 +750,6 @@ select:focus,
     color: var(--muted);
     text-align: center;
     font-size: 12px;
-  }
-
-  /* Show mobile bottom nav */
-  .mobile-bottom-nav-wrapper {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 90;
-    background: var(--card);
-    border-top: 1px solid var(--line);
-    padding-bottom: env(safe-area-inset-bottom);
   }
 
   /* Make room for fixed header and bottom nav */
