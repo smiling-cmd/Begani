@@ -48,7 +48,8 @@ const NAV_BY_ROLE = {
       { label: 'Bookings', icon: Calendar, to: '/therapist-dashboard' },
       { label: 'Chats', icon: MessageSquare, to: '/therapist-chats', match: isChatPath },
       { label: 'Insights', icon: BarChart, to: '/insights' },
-      { label: 'Earnings', icon: DollarSign, to: '/earnings' },
+      // School counsellor sessions are free, so they have no earnings page.
+      { label: 'Earnings', icon: DollarSign, to: '/earnings', hideFor: (user) => user?.therapist_type === 'school_counsellor' },
     ],
     more: [{ label: 'Settings', icon: Settings, to: '/settings' }],
   },
@@ -75,7 +76,8 @@ export default function MobileBottomNav() {
   const [openAt, setOpenAt] = useState(null);
   const open = openAt === location.key;
 
-  const { tabs, more } = NAV_BY_ROLE[user?.role] || NAV_BY_ROLE.student;
+  const { tabs: allTabs, more } = NAV_BY_ROLE[user?.role] || NAV_BY_ROLE.student;
+  const tabs = allTabs.filter((item) => !item.hideFor?.(user));
   const moreActive = more.some((item) => isHere(item, location.pathname));
 
   const closeSheet = (returnFocus = true) => {

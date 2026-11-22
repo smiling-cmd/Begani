@@ -271,3 +271,56 @@ class TuaNewChatTests(APITestCase):
         first = self.client.post("/api/tua/new/").data["conversation_id"]
         second = self.client.post("/api/tua/new/").data["conversation_id"]
         self.assertEqual(first, second)
+
+
+class TuaPastChatsTests(APITestCase):
+    def setUp(self):
+        from tua.models import TuaConversation
+
+        self.TuaConversation = TuaConversation
+        user = User.objects.create_user(email="past@example.com", password="x-test-pass", role=User.Role.STUDENT, is_active=True)
+        self.profile = StudentProfile.objects.create(user=user, alias="past")
+        other = User.objects.create_user(email="other@example.com", password="x-test-pass", role=User.Role.STUDENT, is_active=True)
+        self.other_profile = StudentProfile.objects.create(user=other, alias="other")
+        self.client.force_authenticate(user=user)
+        self.old = TuaConversation.objects.create(student=self.profile, title="Exam stress")
+        TuaMessage.objects.create(conversation=self.old, role="student", content="exams worry me")
+        TuaMessage.objects.create(conversation=self.old, role="tua", content="Tell me more")
+        self.theirs = TuaConversation.objects.create(student=self.other_profile, title="private")
+        TuaMessage.objects.create(conversation=self.theirs, role="student", content="secret")
+
+    def test_list_shows_only_own_non_empty_chats(self):
+        self.TuaConversation.objects.create(student=self.profile, title="New chat")  # empty
+        data = self.client.get("/api/tua/conversations/").data["conversations"]
+        self.assertEqual([c["id"] for c in data], [str(self.old.id)])
+        self.assertEqual(data[0]["title"], "Exam stress")
+        self.assertFalse(data[0]["saved"])
+        self.assertIn(data[0]["days_left"], (89, 90))
+
+    def test_open_an_old_chat_by_id(self):
+        response = self.client.get(f"/api/tua/history/?conversation_id={self.old.id}")
+        self.assertEqual([m["text"] for m in response.data["messages"]], ["exams worry me", "Tell me more"])
+
+    def test_cannot_open_or_save_someone_elses_chat(self):
+        self.assertEqual(self.client.get(f"/api/tua/history/?conversation_id={self.theirs.id}").status_code, 404)
+        self.assertEqual(self.client.patch(f"/api/tua/conversations/{self.theirs.id}/", {"saved": True}, format="json").status_code, 404)
+        self.theirs.refresh_from_db()
+        self.assertFalse(self.theirs.saved)
+
+    def test_save_toggle(self):
+        response = self.client.patch(f"/api/tua/conversations/{self.old.id}/", {"saved": True}, format="json")
+        self.assertEqual(response.data["saved"], True)
+        data = self.client.get("/api/tua/conversations/").data["conversations"]
+        self.assertTrue(data[0]["saved"])
+        self.assertIsNone(data[0]["days_left"])
+        self.assertEqual(self.client.patch(f"/api/tua/conversations/{self.old.id}/", {"saved": "yes"}, format="json").status_code, 400)
+
+    @patch("tua.views.get_tua_response")
+    def test_chat_continues_a_chosen_conversation(self, mock_response):
+        mock_response.return_value = {"reply": "I hear you", "therapist_id": None, "crisis_detected": False}
+        newer = self.TuaConversation.objects.create(student=self.profile, title="newer")
+        TuaMessage.objects.create(conversation=newer, role="student", content="hi")
+        response = self.client.post("/api/tua/chat/", {"message": "back again", "conversation_id": str(self.old.id)}, format="json")
+        self.assertEqual(response.data["conversation_id"], str(self.old.id))
+        self.assertEqual(self.old.messages.count(), 4)
+        self.assertEqual(newer.messages.count(), 1)

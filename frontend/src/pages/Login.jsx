@@ -4,7 +4,9 @@ import axios from 'axios';
 import { API_BASE_URL } from '../api';
 import { ArrowRight, LoaderCircle, Mail } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
-import AuthLayout, { AuthDivider, AuthField, GoogleMark, PasswordField } from '../components/AuthLayout';
+import AuthLayout, { AuthDivider, AuthField, PasswordField } from '../components/AuthLayout';
+import GoogleSignInButton from '../components/GoogleSignInButton';
+import { homeAfterLogin } from '../utils/authRouting';
 
 export default function Login() {
   const { login } = useContext(AuthContext);
@@ -29,19 +31,28 @@ export default function Login() {
         headers: { Authorization: `Bearer ${tokens.access}` },
       });
 
-      login(tokens.access, profile);
-
-      if (profile.role === 'admin') {
-        navigate('/admin-dashboard', { replace: true });
-      } else if (profile.role === 'therapist') {
-        navigate('/therapist-dashboard', { replace: true });
-      } else if (!profile.full_name?.trim()) {
-        navigate('/onboarding', { replace: true });
-      } else {
-        navigate('/home', { replace: true });
-      }
+      login(tokens.access, profile, tokens.refresh);
+      navigate(homeAfterLogin(profile), { replace: true });
     } catch {
       setError('Invalid email or password.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogle = async (credential) => {
+    setError('');
+    setNotice('');
+    setIsSubmitting(true);
+    try {
+      const { data } = await axios.post(`${API_BASE_URL}/api/auth/google/`, { credential });
+      const { data: profile } = await axios.get(`${API_BASE_URL}/api/auth/me/`, {
+        headers: { Authorization: `Bearer ${data.access}` },
+      });
+      login(data.access, profile, data.refresh);
+      navigate(homeAfterLogin(profile), { replace: true });
+    } catch (requestError) {
+      setError(requestError.response?.data?.detail || 'Google sign-in did not work. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -64,14 +75,12 @@ export default function Login() {
         </p>
       </div>
 
-      <button
-        className="auth-google auth-google--secondary"
-        type="button"
-        onClick={() => setNotice('Google sign-in is not connected yet. Please use your email below.')}
-      >
-        <GoogleMark />
-        <span>Sign in with Google</span>
-      </button>
+      <GoogleSignInButton
+        text="signin_with"
+        onCredential={handleGoogle}
+        onError={setNotice}
+        disabled={isSubmitting}
+      />
 
       <AuthDivider text="or" />
 

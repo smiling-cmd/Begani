@@ -171,6 +171,14 @@ DEFAULT_FROM_EMAIL = os.environ.get('DJANGO_DEFAULT_FROM_EMAIL', 'Begani <no-rep
 
 AUTH_USER_MODEL = "accounts.User"
 
+# Where emailed links (password reset) should point: the React app's address.
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173').rstrip('/')
+# Seconds a password-reset link stays valid (default 1 hour).
+PASSWORD_RESET_TIMEOUT = int(os.environ.get('PASSWORD_RESET_TIMEOUT', '3600'))
+
+# Google Sign-In: the OAuth "Web application" client ID from Google Cloud Console.
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -178,6 +186,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_THROTTLE_RATES': {
         'tua_chat': os.environ.get('TUA_CHAT_RATE_LIMIT', '30/hour'),
+        'password_reset': os.environ.get('PASSWORD_RESET_RATE_LIMIT', '10/hour'),
+        'google_login': os.environ.get('GOOGLE_LOGIN_RATE_LIMIT', '30/hour'),
     },
 }
 

@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from bookings.models import Booking
+from counsellors.models import TherapistProfile
 
 
 class TherapistEarningsView(APIView):
@@ -23,6 +24,12 @@ class TherapistEarningsView(APIView):
         if therapist is None:
             return Response(
                 {"error": "Only therapists can view earnings."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if therapist.type == TherapistProfile.Type.SCHOOL:
+            return Response(
+                {"error": "School counsellor sessions are free, so there are no earnings."},
                 status=status.HTTP_403_FORBIDDEN,
             )
 

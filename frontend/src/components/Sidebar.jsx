@@ -91,7 +91,9 @@ export default function Sidebar() {
             <NavItem icon={<Calendar size={18} />} label="Appointments" to="/therapist-dashboard" active={location.pathname === '/therapist-dashboard'} />
             <NavItem icon={<MessageCircle size={18} />} label="Chats" to="/therapist-chats" active={isChatRoute} />
             <NavItem icon={<BarChart size={18} />} label="Insights" to="/insights" active={location.pathname === '/insights'} />
-            <NavItem icon={<DollarSign size={18} />} label="Earnings" to="/earnings" active={location.pathname === '/earnings'} />
+            {user?.therapist_type !== 'school_counsellor' && (
+              <NavItem icon={<DollarSign size={18} />} label="Earnings" to="/earnings" active={location.pathname === '/earnings'} />
+            )}
             <NavItem icon={<Settings size={18} />} label="Settings" to="/settings" active={location.pathname === '/settings'} />
             <button className="sidebar-link mobile-only-nav-item" type="button" onClick={handleLogout}>
               <span className="nav-item-icon"><LogOut size={18} /></span>

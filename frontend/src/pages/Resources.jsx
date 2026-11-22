@@ -85,6 +85,7 @@ export default function Resources() {
             <p>Find a quick practice, learn what support can look like, or browse by topic.</p>
             <Link to="/support" className="button">Find someone to talk to <ArrowRight size={16} /></Link>
           </div>
+          
           <img className="resource-hero-photo" src={studentsPhoto} alt="Two students smiling together" />
         </section>
 

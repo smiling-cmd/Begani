@@ -901,6 +901,23 @@ select:focus,
 .tua-new-chat:hover:not(:disabled) { background: var(--tint); }
 .tua-new-chat:disabled { cursor: not-allowed; opacity: .5; }
 .tua-new-chat-error { color: var(--terra); font-size: 13px; }
+.tua-chat-panel { position: relative; }
+.tua-new-chat.is-saved { color: var(--heading); background: var(--tint); }
+.tua-past { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; gap: 10px; padding: 18px; overflow: hidden; background: var(--card); }
+.tua-past-header { display: flex; align-items: center; justify-content: space-between; }
+.tua-past-header h2 { margin: 0; color: var(--heading); font-size: 1.1rem; }
+.tua-past-close { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 50%; color: var(--heading); background: var(--surface-subtle); cursor: pointer; }
+.tua-past-empty { margin: 0; color: var(--muted); font-size: 14px; }
+.tua-past-list { display: grid; align-content: start; gap: 8px; min-height: 0; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.tua-past-item { display: flex; align-items: stretch; gap: 6px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-subtle); }
+.tua-past-item.is-current { border-color: var(--heading); }
+.tua-past-open { display: grid; flex: 1; gap: 3px; min-width: 0; padding: 11px 12px; border: 0; color: var(--ink); background: none; cursor: pointer; text-align: left; font: inherit; }
+.tua-past-open strong { overflow: hidden; color: var(--heading); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.tua-past-preview { overflow: hidden; color: var(--muted); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.tua-past-open small { color: var(--muted); font-size: 11.5px; }
+.tua-past-save { display: grid; place-items: center; flex: 0 0 auto; width: 44px; border: 0; border-radius: 0 14px 14px 0; color: var(--muted); background: none; cursor: pointer; }
+.tua-past-save.is-saved { color: var(--heading); }
+.tua-past-open:focus-visible, .tua-past-save:focus-visible, .tua-past-close:focus-visible { outline: 2px solid var(--heading); outline-offset: -2px; }
 .tua-urgent { display: grid; justify-items: start; gap: 10px; margin-bottom: 12px; }
 .tua-urgent .tua-crisis-actions { margin-left: 0; max-width: 100%; }
 .tua-urgent-toggle { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: transparent; cursor: pointer; font-size: 12px; font-weight: 600; }

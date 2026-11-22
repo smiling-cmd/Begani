@@ -51,11 +51,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class_group = serializers.CharField(source='student_profile.class_group.name', read_only=True)
     full_name = serializers.CharField(max_length=150, required=False, allow_blank=False)
     photo = serializers.SerializerMethodField()
+    therapist_type = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'role', 'phone', 'full_name', 'alias', 'class_group', 'photo')
-        read_only_fields = ('id', 'email', 'role')
+        fields = ('id', 'email', 'role', 'phone', 'full_name', 'alias', 'class_group', 'photo', 'therapist_type')
+        read_only_fields = ('id', 'email', 'role', 'therapist_type')
+
+    def get_therapist_type(self, instance):
+        # 'school_counsellor' (free sessions) or 'private'; None for students and admins.
+        profile = getattr(instance, 'therapist_profile', None)
+        return profile.type if profile else None
 
     def get_photo(self, instance):
         profile = StudentProfile.objects.filter(user=instance).only('photo').first()

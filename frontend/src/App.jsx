@@ -27,16 +27,19 @@ import Calendar from './pages/Calendar';
 import ChatInbox from './pages/ChatInbox';
 import ChatRoom from './pages/ChatRoom';
 import NotFound from './pages/NotFound';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 const homeFor = (role) => (role === 'admin' ? '/admin-dashboard' : role === 'therapist' ? '/therapist-dashboard' : '/home');
 
 // Sends signed-out visitors to /login and visitors with the wrong role to their own home page.
-const ProtectedRoute = ({ children, allowedRoles }) => {
+const ProtectedRoute = ({ children, allowedRoles, allowUser }) => {
   const { token, user, initializing } = useContext(AuthContext);
   if (!token) return <Navigate to="/login" replace />;
   if (initializing) return <main className="page-content"><p role="status">Loading your account…</p></main>;
   if (!user) return <Navigate to="/login" replace />;
   if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to={homeFor(user.role)} replace />;
+  if (allowUser && !allowUser(user)) return <Navigate to={homeFor(user.role)} replace />;
   return children;
 };
 
@@ -63,7 +66,7 @@ function App() {
           <Route path="/admin-resources" element={<ProtectedRoute allowedRoles={['admin']}><AdminResources /></ProtectedRoute>} />
           <Route path="/admin-activities" element={<ProtectedRoute allowedRoles={['admin']}><AdminActivities /></ProtectedRoute>} />
           <Route path="/insights" element={<ProtectedRoute allowedRoles={['therapist']}><Insights /></ProtectedRoute>} />
-          <Route path="/earnings" element={<ProtectedRoute allowedRoles={['therapist']}><Earnings /></ProtectedRoute>} />
+          <Route path="/earnings" element={<ProtectedRoute allowedRoles={['therapist']} allowUser={(user) => user.therapist_type !== 'school_counsellor'}><Earnings /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
           <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
@@ -73,6 +76,8 @@ function App() {
           <Route path="/therapist-chats" element={<ProtectedRoute><ChatInbox /></ProtectedRoute>} />
           <Route path="/chat/:id" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </Router>
     </AuthProvider>

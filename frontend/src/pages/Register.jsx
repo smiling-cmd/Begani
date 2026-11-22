@@ -4,7 +4,9 @@ import axios from 'axios';
 import { LoaderCircle, Mail, UserRound } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import api, { API_BASE_URL } from '../api';
-import AuthLayout, { AuthDivider, AuthField, GoogleMark, PasswordField } from '../components/AuthLayout';
+import AuthLayout, { AuthDivider, AuthField, PasswordField } from '../components/AuthLayout';
+import GoogleSignInButton from '../components/GoogleSignInButton';
+import { homeAfterLogin } from '../utils/authRouting';
 
 function getErrorMessage(error) {
   const data = error.response?.data;
@@ -90,12 +92,30 @@ export default function Register() {
         { headers: { Authorization: `Bearer ${tokens.access}` } },
       );
 
-      login(tokens.access, profile);
+      login(tokens.access, profile, tokens.refresh);
       navigate(profile.role === 'therapist' ? '/therapist-dashboard' : '/onboarding', { replace: true });
     } catch (requestError) {
       setError(accountCreated
         ? 'Your account was created, but profile setup could not be completed. Please log in to continue.'
         : getErrorMessage(requestError));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogle = async (credential) => {
+    setError('');
+    setNotice('');
+    setIsSubmitting(true);
+    try {
+      const { data } = await axios.post(`${API_BASE_URL}/api/auth/google/`, { credential });
+      const { data: profile } = await axios.get(`${API_BASE_URL}/api/auth/me/`, {
+        headers: { Authorization: `Bearer ${data.access}` },
+      });
+      login(data.access, profile, data.refresh);
+      navigate(homeAfterLogin(profile), { replace: true });
+    } catch (requestError) {
+      setError(requestError.response?.data?.detail || 'Google sign-up did not work. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -194,14 +214,12 @@ export default function Register() {
 
       <AuthDivider text="or" />
 
-      <button
-        className="auth-google auth-google--secondary"
-        type="button"
-        onClick={() => setNotice('Google sign-up is not connected yet. Please use your university email above.')}
-      >
-        <GoogleMark />
-        <span>Continue with Google</span>
-      </button>
+      <GoogleSignInButton
+        text="signup_with"
+        onCredential={handleGoogle}
+        onError={setNotice}
+        disabled={isSubmitting}
+      />
 
       <p className="auth-foot">
         Already have an account? <Link to="/login">Sign in</Link>

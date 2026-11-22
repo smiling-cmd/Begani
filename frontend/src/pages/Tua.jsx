@@ -1,11 +1,12 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { ArrowRight, LifeBuoy, Phone, Send, SquarePen } from 'lucide-react';
+import { ArrowRight, Bookmark, History, LifeBuoy, Phone, Send, SquarePen } from 'lucide-react';
 import api from '../api';
 import Sidebar from '../components/Sidebar';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import tuaImage from '../assets/TUA.png';
 import PriorityRequestDialog from '../components/PriorityRequestDialog';
+import TuaPastChats from '../components/TuaPastChats';
 
 const welcomeMessage = {
   role: 'tua',
@@ -26,6 +27,10 @@ export default function Tua() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [priorityDialog, setPriorityDialog] = useState(null);
   const [showUrgent, setShowUrgent] = useState(false);
+  const [showPast, setShowPast] = useState(false);
+  const [activeId, setActiveId] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [pastError, setPastError] = useState('');
   
   const chatEndRef = useRef(null);
 
@@ -37,6 +42,8 @@ export default function Tua() {
         if (cancelled) return;
         const saved = res.data?.messages || [];
         if (!saved.length) return;
+        setActiveId(res.data.conversation_id);
+        setIsSaved(Boolean(res.data.saved));
         const restored = saved.map((m) => ({
           role: m.role,
           text: m.text,
@@ -67,7 +74,7 @@ export default function Tua() {
 
     try {
       // Call the Django backend
-      const res = await api.post('/api/tua/chat/', { message: text });
+      const res = await api.post('/api/tua/chat/', activeId ? { message: text, conversation_id: activeId } : { message: text });
       
       // Add the real AI reply
       setMessages([...newMessages, {
@@ -77,6 +84,7 @@ export default function Tua() {
         crisisDetected: Boolean(res.data.crisis_detected),
         conversationId: res.data.conversation_id,
       }]);
+      setActiveId(res.data.conversation_id);
     } catch (error) {
       console.error(error);
       const message = error.response?.data?.error;
@@ -97,7 +105,9 @@ export default function Tua() {
     setIsStartingNew(true);
     setNewChatError('');
     try {
-      await api.post('/api/tua/new/');
+      const { data } = await api.post('/api/tua/new/');
+      setActiveId(data.conversation_id);
+      setIsSaved(false);
       setMessages([welcomeMessage]);
       setInput('');
       setShowUrgent(false);
@@ -107,6 +117,41 @@ export default function Tua() {
       setIsStartingNew(false);
     }
   };
+
+  const openPastChat = async (id) => {
+    if (isTyping) return;
+    setPastError('');
+    try {
+      const { data } = await api.get('/api/tua/history/', { params: { conversation_id: id } });
+      setMessages((data.messages || []).map((m) => ({
+        role: m.role,
+        text: m.text,
+        therapistId: m.therapist_id || null,
+        crisisDetected: Boolean(m.crisis_detected),
+        conversationId: data.conversation_id,
+      })));
+      setActiveId(data.conversation_id);
+      setIsSaved(Boolean(data.saved));
+      setShowUrgent(false);
+      setShowPast(false);
+      setInput('');
+    } catch {
+      setPastError('Could not open that chat. Please try again.');
+    }
+  };
+
+  const toggleCurrentSaved = async () => {
+    if (!activeId) return;
+    setPastError('');
+    try {
+      const { data } = await api.patch(`/api/tua/conversations/${activeId}/`, { saved: !isSaved });
+      setIsSaved(data.saved);
+    } catch {
+      setPastError('Could not save this chat. Please try again.');
+    }
+  };
+
+  const isStudent = user?.role === 'student';
 
   const suggestions = ["I'm feeling stressed", "I can't sleep", "Exam anxiety", "I feel lonely", "I'd like to see a counsellor"];
   const conversationId = messages.reduce((latest, message) => message.conversationId || latest, null);
@@ -119,10 +164,18 @@ export default function Tua() {
         <header className="tua-heading">
           <h1>TUA</h1>
           <p>A friendly AI companion for small worries. It helps you find the right counsellor when you're ready.</p>
-          {newChatError && <p className="tua-new-chat-error" role="alert">{newChatError}</p>}
+          {(newChatError || pastError) && <p className="tua-new-chat-error" role="alert">{newChatError || pastError}</p>}
         </header>
 
         <section className="card tua-chat-panel" aria-label="TUA conversation">
+          {showPast && isStudent && (
+            <TuaPastChats
+              currentId={activeId}
+              onOpen={openPastChat}
+              onClose={() => setShowPast(false)}
+              onSavedChange={(id, saved) => { if (id === activeId) setIsSaved(saved); }}
+            />
+          )}
           <div className="tua-message-list" role="log" aria-live="polite">
             {messages.map((msg, i) => {
               const isUser = msg.role === 'user';
@@ -155,7 +208,7 @@ export default function Tua() {
             <div ref={chatEndRef} />
           </div>
 
-          {(hasConversation || (conversationId && user?.role === 'student')) && (
+          {(isStudent || hasConversation) && (
             <div className="tua-urgent">
               <div className="tua-action-row">
                 {hasConversation && (
@@ -168,7 +221,27 @@ export default function Tua() {
                     <SquarePen size={15} aria-hidden="true" /> {isStartingNew ? 'Starting…' : 'New chat'}
                   </button>
                 )}
-                {conversationId && user?.role === 'student' && (
+                {isStudent && (
+                  <button
+                    type="button"
+                    className="tua-new-chat"
+                    aria-expanded={showPast}
+                    onClick={() => setShowPast((shown) => !shown)}
+                  >
+                    <History size={15} aria-hidden="true" /> Past chats
+                  </button>
+                )}
+                {isStudent && hasConversation && activeId && (
+                  <button
+                    type="button"
+                    className={`tua-new-chat${isSaved ? ' is-saved' : ''}`}
+                    aria-pressed={isSaved}
+                    onClick={toggleCurrentSaved}
+                  >
+                    <Bookmark size={15} aria-hidden="true" fill={isSaved ? 'currentColor' : 'none'} /> {isSaved ? 'Saved' : 'Save chat'}
+                  </button>
+                )}
+                {conversationId && isStudent && (
                   <button
                     type="button"
                     className="tua-urgent-toggle"

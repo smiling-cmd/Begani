@@ -83,8 +83,53 @@ class TuaNewChatView(APIView):
         return Response({"conversation_id": str(conversation.id)}, status=status.HTTP_201_CREATED)
 
 
+def get_owned_conversation(profile, conversation_id):
+    """One of the student's own conversations, or None if it is not theirs or was deleted."""
+    try:
+        conversation_id = UUID(str(conversation_id))
+    except (ValueError, AttributeError, TypeError):
+        return None
+    return TuaConversation.objects.filter(
+        id=conversation_id, student=profile, deleted_at__isnull=True
+    ).first()
+
+
+def serialize_conversation_messages(conversation):
+    recent = list(conversation.messages.order_by("-created_at")[:HISTORY_LIMIT])
+    recent.reverse()
+    crisis_ids = set(
+        SafetyEvent.objects.filter(
+            conversation=conversation, level=SafetyEvent.Level.CRISIS
+        ).values_list("message_id", flat=True)
+    )
+    suggested = dict(
+        TuaRecommendation.objects.filter(message__in=[m.id for m in recent])
+        .values_list("message_id", "therapist_id")
+    )
+
+    items = []
+    previous = None
+    for msg in recent:
+        if msg.role == TuaMessage.Role.SYSTEM:
+            previous = msg
+            continue
+        is_tua = msg.role == TuaMessage.Role.TUA
+        therapist_id = suggested.get(msg.id)
+        items.append({
+            "id": str(msg.id),
+            "role": "tua" if is_tua else "user",
+            "text": msg.content,
+            "created_at": msg.created_at,
+            "therapist_id": str(therapist_id) if therapist_id else None,
+            # The safety event is stored on the student's message; show it on the reply to it.
+            "crisis_detected": bool(is_tua and previous and previous.id in crisis_ids),
+        })
+        previous = msg
+    return items
+
+
 class TuaHistoryView(APIView):
-    """Return the student's saved TUA conversation so the chat can be restored."""
+    """Return a saved TUA conversation (the latest, or ?conversation_id=) so the chat can be restored."""
 
     permission_classes = [IsAuthenticated]
 
@@ -93,41 +138,83 @@ class TuaHistoryView(APIView):
         if not profile:
             return Response({"error": "Student profile not found. Are you a student?"}, status=status.HTTP_400_BAD_REQUEST)
 
-        conversation = get_active_conversation(profile)
+        requested = request.query_params.get("conversation_id")
+        if requested:
+            conversation = get_owned_conversation(profile, requested)
+            if conversation is None:
+                return Response({"error": "Conversation not found."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            conversation = get_active_conversation(profile)
         if conversation is None:
             return Response({"conversation_id": None, "messages": []})
 
-        recent = list(conversation.messages.order_by("-created_at")[:HISTORY_LIMIT])
-        recent.reverse()
-        crisis_ids = set(
-            SafetyEvent.objects.filter(
-                conversation=conversation, level=SafetyEvent.Level.CRISIS
-            ).values_list("message_id", flat=True)
-        )
-        suggested = dict(
-            TuaRecommendation.objects.filter(message__in=[m.id for m in recent])
-            .values_list("message_id", "therapist_id")
-        )
+        return Response({
+            "conversation_id": str(conversation.id),
+            "saved": conversation.saved,
+            "messages": serialize_conversation_messages(conversation),
+        })
 
+
+UNSAVED_RETENTION_DAYS = 90
+
+
+class TuaConversationListView(APIView):
+    """The student's past TUA chats, newest first. Empty chats are left out."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = getattr(request.user, "student_profile", None)
+        if not profile:
+            return Response({"error": "Student profile not found. Are you a student?"}, status=status.HTTP_400_BAD_REQUEST)
+
+        now = timezone.now()
         items = []
-        previous = None
-        for msg in recent:
-            if msg.role == TuaMessage.Role.SYSTEM:
-                previous = msg
+        conversations = (
+            TuaConversation.objects.filter(student=profile, deleted_at__isnull=True)
+            .order_by("-last_message_at")[:50]
+        )
+        for conversation in conversations:
+            last = conversation.messages.exclude(role=TuaMessage.Role.SYSTEM).order_by("-created_at").first()
+            if last is None:
                 continue
-            is_tua = msg.role == TuaMessage.Role.TUA
-            therapist_id = suggested.get(msg.id)
+            first_student = conversation.messages.filter(role=TuaMessage.Role.STUDENT).order_by("created_at").first()
+            title = conversation.title if conversation.title and conversation.title != "New chat" else (
+                first_student.content[:50] if first_student else "Chat with TUA"
+            )
+            days_left = None
+            if not conversation.saved:
+                expires = conversation.last_message_at + timedelta(days=UNSAVED_RETENTION_DAYS)
+                days_left = max(0, (expires - now).days)
             items.append({
-                "id": str(msg.id),
-                "role": "tua" if is_tua else "user",
-                "text": msg.content,
-                "created_at": msg.created_at,
-                "therapist_id": str(therapist_id) if therapist_id else None,
-                # The safety event is stored on the student's message; show it on the reply to it.
-                "crisis_detected": bool(is_tua and previous and previous.id in crisis_ids),
+                "id": str(conversation.id),
+                "title": title,
+                "preview": last.content[:90],
+                "last_message_at": conversation.last_message_at,
+                "saved": conversation.saved,
+                "days_left": days_left,
             })
-            previous = msg
-        return Response({"conversation_id": str(conversation.id), "messages": items})
+        return Response({"conversations": items})
+
+
+class TuaConversationDetailView(APIView):
+    """Save or unsave one of the student's chats. Saved chats skip the 90-day clean-up."""
+
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, conversation_id):
+        profile = getattr(request.user, "student_profile", None)
+        if not profile:
+            return Response({"error": "Student profile not found. Are you a student?"}, status=status.HTTP_400_BAD_REQUEST)
+        conversation = get_owned_conversation(profile, conversation_id)
+        if conversation is None:
+            return Response({"error": "Conversation not found."}, status=status.HTTP_404_NOT_FOUND)
+        saved = request.data.get("saved")
+        if not isinstance(saved, bool):
+            return Response({"error": "saved must be true or false."}, status=status.HTTP_400_BAD_REQUEST)
+        conversation.saved = saved
+        conversation.save(update_fields=["saved"])
+        return Response({"id": str(conversation.id), "saved": conversation.saved})
 
 
 class TuaChatView(APIView):
@@ -150,9 +237,18 @@ class TuaChatView(APIView):
         if not profile:
              return Response({"error": "Student profile not found. Are you a student?"}, status=status.HTTP_400_BAD_REQUEST)
 
-        conversation = get_active_conversation(profile)
+        requested = request.data.get("conversation_id")
+        if requested:
+            conversation = get_owned_conversation(profile, requested)
+            if conversation is None:
+                return Response({"error": "Conversation not found."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            conversation = get_active_conversation(profile)
         if conversation is None:
             conversation = TuaConversation.objects.create(student=profile, title=user_message[:50])
+        elif not conversation.title or conversation.title == "New chat":
+            conversation.title = user_message[:50]
+            conversation.save(update_fields=["title"])
 
         student_message = TuaMessage.objects.create(
             conversation=conversation, 
