@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
-from .models import PriorityRequest, SafetyEvent, TuaConversation, TuaMessage
+from .models import PriorityRequest, SafetyEvent, TuaConversation, TuaMessage, TuaRecommendation
 from .services import (
     TuaProviderError,
     TuaResponseError,
@@ -51,6 +51,65 @@ def notify_crisis(profile):
         Notification.objects.create(user=admin, type="crisis_alert", body=body)
 
 
+HISTORY_LIMIT = 100
+
+
+def get_active_conversation(profile):
+    """The student's most recent conversation that has not been deleted."""
+    return (
+        TuaConversation.objects.filter(student=profile, deleted_at__isnull=True)
+        .order_by("-last_message_at")
+        .first()
+    )
+
+
+class TuaHistoryView(APIView):
+    """Return the student's saved TUA conversation so the chat can be restored."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = getattr(request.user, "student_profile", None)
+        if not profile:
+            return Response({"error": "Student profile not found. Are you a student?"}, status=status.HTTP_400_BAD_REQUEST)
+
+        conversation = get_active_conversation(profile)
+        if conversation is None:
+            return Response({"conversation_id": None, "messages": []})
+
+        recent = list(conversation.messages.order_by("-created_at")[:HISTORY_LIMIT])
+        recent.reverse()
+        crisis_ids = set(
+            SafetyEvent.objects.filter(
+                conversation=conversation, level=SafetyEvent.Level.CRISIS
+            ).values_list("message_id", flat=True)
+        )
+        suggested = dict(
+            TuaRecommendation.objects.filter(message__in=[m.id for m in recent])
+            .values_list("message_id", "therapist_id")
+        )
+
+        items = []
+        previous = None
+        for msg in recent:
+            if msg.role == TuaMessage.Role.SYSTEM:
+                previous = msg
+                continue
+            is_tua = msg.role == TuaMessage.Role.TUA
+            therapist_id = suggested.get(msg.id)
+            items.append({
+                "id": str(msg.id),
+                "role": "tua" if is_tua else "user",
+                "text": msg.content,
+                "created_at": msg.created_at,
+                "therapist_id": str(therapist_id) if therapist_id else None,
+                # The safety event is stored on the student's message; show it on the reply to it.
+                "crisis_detected": bool(is_tua and previous and previous.id in crisis_ids),
+            })
+            previous = msg
+        return Response({"conversation_id": str(conversation.id), "messages": items})
+
+
 class TuaChatView(APIView):
     permission_classes = [IsAuthenticated]
     throttle_classes = [ScopedRateThrottle]
@@ -71,10 +130,9 @@ class TuaChatView(APIView):
         if not profile:
              return Response({"error": "Student profile not found. Are you a student?"}, status=status.HTTP_400_BAD_REQUEST)
 
-        conversation, _created = TuaConversation.objects.get_or_create(
-            student=profile, 
-            defaults={'title': user_message[:50]}
-        )
+        conversation = get_active_conversation(profile)
+        if conversation is None:
+            conversation = TuaConversation.objects.create(student=profile, title=user_message[:50])
 
         student_message = TuaMessage.objects.create(
             conversation=conversation, 
@@ -108,11 +166,18 @@ class TuaChatView(APIView):
                 status=status.HTTP_502_BAD_GATEWAY,
             )
 
-        TuaMessage.objects.create(
-            conversation=conversation, 
-            role=TuaMessage.Role.TUA, 
+        tua_message = TuaMessage.objects.create(
+            conversation=conversation,
+            role=TuaMessage.Role.TUA,
             content=tua_data["reply"]
         )
+        # Remember the suggested counsellor so a restored chat shows the same link.
+        if tua_data["therapist_id"]:
+            suggested = TherapistProfile.objects.filter(
+                id=tua_data["therapist_id"], status=TherapistProfile.Status.APPROVED
+            ).first()
+            if suggested:
+                TuaRecommendation.objects.create(message=tua_message, therapist=suggested)
         conversation.last_message_at = timezone.now()
         conversation.save(update_fields=["last_message_at"])
 

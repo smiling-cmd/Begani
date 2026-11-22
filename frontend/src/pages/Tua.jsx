@@ -18,9 +18,33 @@ export default function Tua() {
   ]);
   const [input, setInput] = useState(location.state?.initialMessage || '');
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [priorityDialog, setPriorityDialog] = useState(null);
   
   const chatEndRef = useRef(null);
+
+  // Restore the saved conversation so Tua remembers past chats
+  useEffect(() => {
+    let cancelled = false;
+    api.get('/api/tua/history/')
+      .then((res) => {
+        if (cancelled) return;
+        const saved = res.data?.messages || [];
+        if (!saved.length) return;
+        const restored = saved.map((m) => ({
+          role: m.role,
+          text: m.text,
+          therapistId: m.therapist_id || null,
+          crisisDetected: Boolean(m.crisis_detected),
+          conversationId: res.data.conversation_id,
+        }));
+        // Keep anything the student typed or sent before the history arrived.
+        setMessages((current) => [...restored, ...current.slice(1)]);
+      })
+      .catch(() => { /* Chat still works without history */ })
+      .finally(() => { if (!cancelled) setIsLoadingHistory(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -114,7 +138,7 @@ export default function Tua() {
             </div>
           )}
 
-          {messages.length === 1 && (
+          {!isLoadingHistory && messages.length === 1 && (
             <div className="tua-suggestions" aria-label="Suggested messages">
               {suggestions.map((sug) => (
                 <button key={sug} type="button" disabled={isTyping} onClick={() => handleSend(sug)}>

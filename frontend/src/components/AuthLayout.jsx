@@ -20,7 +20,7 @@ export default function AuthLayout({
   children,
 }) {
   return (
-    <div className="auth-page">
+    <div className={`auth-page${showPhoto && !heroText ? ' auth-page--glass' : ''}`}>
       <header className="auth-topbar">
         <Link to="/login" className="auth-brand" aria-label="Begani">
           <img src={beganiLogo} alt="Begani — Share the load." width="220" height="90" />
@@ -42,7 +42,8 @@ export default function AuthLayout({
           </aside>
         )}
 
-        {showPhoto && !heroText && (
+        {showPhoto && !heroText ? (
+          <div className="auth-glass">
           <aside className="auth-photo-card" aria-label="Student community">
             <div className="auth-photo-media">
               <img
@@ -66,9 +67,11 @@ export default function AuthLayout({
               </div>
             </div>
           </aside>
+          <section className="auth-card" aria-label={label}>{children}</section>
+          </div>
+        ) : (
+          <section className="auth-card" aria-label={label}>{children}</section>
         )}
-
-        <section className="auth-card" aria-label={label}>{children}</section>
       </main>
     </div>
   );
