@@ -874,3 +874,31 @@
   border-color: var(--auth-green);
   background: #ffffff;
 }
+/* Sign up on desktop: the card sits in the true middle of the page and the
+   headline stays on the left, sized to the space beside the card. Below
+   1200px there is not enough room for both, so the card stays on the right. */
+@media (min-width: 1200px) {
+  .auth-stage:not(.auth-stage--split) {
+    position: relative;
+    justify-content: center;
+  }
+
+  .auth-stage:not(.auth-stage--split) .auth-hero-text {
+    position: absolute;
+    top: 50%;
+    left: clamp(20px, 4.5vw, 64px);
+    width: calc(50vw - 255px - clamp(20px, 4.5vw, 64px) - 24px);
+    max-width: 580px;
+    flex: none;
+    padding-right: 0;
+    transform: translateY(calc(-50% - 40px));
+  }
+
+  .auth-stage:not(.auth-stage--split) .auth-hero-title {
+    font-size: clamp(2rem, 3.2vw, 3.6rem);
+  }
+
+  .auth-stage:not(.auth-stage--split) .auth-hero-desc {
+    max-width: 100%;
+  }
+}

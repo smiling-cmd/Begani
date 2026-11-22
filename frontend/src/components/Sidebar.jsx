@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   BarChart,
@@ -13,6 +13,8 @@ import {
   MessageCircle,
   Moon,
   Mountain,
+  PanelLeftClose,
+  PanelLeftOpen,
   Settings,
   Sun,
   UserRound,
@@ -25,6 +27,16 @@ import MobileHeader from './MobileHeader';
 import MobileBottomNav from './MobileBottomNav';
 import './Sidebar.css';
 
+const COLLAPSE_KEY = 'begani-sidebar-collapsed';
+
+function readCollapsed() {
+  try {
+    return window.localStorage.getItem(COLLAPSE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export default function Sidebar() {
   const { user, logout } = useContext(AuthContext);
   const themeContext = useContext(ThemeContext);
@@ -32,6 +44,7 @@ export default function Sidebar() {
   const toggleTheme = themeContext?.toggleTheme || (() => {});
   const location = useLocation();
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(readCollapsed);
   const isTherapist = user?.role === 'therapist';
   const isAdmin = user?.role === 'admin';
   const isChatRoute =
@@ -44,6 +57,18 @@ export default function Sidebar() {
     navigate('/login');
   };
 
+  const toggleCollapsed = () => {
+    setCollapsed((current) => {
+      const next = !current;
+      try {
+        window.localStorage.setItem(COLLAPSE_KEY, next ? '1' : '0');
+      } catch {
+        /* The rail still collapses; it just will not be remembered. */
+      }
+      return next;
+    });
+  };
+
   const homePath = isAdmin
     ? '/admin-dashboard'
     : isTherapist
@@ -53,8 +78,11 @@ export default function Sidebar() {
   return (
     <>
       <MobileHeader />
-      <aside className="sidebar sidebar-desktop" aria-label="Main navigation">
+      <aside className={`sidebar sidebar-desktop${collapsed ? ' is-collapsed' : ''}`} aria-label="Main navigation">
         <div className="sidebar-brand">
+          <Link to={homePath} className="sidebar-mark" aria-label="Begani Home" title="Begani Home">
+            <Leaf size={20} aria-hidden="true" />
+          </Link>
           <Link to={homePath} className="brand-logo-link" aria-label="Begani Home">
             <img
               className="brand-logo-image"
@@ -64,6 +92,16 @@ export default function Sidebar() {
               height="101"
             />
           </Link>
+          <button
+            type="button"
+            className="sidebar-theme-toggle sidebar-collapse-toggle"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-pressed={collapsed}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            onClick={toggleCollapsed}
+          >
+            {collapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
+          </button>
           <button
             type="button"
             className="sidebar-theme-toggle"
@@ -126,7 +164,7 @@ export default function Sidebar() {
         <Link
           to="/settings"
           className="sidebar-user"
-          title={user?.alias ? 'Counsellors see you by this alias, not your name.' : undefined}
+          title={user?.alias ? 'Counsellors see you by this alias, not your name.' : 'Settings'}
         >
           <div className="user-avatar" aria-hidden="true"><UserRound size={16} /></div>
           <div className="user-copy">
@@ -134,7 +172,7 @@ export default function Sidebar() {
             <small>{user?.alias ? `${user.role} · alias` : user?.role}</small>
           </div>
         </Link>
-        <button className="logout-button" type="button" onClick={handleLogout}>
+        <button className="logout-button" type="button" title="Log out" onClick={handleLogout}>
           <LogOut size={16} />
           <span>Log out</span>
         </button>
@@ -146,7 +184,7 @@ export default function Sidebar() {
 }
 
 function NavGroup({ label }) {
-  return <span className="sidebar-group-label" aria-hidden="true">{label}</span>;
+  return <span className="sidebar-group-label" aria-hidden="true"><span>{label}</span></span>;
 }
 
 function NavItem({ icon, label, active, to }) {
