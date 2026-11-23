@@ -175,3 +175,35 @@ class SeedArticlesTests(APITestCase):
         nimh = ResourceReference.objects.filter(author__startswith="National Institute").first()
         self.assertIsNone(nimh.year)
         self.assertIn("(n.d.)", nimh.apa_text)
+
+
+class SeedAudioCommandTests(APITestCase):
+    def test_adds_audio_resources_and_is_repeatable(self):
+        import shutil
+        import subprocess
+        import tempfile
+        from pathlib import Path
+
+        from django.core.management import call_command
+        from django.test import override_settings
+
+        if not shutil.which("ffmpeg"):
+            self.skipTest("ffmpeg is not installed")
+        with tempfile.TemporaryDirectory() as source, tempfile.TemporaryDirectory() as media:
+            subprocess.run(
+                ["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "sine=frequency=300:duration=2", str(Path(source) / "liecio-light-rain-109591.mp3")],
+                check=True,
+            )
+            subprocess.run(
+                ["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "sine=frequency=300:duration=2", str(Path(source) / "FreeMindfulness3MinuteBreathing.mp3")],
+                check=True,
+            )
+            with override_settings(MEDIA_ROOT=media):
+                call_command("seed_audio", source=source, publish=True, verbosity=0)
+                call_command("seed_audio", source=source, publish=True, verbosity=0)
+                rain = Resource.objects.get(title="Light rain")
+                guided = Resource.objects.get(title="3-minute breathing space")
+                self.assertEqual(Resource.objects.filter(type="audio").count(), 2)
+                self.assertEqual(rain.status, Resource.Status.PUBLISHED)
+                self.assertEqual(guided.status, Resource.Status.PENDING_REVIEW)
+                self.assertTrue(rain.audio_file.name.endswith(".mp3"))
