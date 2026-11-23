@@ -1,79 +1,88 @@
 from django.utils import timezone
-from django.utils.text import slugify
-from rest_framework import generics, serializers
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status as http_status
 
 from accounts.permissions import IsUniversityAdmin
-from .models import Resource, ResourceCategory
-
-
-class ResourceSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(source="category.name", read_only=True)
-
-    class Meta:
-        model = Resource
-        fields = ("id", "title", "summary", "body", "type", "category", "media_url", "language")
-
+from .models import Resource
+from .serializers import (
+    ResourceSerializer,
+    AdminResourceCreateSerializer,
+)
 
 class ResourceListView(generics.ListAPIView):
+    """Student-facing list — published resources only."""
     serializer_class = ResourceSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Resource.objects.filter(status=Resource.Status.PUBLISHED).select_related("category").order_by("title")
-
-
-class AdminResourceCreateSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(write_only=True, max_length=100)
-    category_name = serializers.CharField(source="category.name", read_only=True)
-    status = serializers.CharField(read_only=True)
-
-    class Meta:
-        model = Resource
-        fields = (
-            "id",
-            "title",
-            "summary",
-            "body",
-            "type",
-            "category",
-            "category_name",
-            "media_url",
-            "language",
-            "status",
+        return (
+            Resource.objects.filter(status=Resource.Status.PUBLISHED)
+            .select_related("category")
+            .prefetch_related("references")
+            .order_by("title")
         )
 
-    def validate_category(self, value):
-        category = value.strip()
-        if not category:
-            raise serializers.ValidationError("Category is required.")
-        if not slugify(category):
-            raise serializers.ValidationError("Enter a category name containing letters or numbers.")
-        return category
-
-    def validate(self, attrs):
-        if not attrs.get("body", "").strip() and not attrs.get("media_url", "").strip():
-            raise serializers.ValidationError("Add article content or a media URL before publishing.")
-        return attrs
-
-    def create(self, validated_data):
-        category_name = validated_data.pop("category")
-        category_slug = slugify(category_name)
-        category, _created = ResourceCategory.objects.get_or_create(
-            slug=category_slug,
-            defaults={"name": category_name},
+class AdminResourceListView(generics.ListAPIView):
+    """
+    Admin-facing list — shows ALL resources (drafts, pending review, published).
+    This feeds the admin dashboard so you can see what you're working on.
+    """
+    serializer_class = AdminResourceCreateSerializer
+    permission_classes = [IsUniversityAdmin]
+    
+    def get_queryset(self):
+        return (
+            Resource.objects.all()
+            .select_related("category")
+            .prefetch_related("references")
+            .order_by("-created_at")
         )
-        return Resource.objects.create(category=category, **validated_data)
-
 
 class AdminResourceCreateView(generics.CreateAPIView):
+    """Admin-facing create — auto-publishes on creation based on current workflow."""
     queryset = Resource.objects.all()
     serializer_class = AdminResourceCreateSerializer
     permission_classes = [IsUniversityAdmin]
 
     def perform_create(self, serializer):
+        # Forces publish immediately upon creation
         serializer.save(
             status=Resource.Status.PUBLISHED,
             created_by=self.request.user,
             published_at=timezone.now(),
+        )
+
+class AdminResourceDetailView(generics.RetrieveUpdateAPIView):
+    """
+    Admin-facing detail/update — allows fetching a single article for editing,
+    and saving updates (PATCH/PUT).
+    """
+    queryset = Resource.objects.all()
+    serializer_class = AdminResourceCreateSerializer
+    permission_classes = [IsUniversityAdmin]
+
+class AdminResourcePublishView(generics.GenericAPIView):
+    """Admin-facing publish — flips a draft to PUBLISHED and stamps published_at."""
+    queryset = Resource.objects.all()
+    serializer_class = AdminResourceCreateSerializer
+    permission_classes = [IsUniversityAdmin]
+
+    def post(self, request, *args, **kwargs):
+        resource = self.get_object()
+
+        if resource.status == Resource.Status.PUBLISHED:
+            return Response(
+                {"detail": "Resource is already published."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        resource.status = Resource.Status.PUBLISHED
+        resource.published_at = timezone.now()
+        resource.save(update_fields=["status", "published_at"])
+
+        return Response(
+            AdminResourceCreateSerializer(resource, context={"request": request}).data,
+            status=http_status.HTTP_200_OK,
         )
