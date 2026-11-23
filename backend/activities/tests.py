@@ -184,3 +184,17 @@ class AdminActivityCreateTests(APITestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertFalse(Activity.objects.exists())
+
+
+class SeedActivitiesCommandTests(APITestCase):
+    def test_seed_adds_free_and_paid_activities_once(self):
+        from django.core.management import call_command
+        from io import StringIO
+        call_command("seed_activities", stdout=StringIO())
+        call_command("seed_activities", stdout=StringIO())
+        activities = Activity.objects.all()
+        self.assertEqual(activities.count(), 10)
+        self.assertTrue(activities.filter(fee_kes=0).exists())
+        self.assertTrue(activities.filter(fee_kes__gt=0).exists())
+        self.assertTrue(set(activities.values_list("type", flat=True)) >= {"painting", "hiking", "picnic", "trip"})
+        self.assertFalse(activities.filter(starts_at__lt=timezone.now()).exists())

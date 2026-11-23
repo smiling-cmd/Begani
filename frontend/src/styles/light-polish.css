@@ -1,0 +1,111 @@
+/* Begani organic editorial system: a deliberately light, reassuring workspace. */
+:root {
+  --brand-teal: #20c9b3;
+  --brand-teal-deep: #118b7c;
+  --forest: #163f35;
+  --forest-soft: #245748;
+  --sage: #aebfae;
+  --sage-pale: #e6efe8;
+  --ivory: #fbf8f0;
+  --paper: #fffdf8;
+  --terracotta: #c97962;
+  --ink: #183b33;
+  --heading: #163f35;
+  --muted: #566a5f;
+  --bg: var(--ivory);
+  --card: var(--paper);
+  --line: #dde6dd;
+  --tint: #e2f5ef;
+  --shadow: 0 18px 45px -34px rgba(22, 63, 53, .42);
+}
+
+body {
+  min-width: 320px;
+  background: radial-gradient(circle at 2% 0%, rgba(195, 223, 208, .48), transparent 30rem),
+    radial-gradient(circle at 100% 100%, rgba(245, 218, 194, .34), transparent 34rem), var(--ivory);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.page-heading h1, .page-title, .support-page-heading h1,
+.therapist-dashboard-title, .tua-heading h1, .home-greeting-title,
+.home-community-card h2, .home-tua-card h3, .home-urgent-title {
+  font-family: var(--font-heading) !important;
+  font-weight: 400;
+  letter-spacing: -.04em;
+}
+
+.page-heading h1, .page-title { font-size: clamp(2.75rem, 5vw, 4.75rem); line-height: .98; }
+.eyebrow, .home-community-eyebrow { color: var(--brand-teal-deep); font-size: 10px; font-weight: 800; letter-spacing: .17em; }
+
+.panel, .card, .settings-card, .settings-appearance, .settings-logout,
+.admin-content-panel, .therapist-dashboard-card, .therapist-info-card,
+.calendar-month, .calendar-agenda, .journal-panel {
+  border: 1px solid rgba(22, 63, 53, .10);
+  border-radius: 24px;
+  background: rgba(255, 253, 248, .88);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.92);
+}
+.panel:hover, .card:hover { box-shadow: 0 22px 50px -34px rgba(22, 63, 53, .48), inset 0 1px 0 #fff; }
+
+.button, .btn-primary, .home-mood-submit {
+  border-color: var(--brand-teal);
+  border-radius: 999px;
+  color: #073d35;
+  background: var(--brand-teal);
+  box-shadow: 0 12px 22px -16px rgba(17, 139, 124, .7);
+}
+.button:hover:not(:disabled), .btn-primary:hover:not(:disabled), .home-mood-submit:hover:not(:disabled) {
+  color: #fff;
+  background: var(--brand-teal-deep);
+}
+.button-secondary, .btn-secondary, .button-light, .filter-chip, .icon-button {
+  border-color: #d8e2d8;
+  border-radius: 999px;
+  background: rgba(255,253,248,.86);
+}
+.filter-chip.selected { border-color: var(--forest); background: var(--forest); }
+.button-warning, .button-danger { border-color: var(--terracotta); background: var(--terracotta); }
+.search-field, .tua-composer, .chat-composer { border-color: #d7e2d8; background: rgba(255,253,248,.93); }
+
+.home-page-content::before { opacity: .8; }
+.home-community-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(22, 63, 53, .10);
+  border-radius: 32px;
+  background: linear-gradient(118deg, #e0eee5 0%, #f8f2e6 62%, #f1e8d9 100%);
+  box-shadow: 0 28px 60px -42px rgba(22, 63, 53, .55);
+}
+.home-community-card::after { content: ''; position: absolute; right: 34%; bottom: -110px; width: 260px; height: 260px; border-radius: 48% 52% 43% 57%; background: rgba(174,191,174,.28); pointer-events: none; }
+.home-community-copy { position: relative; z-index: 1; }
+.home-community-card > img { position: relative; z-index: 1; filter: saturate(.72) sepia(.08); }
+.home-community-card a { color: var(--forest); font-weight: 800; }
+.home-community-card a svg { color: var(--brand-teal-deep); }
+.home-card { border-radius: 26px; }
+.home-card-title { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 400; }
+.home-quick-access-icon, .resource-icon, .resource-hero-icon { color: var(--brand-teal-deep); background: var(--tint); }
+.home-tua-card { border-radius: 28px; background: linear-gradient(135deg, #d8eee4, #f5f0e4); }
+.home-tua-cta { background: var(--forest); }
+.home-urgent-banner { border-color: #ead4c9; background: #fbefe8; }
+.home-urgent-icon { color: #fffaf7; background: var(--terracotta); }
+.home-emergency-link { color: #9a4f3c; }
+
+.activity-intro, .resource-hero { border-radius: 28px; background: linear-gradient(125deg, #dcece2, #fbf2e6); }
+.activity-art { background: linear-gradient(145deg, #e5efe5, #bfdbc9); }
+.resource-card, .activity-card, .therapist-card { border-radius: 22px; }
+.resource-card:hover, .activity-card:hover, .therapist-card:hover { transform: translateY(-3px); }
+.chat-message.mine, .tua-message-bubble.is-user { background: linear-gradient(140deg, var(--forest-soft), var(--forest)); }
+
+.begani-signup-page { color: var(--ink); background: var(--ivory); font-family: var(--font-body); }
+.begani-signup-page .begani-signup-glass { border-radius: 30px; }
+.begani-signup-page .begani-signup-heading h1 { font-family: var(--font-heading) !important; font-weight: 400 !important; }
+.begani-signup-page .begani-signup-submit { border-color: var(--brand-teal); color: #073d35; background: var(--brand-teal); }
+.begani-signup-page .begani-signup-submit:hover:not(:disabled) { color: #fff; background: var(--brand-teal-deep); }
+
+@media (max-width: 640px) {
+  .page-heading h1, .page-title { font-size: 2.7rem; }
+  .home-community-card { border-radius: 24px; }
+  .home-community-card::after { right: -80px; bottom: -105px; }
+  .panel, .card, .home-card, .home-tua-card { border-radius: 20px; }
+}

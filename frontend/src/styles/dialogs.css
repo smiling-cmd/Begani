@@ -1,0 +1,23 @@
+/* 14. DIALOGS */
+.dialog-backdrop,
+.priority-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(17, 34, 27, .56);
+}
+
+.dialog-card,
+.priority-dialog {
+  position: relative;
+  width: min(100%, 520px);
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 28px;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+}

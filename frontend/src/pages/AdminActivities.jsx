@@ -93,6 +93,8 @@ export default function AdminActivities() {
                   <option value="reading_club">Reading club</option>
                   <option value="group_talk">Group talk</option>
                   <option value="mindfulness">Mindfulness</option>
+                  <option value="picnic">Picnic</option>
+                  <option value="trip">Wellbeing trip</option>
                   <option value="other">Other</option>
                 </select>
               </label>

@@ -1,0 +1,75 @@
+/* Therapist and admin use the same shared surfaces, with role-specific hierarchy. */
+.therapist-dashboard-title { font-size: clamp(2.6rem, 4.4vw, 4.2rem); font-weight: 400; }
+.therapist-dashboard-stats { gap: 16px; }.therapist-stat-card { border-radius: 20px; }
+.therapist-stat-card-heading { color: var(--brand-teal-deep); }.therapist-dashboard-card, .admin-therapist-panel { border-radius: 26px; }
+.therapist-dashboard-section-title, .admin-therapist-heading h2 { font-family: var(--font-heading); font-size: 1.7rem; font-weight: 400; }
+.admin-therapist-row { border-color: rgba(22,63,53,.10); border-radius: 18px; background: rgba(255,253,248,.52); }
+:root[data-theme='dark'] .admin-therapist-row { border-color: var(--line); background: var(--surface-raised); }
+
+@media (max-width: 760px) {
+  .home-community-slideshow { min-height: 260px; }
+  .home-community-slideshow > img { padding: 10px; }
+}
+
+/* Let pages travel naturally on scroll-journey pages (Home). Keep sticky sidebar everywhere else. */
+@media (min-width: 641px) {
+  .app-shell { align-items: stretch; }
+  .page-content { padding-bottom: clamp(64px, 10vw, 140px); }
+}
+
+/* Media-led home sections create a gentle, website-like scroll story. */
+.home-focus-film {
+  display: grid;
+  grid-template-columns: minmax(260px, .78fr) minmax(0, 1.22fr);
+  overflow: hidden;
+  margin: 24px 0;
+  border: 1px solid rgba(22,63,53,.12);
+  border-radius: 32px;
+  background: linear-gradient(135deg, #1b4a3d, #102d26);
+  box-shadow: 0 28px 60px -42px rgba(11,42,33,.7);
+}
+.home-focus-film-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(28px, 4vw, 64px); color: #f6faf2; }
+.home-focus-film-copy .home-community-eyebrow { color: #82dec9; }
+.home-focus-film-copy h2 { max-width: 430px; margin: 11px 0; font-family: var(--font-heading); font-size: clamp(2.35rem, 4vw, 4.5rem); font-weight: 400; letter-spacing: -.04em; line-height: .96; }
+.home-focus-film-copy p { max-width: 420px; margin: 0; color: rgba(246,250,242,.76); line-height: 1.65; }
+.home-focus-film-copy a { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding: 12px 18px; border-radius: 999px; color: #103c32; background: #20c9b3; font-size: 12px; font-weight: 800; text-decoration: none; }
+:root[data-theme='dark'] .home-focus-film { border-color: rgba(154,211,184,.16); background: linear-gradient(135deg, #163d33, #0d211c); }
+
+@media (max-width: 760px) {
+  .home-focus-film { grid-template-columns: 1fr; border-radius: 24px; }
+  .home-focus-film-copy { padding: 30px 24px; }
+}
+
+/* Scroll-reveal animation removed: content stays fully visible while scrolling. */
+
+/* Cleaned up home-scroll-app override */
+
+/* Home is a scroll journey (no sticky quick-link bar; the page just scrolls) */
+.home-scroll-page { width: min(100%, 1520px); margin: 0 auto; padding-top: 14px; }
+.home-scroll-slide { scroll-margin-top: 24px; }
+.home-focus-film { min-height: 0; margin-top: 0; }
+.home-focus-film-copy h1, .home-focus-film-copy h2 { max-width: 500px; margin: 11px 0; font-family: var(--font-heading); font-size: clamp(2.7rem, 5.2vw, 5.8rem); font-weight: 400; letter-spacing: -.05em; line-height: .92; }
+.home-dashboard-grid { min-height: min(760px, calc(100svh - 100px)); align-content: center; }
+.home-dashboard-grid .home-tua-card { order: -1; grid-column: 1 / -1; min-height: 260px; }
+.home-urgent-banner { min-height: min(260px, calc(100svh - 160px)); align-content: center; }
+
+@media (max-width: 760px) {
+  .home-scroll-page { padding-top: 10px; }
+  .home-focus-film { min-height: auto; }
+  .home-dashboard-grid { min-height: auto; }
+  .home-dashboard-grid .home-tua-card { min-height: 220px; }
+  .home-urgent-banner { min-height: auto; }
+}
+
+
+/* Additional Component Specific Helpers */
+.filter-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.support-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.support-chats-link { display: inline-flex; align-items: center; gap: 7px; }
+.therapist-booking-title { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: var(--heading); }
+.therapist-booking-title svg { color: var(--brand-teal); }
+
+
+/* Scroll reveal helpers */
+.scroll-reveal { opacity: 1; transform: none; }
+.scroll-reveal-delay-1, .scroll-reveal-delay-2 { opacity: 1; }

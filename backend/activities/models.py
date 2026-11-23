@@ -12,6 +12,8 @@ class Activity(models.Model):
         READING_CLUB = "reading_club", "Reading Club"
         GROUP_TALK = "group_talk", "Group Talk"
         MINDFULNESS = "mindfulness", "Mindfulness"
+        PICNIC = "picnic", "Picnic"
+        TRIP = "trip", "Wellbeing Trip"
         OTHER = "other", "Other"
 
     class Status(models.TextChoices):

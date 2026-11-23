@@ -1,0 +1,61 @@
+/* 17. RESPONSIVE */
+@media (max-width: 900px) {
+  .page-content {
+    padding: 24px 20px;
+  }
+
+  .home-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-community-card {
+    grid-template-columns: 1fr;
+  }
+
+  .therapist-dashboard-grid,
+  .therapist-profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-content {
+    padding: 20px 16px 104px;
+  }
+
+  .page-title,
+  .page-heading h1 {
+    font-size: 2.55rem;
+  }
+
+  .home-card,
+  .home-tua-card,
+  .panel,
+  .card {
+    border-radius: 22px;
+  }
+
+  .home-urgent-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Adjust page content top spacing on mobile with top bar */
+@media (max-width: 900px) {
+  .page-content {
+    padding-top: 76px;
+  }
+}
+
+/* 18. REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}

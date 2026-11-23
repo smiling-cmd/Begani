@@ -13,6 +13,8 @@ const typeLabels = {
   reading_club: 'Reading club',
   group_talk: 'Group talk',
   mindfulness: 'Mindfulness',
+  picnic: 'Picnic',
+  trip: 'Wellbeing trip',
   other: 'Other',
 };
 

@@ -1,0 +1,57 @@
+/* 16. AUTH SCREENS */
+.auth-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-left {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--ivory);
+}
+
+.auth-right {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(28px, 5vw, 64px);
+  border-radius: 40px 0 0 40px;
+  color: white;
+  background: var(--brand-green, #1d4131);
+}
+
+.auth-form-shell {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-form-shell h1 {
+  margin: 0 0 5px;
+  font-size: clamp(36px, 4vw, 48px);
+}
+
+.auth-input {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 16px 0 49px;
+  border: 1px solid rgba(214, 231, 218, .58);
+  border-radius: 999px;
+  color: white;
+  background: rgba(255, 255, 255, .07);
+}
+
+.auth-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  color: var(--green);
+  background: #fff;
+  font-weight: 750;
+}
