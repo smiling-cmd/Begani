@@ -1,12 +1,13 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import api from '../api';
 import { ArrowRight, BookOpen, Bookmark, Clock, Headphones, Heart, Pause, Play, Search, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import AudioDock from '../components/AudioDock';
+import { usePlayer } from '../components/AudioPlayer';
 import { AuthContext } from '../context/AuthContext';
 import heroPhoto from '../assets/pages/resources-hero.webp';
 import ResourceViewer from '../components/ResourceViewer';
+import ArtScene from '../components/ResourceArt';
 import { ACTION_LABELS, TYPE_LABELS, isAudioUrl } from '../utils/resourceMedia';
 import './Resources.css';
 
@@ -16,16 +17,12 @@ const FORMATS = [
   { id: 'video', label: 'Watch', blurb: 'Short videos', types: ['video'], icon: Video },
 ];
 
-const TYPE_ICONS = { article: BookOpen, guide: BookOpen, audio: Headphones, video: Video };
-
-// A resource's own cover when it has one; otherwise a calm tinted block with its type icon.
+// A resource's own cover when it has one; otherwise generated cover art for its topic.
 function Thumb({ resource, decorative = false }) {
   if (resource.cover_image) {
     return <img src={resource.cover_image} alt={decorative ? '' : (resource.image_alt || '')} loading="lazy" />;
   }
-  const Icon = TYPE_ICONS[resource.type] || BookOpen;
-  const tone = resource.type === 'audio' ? 'audio' : resource.type === 'video' ? 'video' : 'read';
-  return <span className={`rx-thumb rx-thumb--${tone}`} aria-hidden="true"><Icon size={22} /></span>;
+  return <span className="rx-thumb rx-thumb--art"><ArtScene resource={resource} /></span>;
 }
 
 function audioSource(resource) {
@@ -63,9 +60,7 @@ export default function Resources() {
   const [selected, setSelected] = useState(null);
   const [saved, setSaved] = useState([]);
   const [limit, setLimit] = useState(8);
-  const [track, setTrack] = useState(null);
-  const [playing, setPlaying] = useState(false);
-  const audioRef = useRef(null);
+  const { track, playing, playTrack: startTrack } = usePlayer();
 
   useEffect(() => {
     if (!token) return undefined;
@@ -111,18 +106,7 @@ export default function Resources() {
       : [...current, id]);
   };
 
-  const playTrack = (resource) => {
-    if (track?.id === resource.id) {
-      const audio = audioRef.current;
-      if (audio) {
-        if (audio.paused) audio.play().catch(() => setPlaying(false));
-        else audio.pause();
-      }
-      return;
-    }
-    setPlaying(false);
-    setTrack(resource);
-  };
+  const playTrack = (resource) => startTrack(resource, audioSource(resource));
 
   const clearFilters = () => { setQuery(''); setCategory('All'); setKind('all'); setLimit(8); };
 
@@ -290,17 +274,6 @@ export default function Resources() {
           <Link to="/support" className="button button-secondary">Find someone to talk to <ArrowRight size={16} aria-hidden="true" /></Link>
         </div>
       </main>
-
-      {track && (
-        <AudioDock
-          track={track}
-          src={audioSource(track)}
-          audioRef={audioRef}
-          playing={playing}
-          onPlayingChange={setPlaying}
-          onClose={() => { setTrack(null); setPlaying(false); }}
-        />
-      )}
 
       {selected && (
         <ResourceViewer

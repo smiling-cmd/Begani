@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import ArtScene from './ResourceArt';
 import { ArrowRight, Bookmark, X } from 'lucide-react';
 import {
   ACTION_LABELS,
@@ -110,8 +111,10 @@ export default function ResourceViewer({ resource, saved, onToggleSaved, onClose
       <article className="dialog-card resource-dialog resource-viewer" role="dialog" aria-modal="true" aria-labelledby="resource-dialog-title">
         <button type="button" className="icon-button dialog-close" onClick={onClose} aria-label="Close resource"><X size={20} /></button>
 
-        {resource.cover_image && (
+        {resource.cover_image ? (
           <img className="resource-viewer-cover" src={resource.cover_image} alt={resource.image_alt || ''} />
+        ) : (
+          <div className="resource-viewer-cover resource-viewer-art"><ArtScene resource={resource} /></div>
         )}
 
         <span className="category-label">{resource.category || 'Wellbeing'} · {TYPE_LABELS[resource.type] || resource.type}</span>

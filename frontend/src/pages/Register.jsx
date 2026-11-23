@@ -210,6 +210,9 @@ export default function Register() {
             <span>Create My Account →</span>
           )}
         </button>
+        <p className="auth-legal">
+          By creating an account you agree to our <Link to="/terms" target="_blank" rel="noopener">Terms</Link> and <Link to="/privacy" target="_blank" rel="noopener">Privacy Policy</Link>.
+        </p>
       </form>
 
       <AuthDivider text="or" />

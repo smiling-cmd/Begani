@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Headphones, Pause, Play, RotateCcw, RotateCw, X } from 'lucide-react';
+import { ChevronDown, Pause, Play, RotateCcw, RotateCw, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import ArtScene from './ResourceArt';
 import './AudioPlayer.css';
 
 // One audio element for the whole app. It lives above the routes, so a track keeps
@@ -21,7 +22,7 @@ function formatTime(seconds) {
 
 function Art({ track, className }) {
   if (track.cover_image) return <img className={className} src={track.cover_image} alt="" />;
-  return <span className={`${className} ap-art-fallback`} aria-hidden="true"><Headphones /></span>;
+  return <span className={`${className} ap-art-fallback ap-art-scene`}><ArtScene resource={track} /></span>;
 }
 
 export function PlayerProvider({ children }) {

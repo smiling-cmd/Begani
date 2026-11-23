@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import api from '../api';
-import { BookOpen, PlusCircle, Upload, Plus, Trash2 } from 'lucide-react';
+import { BookOpen, PlusCircle, Upload, Plus, Trash2, Save } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 
 const emptyReference = {
@@ -45,6 +45,34 @@ export default function AdminResources() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [drafts, setDrafts] = useState([]);
+  const [publishingId, setPublishingId] = useState(null);
+
+  const loadDrafts = useCallback(() => {
+    api.get('/api/resources/admin/')
+      .then(({ data }) => {
+        const list = Array.isArray(data) ? data : data.results || [];
+        setDrafts(list.filter((item) => item.status === 'draft' || item.status === 'pending_review'));
+      })
+      .catch(() => { /* the form still works without the drafts list */ });
+  }, []);
+
+  useEffect(() => { loadDrafts(); }, [loadDrafts]);
+
+  const publishDraft = async (id) => {
+    setPublishingId(id);
+    setError('');
+    setNotice('');
+    try {
+      await api.post(`/api/resources/admin/${id}/publish/`);
+      setNotice('Resource published. Students can now find it in Resources.');
+      loadDrafts();
+    } catch (requestError) {
+      setError(getErrorMessage(requestError));
+    } finally {
+      setPublishingId(null);
+    }
+  };
 
   const updateField = (event) => {
     setFormData((current) => ({ ...current, [event.target.name]: event.target.value }));
@@ -80,10 +108,16 @@ export default function AdminResources() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const asDraft = event.nativeEvent.submitter?.value === 'draft';
     if (saving) return;
     
-    // Frontend validation matching backend
-    if (formData.type === 'article' || formData.type === 'guide') {
+    // Frontend validation matching backend (a draft can be incomplete, except for a title and topic)
+    if (asDraft) {
+      if (!formData.title.trim() || !formData.category.trim()) {
+        setError('Add a title and a topic before saving a draft.');
+        return;
+      }
+    } else if (formData.type === 'article' || formData.type === 'guide') {
       if (!formData.body.trim()) {
         setError('Article body is required.');
         return;
@@ -105,6 +139,7 @@ export default function AdminResources() {
     setNotice('');
 
     const payload = new FormData();
+    payload.append('save_as', asDraft ? 'draft' : 'publish');
     
     // 1. Append basic text fields
     Object.keys(formData).forEach(key => {
@@ -139,7 +174,8 @@ export default function AdminResources() {
       setVideoFile(null);
       setAudioFile(null);
       setReferences([]);
-      setNotice('Resource published. Students can now find it in Resources.');
+      setNotice(asDraft ? 'Draft saved. Students cannot see it until you publish it.' : 'Resource published. Students can now find it in Resources.');
+      loadDrafts();
     } catch (requestError) {
       setError(getErrorMessage(requestError));
     } finally {
@@ -270,11 +306,30 @@ export default function AdminResources() {
             {notice && <p className="form-message success" role="status">{notice}</p>}
             
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button className="button" type="submit" disabled={saving}>
-                <PlusCircle size={17} /> {saving ? 'Publishing…' : 'Publish resource'}
+              <button className="button-secondary button" type="submit" value="draft" formNoValidate disabled={saving}>
+                <Save size={17} /> Save draft
+              </button>
+              <button className="button" type="submit" value="publish" disabled={saving}>
+                <PlusCircle size={17} /> {saving ? 'Saving…' : 'Publish resource'}
               </button>
             </div>
           </form>
+
+          {drafts.length > 0 && (
+            <div className="admin-drafts" style={{ marginTop: '28px' }}>
+              <h2>Waiting to publish</h2>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 0', display: 'grid', gap: '8px' }}>
+                {drafts.map((item) => (
+                  <li key={item.id} style={{ display: 'flex', gap: '12px', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', border: '1px solid var(--line)', borderRadius: '12px' }}>
+                    <span><strong>{item.title}</strong> <small className="muted-copy">· {item.status === 'draft' ? 'Draft' : 'Pending review'}</small></span>
+                    <button type="button" className="button" disabled={publishingId === item.id} onClick={() => publishDraft(item.id)}>
+                      {publishingId === item.id ? 'Publishing…' : 'Publish'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
       </main>
     </div>

@@ -54,6 +54,7 @@
 
 .ap-full-body { display: grid; gap: 22px; width: min(440px, 100%); margin: auto; padding: 18px 0 36px; }
 .ap-art { display: block; width: min(100%, 48dvh); aspect-ratio: 1; margin: 0 auto; border-radius: 24px; object-fit: cover; box-shadow: 0 24px 48px -18px rgba(0, 0, 0, .55); }
+.ap-art.ap-art-fallback { display: grid; place-items: center; }
 .ap-art.ap-art-fallback svg { width: 72px; height: 72px; }
 .ap-full-category { margin: 0; color: rgba(255, 255, 255, .78); font-size: 14px; text-align: center; }
 
@@ -87,3 +88,8 @@
   .ap-full { animation: none; }
   .ap-mini-progress, .ap-play { transition: none; }
 }
+/* Generated cover art inside the player */
+.ap-art-scene { position: relative; overflow: hidden; background: none; }
+.ap-art-scene .art-scene,
+.ap-art.ap-art-scene .art-scene,
+.ap-mini-art.ap-art-scene .art-scene { display: block; width: 100%; height: 100%; }

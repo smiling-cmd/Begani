@@ -92,6 +92,24 @@ class AdminResourceCreateTests(APITestCase):
         self.assertEqual(student_resources.status_code, 200)
         self.assertEqual(student_resources.data[0]["title"], "Managing Exam Stress")
 
+    def test_admin_can_save_draft_that_students_cannot_see_then_publish_it(self):
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.post(
+            "/api/resources/admin/create/",
+            {"title": "Draft guide", "type": "article", "category": "Sleep", "body": "Words here.", "save_as": "draft"},
+            format="multipart",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+        self.assertEqual(response.data["status"], "draft")
+        resource_id = response.data["id"]
+        self.assertFalse(Resource.objects.get(pk=resource_id).published_at)
+        listing = self.client.get("/api/resources/").data
+        titles = [item["title"] for item in (listing.get("results", []) if isinstance(listing, dict) else listing)]
+        self.assertNotIn("Draft guide", titles)
+        published = self.client.post(f"/api/resources/admin/{resource_id}/publish/")
+        self.assertEqual(published.status_code, 200)
+        self.assertEqual(published.data["status"], "published")
+
     def test_non_admin_cannot_create_resources(self):
         self.client.force_authenticate(user=self.student)
 

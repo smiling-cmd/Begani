@@ -27,6 +27,7 @@ import Calendar from './pages/Calendar';
 import ChatInbox from './pages/ChatInbox';
 import ChatRoom from './pages/ChatRoom';
 import NotFound from './pages/NotFound';
+import LegalPage from './pages/LegalPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 
@@ -54,6 +55,8 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/terms" element={<LegalPage kind="terms" />} />
+          <Route path="/privacy" element={<LegalPage kind="privacy" />} />
 
           {/* AUTHENTICATED ROUTES */}
           <Route path="/onboarding" element={<ProtectedRoute><OnboardingName /></ProtectedRoute>} />

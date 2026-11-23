@@ -41,13 +41,15 @@ class AdminResourceListView(generics.ListAPIView):
         )
 
 class AdminResourceCreateView(generics.CreateAPIView):
-    """Admin-facing create — auto-publishes on creation based on current workflow."""
+    """Admin-facing create. Send save_as="draft" to keep it private; anything else publishes."""
     queryset = Resource.objects.all()
     serializer_class = AdminResourceCreateSerializer
     permission_classes = [IsUniversityAdmin]
 
     def perform_create(self, serializer):
-        # Forces publish immediately upon creation
+        if self.request.data.get("save_as") == "draft":
+            serializer.save(status=Resource.Status.DRAFT, created_by=self.request.user)
+            return
         serializer.save(
             status=Resource.Status.PUBLISHED,
             created_by=self.request.user,
