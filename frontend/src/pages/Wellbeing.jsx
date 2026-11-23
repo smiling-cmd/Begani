@@ -74,6 +74,8 @@ function formatDate(value) {
   return new Date(value).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+const scrollBehavior = () => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+
 export default function Wellbeing() {
   const { hash } = useLocation();
   const { token } = useContext(AuthContext);
@@ -85,6 +87,7 @@ export default function Wellbeing() {
   const [journalError, setJournalError] = useState('');
   const [journalDraft, setJournalDraft] = useState('');
   const [savingJournal, setSavingJournal] = useState(false);
+  const [journalSaved, setJournalSaved] = useState(false);
 
   // Which tool is open. A link such as /wellbeing#study-focus opens that tool; picking a tile afterwards wins.
   const hashTool = TOOL_BY_HASH[hash.slice(1)];
@@ -98,15 +101,16 @@ export default function Wellbeing() {
     setOpened((current) => new Set([...current, active, id]));
     if (window.matchMedia('(max-width: 900px)').matches) {
       window.requestAnimationFrame(() => {
-        document.getElementById('wb-workspace')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('wb-workspace')?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
       });
     }
+    document.getElementById('wb-workspace')?.focus({ preventScroll: true });
   };
 
   // Links from articles scroll to the tool they mention.
   useEffect(() => {
     if (!hashTool) return;
-    document.getElementById('wb-workspace')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('wb-workspace')?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
   }, [hashTool, hash]);
 
   useEffect(() => {
@@ -173,6 +177,8 @@ export default function Wellbeing() {
     try {
       await saveJournalBody(body);
       setJournalDraft('');
+      setJournalSaved(true);
+      window.setTimeout(() => setJournalSaved(false), 3000);
     } catch (error) {
       setJournalError(getErrorMessage(error, 'Could not save your entry. Please try again.'));
     } finally {
@@ -261,7 +267,7 @@ export default function Wellbeing() {
                 <div className="checkin-list">
                   {checkins.slice(0, 4).map((checkin) => (
                     <article className="checkin-row" key={checkin.id}>
-                      <span className="checkin-face" aria-hidden="true">{moods.find((mood) => mood.label === getMoodLabel(checkin.score))?.face || '😁'}</span>
+                      <span className="checkin-face" aria-hidden="true">{moods.find((mood) => mood.label === getMoodLabel(checkin.score))?.face || '😐'}</span>
                       <span className="checkin-copy"><strong>{getMoodLabel(checkin.score)}</strong><small>{formatDate(checkin.checked_in_at)}</small></span>
                       <span className="score-pill">{checkin.score}/10</span>
                     </article>
@@ -324,7 +330,7 @@ export default function Wellbeing() {
                 );
               })}
             </div>
-            <div className="wb-workspace" id="wb-workspace" role="region" aria-label={`${activeTool.label} tool`}>
+            <div className="wb-workspace" id="wb-workspace" tabIndex={-1} role="region" aria-label={`${activeTool.label} tool`}>
               {TOOLS.filter((tool) => opened.has(tool.id) || tool.id === active).map((tool) => (
                 <div key={tool.id} hidden={tool.id !== active}>{renderTool(tool.id)}</div>
               ))}
@@ -340,8 +346,8 @@ export default function Wellbeing() {
             </div>
             <form onSubmit={handleSaveJournal} className="journal-form">
               <label className="sr-only" htmlFor="journal-entry">Write a private journal entry</label>
-              <textarea id="journal-entry" value={journalDraft} onChange={(event) => setJournalDraft(event.target.value)} placeholder="Write whatever is on your mind..." rows="4" maxLength="4000" />
-              <div className="journal-form-footer"><span>{journalDraft.length}/4000</span><button type="submit" className="button" disabled={!journalDraft.trim() || savingJournal}>{savingJournal ? 'Saving…' : 'Save entry'}</button></div>
+              <textarea id="journal-entry" value={journalDraft} onChange={(event) => { setJournalDraft(event.target.value); setJournalSaved(false); }} placeholder="Write whatever is on your mind..." rows="4" maxLength="4000" />
+              <div className="journal-form-footer"><span role="status">{journalSaved ? 'Entry saved' : `${journalDraft.length}/4000`}</span><button type="submit" className="button" disabled={!journalDraft.trim() || savingJournal}>{savingJournal ? 'Saving…' : 'Save entry'}</button></div>
             </form>
             {journalError && <p className="form-message error" role="alert">{journalError}</p>}
             {loadingJournal ? <p className="muted-copy">Loading your journal…</p> : journalEntries.length === 0 ? (

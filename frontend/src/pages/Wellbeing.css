@@ -159,7 +159,7 @@
 
 .checkin-copy small {
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 12px;
 }
 
 .score-pill {
@@ -236,7 +236,7 @@
 }
 
 .week-bar small {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -331,7 +331,7 @@
   display: block;
   margin-bottom: 12px;
   color: #b9e5d7;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: .16em;
   text-transform: uppercase;
@@ -377,7 +377,7 @@
 }
 
 .practice-chip {
-  min-height: 34px;
+  min-height: 40px;
   padding: 0 14px;
   border: 1px solid rgba(255, 255, 255, .26);
   border-radius: 999px;
@@ -680,7 +680,8 @@
 }
 
 .tool-chip {
-  min-height: 34px;
+  min-height: 40px;
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
   padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -947,11 +948,15 @@
   line-height: 1.6;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .journal-entry time {
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 12px;
 }
 
 /* ---------- Support nudge ---------- */
@@ -1053,4 +1058,76 @@
 
 .week-empty .mood-insight-line {
   margin: 0;
+}
+
+/* ---------- UI polish: focus, hover, dark mode ---------- */
+
+.tool-chip:hover:not(:disabled) {
+  background: var(--tint);
+}
+
+.checkin-row,
+.journal-entry {
+  transition: background .15s ease;
+}
+
+.journal-entry:hover {
+  background: rgba(255, 253, 248, .95);
+}
+
+.practice-chip:focus-visible,
+.practice-reset:focus-visible,
+.tool-chip:focus-visible {
+  outline: 2px solid var(--brand-teal-deep);
+  outline-offset: 2px;
+}
+
+.practice-card .practice-chip:focus-visible,
+.practice-card .practice-reset:focus-visible {
+  outline-color: #f5f9ee;
+}
+
+.check-row:focus-within {
+  outline: 2px solid var(--brand-teal-deep);
+  outline-offset: 2px;
+}
+
+.journal-form textarea:focus,
+.gratitude-field input:focus {
+  border-color: var(--brand-teal-deep);
+  box-shadow: 0 0 0 3px rgba(17, 139, 124, .18);
+  outline: none;
+}
+
+@media (max-width: 760px) {
+  .practice-chip,
+  .tool-chip {
+    min-height: 44px;
+  }
+}
+
+:root[data-theme='dark'] .score-pill {
+  color: #b9e5d7;
+  background: rgba(185, 229, 215, .14);
+}
+
+:root[data-theme='dark'] .checkin-face {
+  background: rgba(255, 255, 255, .08);
+}
+
+:root[data-theme='dark'] .checkin-row {
+  border-bottom-color: rgba(255, 255, 255, .08);
+}
+
+:root[data-theme='dark'] .journal-panel {
+  background: linear-gradient(125deg, #1b3029, #1a3c32);
+}
+
+:root[data-theme='dark'] .journal-entry {
+  border-color: rgba(255, 255, 255, .08);
+  background: rgba(255, 255, 255, .05);
+}
+
+:root[data-theme='dark'] .journal-entry:hover {
+  background: rgba(255, 255, 255, .08);
 }

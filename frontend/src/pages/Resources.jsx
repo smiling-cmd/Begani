@@ -6,31 +6,26 @@ import Sidebar from '../components/Sidebar';
 import AudioDock from '../components/AudioDock';
 import { AuthContext } from '../context/AuthContext';
 import heroPhoto from '../assets/pages/resources-hero.webp';
-import readPhoto from '../assets/pages/wellbeing-reading.webp';
-import listenPhoto from '../assets/pages/listen-calm.webp';
-import watchPhoto from '../assets/home/thumb-playing.webp';
-import socialPhoto from '../assets/home/thumb-social.webp';
-import relaxPhoto from '../assets/pages/settings-relax.webp';
-import friendsPhoto from '../assets/pages/messages-friends.webp';
 import ResourceViewer from '../components/ResourceViewer';
 import { ACTION_LABELS, TYPE_LABELS, isAudioUrl } from '../utils/resourceMedia';
 import './Resources.css';
 
 const FORMATS = [
-  { id: 'read', label: 'Read', blurb: 'Articles and guides', types: ['article', 'guide'], photo: readPhoto, icon: BookOpen },
-  { id: 'audio', label: 'Listen', blurb: 'Calming sounds and guided audio', types: ['audio'], photo: listenPhoto, icon: Headphones },
-  { id: 'video', label: 'Watch', blurb: 'Short videos', types: ['video'], photo: watchPhoto, icon: Video },
+  { id: 'read', label: 'Read', blurb: 'Articles and guides', types: ['article', 'guide'], icon: BookOpen },
+  { id: 'audio', label: 'Listen', blurb: 'Calming sounds and guided audio', types: ['audio'], icon: Headphones },
+  { id: 'video', label: 'Watch', blurb: 'Short videos', types: ['video'], icon: Video },
 ];
 
-// Resources without their own cover still get a photo, picked by topic so a topic always looks the same.
-const FALLBACK_COVERS = [readPhoto, relaxPhoto, socialPhoto, friendsPhoto, watchPhoto];
+const TYPE_ICONS = { article: BookOpen, guide: BookOpen, audio: Headphones, video: Video };
 
-function coverFor(resource) {
-  if (resource.cover_image) return resource.cover_image;
-  const key = `${resource.category || ''}${resource.type}`;
-  let hash = 0;
-  for (let index = 0; index < key.length; index += 1) hash = (hash * 31 + key.charCodeAt(index)) % 9973;
-  return FALLBACK_COVERS[hash % FALLBACK_COVERS.length];
+// A resource's own cover when it has one; otherwise a calm tinted block with its type icon.
+function Thumb({ resource, decorative = false }) {
+  if (resource.cover_image) {
+    return <img src={resource.cover_image} alt={decorative ? '' : (resource.image_alt || '')} loading="lazy" />;
+  }
+  const Icon = TYPE_ICONS[resource.type] || BookOpen;
+  const tone = resource.type === 'audio' ? 'audio' : resource.type === 'video' ? 'video' : 'read';
+  return <span className={`rx-thumb rx-thumb--${tone}`} aria-hidden="true"><Icon size={22} /></span>;
 }
 
 function audioSource(resource) {
@@ -67,6 +62,7 @@ export default function Resources() {
   const [kind, setKind] = useState('all');
   const [selected, setSelected] = useState(null);
   const [saved, setSaved] = useState([]);
+  const [limit, setLimit] = useState(8);
   const [track, setTrack] = useState(null);
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef(null);
@@ -102,6 +98,11 @@ export default function Resources() {
     .filter((resource) => resource.type !== 'audio')
     .sort((a, b) => String(b.published_at || '').localeCompare(String(a.published_at || '')))
     .slice(0, 3), [resources]);
+  const libraryResources = useMemo(() => {
+    if (filtersActive) return visibleResources;
+    const rest = visibleResources.filter((resource) => !featured.some((item) => item.id === resource.id));
+    return rest.length ? rest : visibleResources;
+  }, [filtersActive, visibleResources, featured]);
   const listenItems = useMemo(() => resources.filter((resource) => audioSource(resource)), [resources]);
 
   const toggleSaved = (id) => {
@@ -123,6 +124,8 @@ export default function Resources() {
     setTrack(resource);
   };
 
+  const clearFilters = () => { setQuery(''); setCategory('All'); setKind('all'); setLimit(8); };
+
   const chooseFormat = (id) => setKind((current) => (current === id ? 'all' : id));
 
   const renderCard = (resource, { large = false } = {}) => {
@@ -132,7 +135,7 @@ export default function Resources() {
     return (
       <article className={`rx-card${large ? ' is-large' : ''}`} key={resource.id}>
         <div className="rx-card-cover">
-          <img src={coverFor(resource)} alt={resource.cover_image ? (resource.image_alt || '') : ''} loading="lazy" />
+          <Thumb resource={resource} />
           <span className="rx-badge">{TYPE_LABELS[resource.type] || resource.type}</span>
           <button type="button" className={`rx-save${isSaved ? ' is-saved' : ''}`} aria-label={isSaved ? `Remove ${resource.title} from saved` : `Save ${resource.title}`} aria-pressed={isSaved} onClick={() => toggleSaved(resource.id)}>
             <Bookmark size={17} fill={isSaved ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -148,6 +151,33 @@ export default function Resources() {
           <h3>{resource.title}</h3>
           <p>{resource.summary || 'Explore this wellbeing resource.'}</p>
           <button type="button" className="text-button" onClick={() => setSelected(resource)}>{ACTION_LABELS[resource.type] || 'Open'} <ArrowRight size={16} aria-hidden="true" /></button>
+        </div>
+      </article>
+    );
+  };
+
+  const renderRow = (resource) => {
+    const isSaved = saved.includes(resource.id);
+    const src = audioSource(resource);
+    const isCurrent = track?.id === resource.id;
+    return (
+      <article className="rx-row" key={resource.id}>
+        <div className="rx-row-thumb"><Thumb resource={resource} decorative /></div>
+        <div className="rx-row-body">
+          <span className="rx-row-meta">{resource.category || 'Wellbeing'} · {cardMeta(resource)}</span>
+          <h3>{resource.title}</h3>
+          <p>{resource.summary || 'Explore this wellbeing resource.'}</p>
+          <button type="button" className="text-button" onClick={() => setSelected(resource)}>{ACTION_LABELS[resource.type] || 'Open'} <ArrowRight size={16} aria-hidden="true" /></button>
+        </div>
+        <div className="rx-row-actions">
+          {src && (
+            <button type="button" className="rx-icon-btn rx-icon-btn--play" aria-label={isCurrent && playing ? `Pause ${resource.title}` : `Play ${resource.title}`} onClick={() => playTrack(resource)}>
+              {isCurrent && playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
+            </button>
+          )}
+          <button type="button" className={`rx-icon-btn${isSaved ? ' is-saved' : ''}`} aria-label={isSaved ? `Remove ${resource.title} from saved` : `Save ${resource.title}`} aria-pressed={isSaved} onClick={() => toggleSaved(resource.id)}>
+            <Bookmark size={17} fill={isSaved ? 'currentColor' : 'none'} aria-hidden="true" />
+          </button>
         </div>
       </article>
     );
@@ -173,11 +203,10 @@ export default function Resources() {
 
         {!loading && !error && resources.length > 0 && (
           <div className="rx-tiles" role="group" aria-label="Browse by format">
-            {FORMATS.map((format) => {
+            {FORMATS.filter((format) => counts[format.id] > 0).map((format) => {
               const Icon = format.icon;
               return (
                 <button key={format.id} type="button" className={`rx-tile${kind === format.id ? ' selected' : ''}`} aria-pressed={kind === format.id} onClick={() => chooseFormat(format.id)}>
-                  <img src={format.photo} alt="" loading="lazy" />
                   <span className="rx-tile-text">
                     <span className="rx-tile-icon"><Icon size={18} aria-hidden="true" /></span>
                     <strong>{format.label}</strong>
@@ -208,7 +237,7 @@ export default function Resources() {
                     return (
                       <li key={resource.id}>
                         <button type="button" className={`rx-listen-item${isCurrent ? ' is-current' : ''}`} onClick={() => playTrack(resource)} aria-label={`${isCurrent && playing ? 'Pause' : 'Play'} ${resource.title}`}>
-                          <img src={coverFor(resource)} alt="" loading="lazy" />
+                          <Thumb resource={resource} decorative />
                           <span className="rx-listen-text"><strong>{resource.title}</strong><small>{resource.category || 'Audio'}</small></span>
                           <span className="rx-listen-icon">{isCurrent && playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}</span>
                         </button>
@@ -228,7 +257,7 @@ export default function Resources() {
 
             <section className="rx-section" aria-labelledby="rx-library-title">
               <div className="rx-section-head">
-                <div><h2 id="rx-library-title">Explore the library</h2><p>{saved.length} saved this visit · saved items stay on this page only.</p></div>
+                <div><h2 id="rx-library-title">Explore the library</h2><p>{saved.length} saved this visit · saved items stay on this page only.</p>{filtersActive && visibleResources.length > 0 && <button type="button" className="text-button" onClick={clearFilters}>Clear filters</button>}<span className="sr-only" role="status">{filtersActive ? `${visibleResources.length} ${visibleResources.length === 1 ? 'resource' : 'resources'} found` : ''}</span></div>
               </div>
               {categories.length > 1 && (
                 <div className="rx-chips" role="group" aria-label="Filter resources by topic">
@@ -241,10 +270,15 @@ export default function Resources() {
                 <section className="empty-state panel">
                   <h2>{resources.length ? 'No resources found' : 'No resources published yet'}</h2>
                   <p>{resources.length ? 'Try another search or choose a different topic.' : 'New guides and practices will appear here when they are published.'}</p>
-                  {resources.length > 0 && <button type="button" className="button button-secondary" onClick={() => { setQuery(''); setCategory('All'); setKind('all'); }}>Clear filters</button>}
+                  {resources.length > 0 && <button type="button" className="button button-secondary" onClick={clearFilters}>Clear filters</button>}
                 </section>
               ) : (
-                <div className="rx-grid">{visibleResources.map((resource) => renderCard(resource))}</div>
+                <>
+                  <div className="rx-rows">{libraryResources.slice(0, limit).map((resource) => renderRow(resource))}</div>
+                  {libraryResources.length > limit && (
+                    <button type="button" className="button button-secondary rx-more" onClick={() => setLimit((current) => current + 8)}>Show more ({libraryResources.length - limit} more)</button>
+                  )}
+                </>
               )}
             </section>
           </>

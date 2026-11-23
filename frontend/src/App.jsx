@@ -30,6 +30,7 @@ import NotFound from './pages/NotFound';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 
+
 const homeFor = (role) => (role === 'admin' ? '/admin-dashboard' : role === 'therapist' ? '/therapist-dashboard' : '/home');
 
 // Sends signed-out visitors to /login and visitors with the wrong role to their own home page.
@@ -78,6 +79,8 @@ function App() {
           <Route path="*" element={<NotFound />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+
+
         </Routes>
       </Router>
     </AuthProvider>
