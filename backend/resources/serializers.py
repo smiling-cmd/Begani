@@ -6,7 +6,7 @@ from .models import Resource, ResourceCategory, ResourceReference
 class ResourceReferenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResourceReference
-        fields = ("id", "author", "year", "title", "publication", "url", "doi", "order")
+        fields = ("id", "author", "year", "title", "publication", "url", "doi", "apa_text", "order")
         read_only_fields = ("id",)
 
 
@@ -130,3 +130,26 @@ class AdminResourceCreateSerializer(serializers.ModelSerializer):
             )
 
         return resource
+
+    def update(self, instance, validated_data):
+        references_data = validated_data.pop("references", None)
+        category_name = validated_data.pop("category", None)
+
+        if category_name:
+            instance.category, _ = ResourceCategory.objects.get_or_create(
+                slug=slugify(category_name),
+                defaults={"name": category_name},
+            )
+
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+
+        # Replace references only when the client sent a list
+        if references_data is not None:
+            instance.references.all().delete()
+            for index, ref_data in enumerate(references_data):
+                ref_data.pop("id", None)
+                ResourceReference.objects.create(resource=instance, order=index, **ref_data)
+
+        return instance

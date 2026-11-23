@@ -1,10 +1,27 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import api from '../api';
-import { ArrowRight, BookOpen, Bookmark, Headphones, Heart, Search, Video, X } from 'lucide-react';
+import { ArrowRight, BookOpen, Bookmark, Headphones, Heart, Search, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import studentsPhoto from '../assets/students.jpeg';
+import ResourceViewer from '../components/ResourceViewer';
+import { ACTION_LABELS, TYPE_LABELS } from '../utils/resourceMedia';
+import './Resources.css';
+
+const TYPE_FILTERS = [
+  { id: 'all', label: 'Everything' },
+  { id: 'read', label: 'Read', types: ['article', 'guide'] },
+  { id: 'audio', label: 'Listen', types: ['audio'] },
+  { id: 'video', label: 'Watch', types: ['video'] },
+];
+
+function cardMeta(resource) {
+  if (resource.type === 'article' || resource.type === 'guide') {
+    return resource.reading_time ? `${resource.reading_time} min read` : TYPE_LABELS[resource.type];
+  }
+  return TYPE_LABELS[resource.type] || resource.type;
+}
 
 function getResourceIcon(type) {
   if (type === 'audio') return Headphones;
@@ -31,6 +48,7 @@ export default function Resources() {
   const [retryCount, setRetryCount] = useState(0);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
+  const [kind, setKind] = useState('all');
   const [selected, setSelected] = useState(null);
   const [saved, setSaved] = useState([]);
 
@@ -46,21 +64,14 @@ export default function Resources() {
     return () => { active = false; };
   }, [token, retryCount]);
 
-  useEffect(() => {
-    if (!selected) return undefined;
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setSelected(null);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selected]);
-
   const categories = useMemo(() => ['All', ...new Set(resources.map((resource) => resource.category).filter(Boolean))], [resources]);
   const visibleResources = useMemo(() => resources.filter((resource) => {
     const matchesCategory = category === 'All' || resource.category === category;
+    const kindTypes = TYPE_FILTERS.find((option) => option.id === kind)?.types;
+    const matchesKind = !kindTypes || kindTypes.includes(resource.type);
     const matchesQuery = `${resource.title} ${resource.summary} ${resource.category || ''} ${resource.type} ${resource.language}`.toLowerCase().includes(query.trim().toLowerCase());
-    return matchesCategory && matchesQuery;
-  }), [category, query, resources]);
+    return matchesCategory && matchesKind && matchesQuery;
+  }), [category, kind, query, resources]);
 
   const toggleSaved = (id) => {
     setSaved((current) => current.includes(id)
@@ -95,6 +106,15 @@ export default function Resources() {
             <span className="sr-only">Search resources</span>
             <input aria-label="Search resources" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search guides, practices, or topics..." />
           </label>
+          {!loading && !error && resources.length > 0 && (
+            <div className="filter-list" role="group" aria-label="Filter resources by format">
+              {TYPE_FILTERS.map((option) => (
+                <button key={option.id} type="button" className={`filter-chip${kind === option.id ? ' selected' : ''}`} onClick={() => setKind(option.id)} aria-pressed={kind === option.id}>
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
           {!loading && !error && categories.length > 1 && (
             <div className="filter-list" aria-label="Filter resources by topic">
               {categories.map((option) => (
@@ -131,16 +151,19 @@ export default function Resources() {
               const isSaved = saved.includes(resource.id);
               return (
                 <article className="resource-card panel" key={resource.id}>
+                  {resource.cover_image && (
+                    <img className="resource-cover" src={resource.cover_image} alt={resource.image_alt || ''} loading="lazy" />
+                  )}
                   <div className="resource-card-top">
                     <span className="resource-icon"><Icon size={23} /></span>
                     <button type="button" className={`icon-button${isSaved ? ' is-saved' : ''}`} aria-label={isSaved ? `Remove ${resource.title} from saved` : `Save ${resource.title}`} aria-pressed={isSaved} onClick={() => toggleSaved(resource.id)}>
                       <Bookmark size={19} fill={isSaved ? 'currentColor' : 'none'} />
                     </button>
                   </div>
-                  <div className="resource-labels"><span>{resource.category || 'Wellbeing'}</span><span>{resource.type}</span></div>
+                  <div className="resource-labels"><span>{resource.category || 'Wellbeing'}</span><span>{cardMeta(resource)}</span></div>
                   <h3>{resource.title}</h3>
                   <p>{resource.summary || 'Explore this wellbeing resource.'}</p>
-                  <button type="button" className="text-button" onClick={() => setSelected(resource)}>Read this <ArrowRight size={16} /></button>
+                  <button type="button" className="text-button" onClick={() => setSelected(resource)}>{ACTION_LABELS[resource.type] || 'Open'} <ArrowRight size={16} /></button>
                 </article>
               );
             })}
@@ -151,23 +174,12 @@ export default function Resources() {
       </main>
 
       {selected && (
-        <div className="dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>
-          <article className="dialog-card resource-dialog" role="dialog" aria-modal="true" aria-labelledby="resource-dialog-title">
-            <button type="button" className="icon-button dialog-close" onClick={() => setSelected(null)} aria-label="Close resource"><X size={20} /></button>
-            <span className="category-label">{selected.category || 'Wellbeing'} · {selected.type}</span>
-            <h2 id="resource-dialog-title">{selected.title}</h2>
-            {selected.summary && <p className="resource-summary">{selected.summary}</p>}
-            {selected.body && <p>{selected.body}</p>}
-            {selected.media_url && <a className="button" href={selected.media_url} target="_blank" rel="noreferrer">Open resource <ArrowRight size={16} /></a>}
-            <div className="dialog-actions">
-              <button type="button" className="button button-secondary" onClick={() => toggleSaved(selected.id)}>
-                <Bookmark size={16} fill={saved.includes(selected.id) ? 'currentColor' : 'none'} />
-                {saved.includes(selected.id) ? 'Saved' : 'Save for later'}
-              </button>
-              <button type="button" className="text-button" onClick={() => setSelected(null)}>Done</button>
-            </div>
-          </article>
-        </div>
+        <ResourceViewer
+          resource={selected}
+          saved={saved.includes(selected.id)}
+          onToggleSaved={() => toggleSaved(selected.id)}
+          onClose={() => setSelected(null)}
+        />
       )}
     </div>
   );

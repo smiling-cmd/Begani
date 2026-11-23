@@ -80,11 +80,13 @@ class ResourceReference(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     resource = models.ForeignKey(Resource, on_delete=models.CASCADE, related_name="references")
     author = models.CharField(max_length=200)
-    year = models.PositiveIntegerField()
+    year = models.PositiveIntegerField(null=True, blank=True)  # blank for "n.d." sources
     title = models.CharField(max_length=300)
     publication = models.CharField(max_length=300, blank=True)
     url = models.URLField(blank=True)
     doi = models.CharField(max_length=100, blank=True)
+    # Full APA 7 reference exactly as it should be shown; used when present
+    apa_text = models.TextField(blank=True)
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
