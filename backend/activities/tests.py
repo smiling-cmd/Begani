@@ -71,6 +71,13 @@ class ActivityRegistrationTests(APITestCase):
             status=Activity.Status.PUBLISHED,
         )
 
+    def test_spots_left_drops_when_someone_registers_and_returns_on_cancel(self):
+        self.assertEqual(self.client.get("/api/activities/").json()[0]["spots_left"], 2)
+        registration = self.client.post(f"/api/activities/{self.activity.id}/register/", {}, format="json").json()
+        self.assertEqual(self.client.get("/api/activities/").json()[0]["spots_left"], 1)
+        self.client.post(f"/api/activities/registrations/{registration['id']}/cancel/", {}, format="json")
+        self.assertEqual(self.client.get("/api/activities/").json()[0]["spots_left"], 2)
+
     def test_registers_student_and_lists_saved_registration(self):
         response = self.client.post(f"/api/activities/{self.activity.id}/register/", {}, format="json")
 

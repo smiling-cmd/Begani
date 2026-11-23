@@ -1,13 +1,11 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import api from '../api';
-import { CalendarDays, ChevronLeft, ChevronRight, Clock3, Download, MapPin } from 'lucide-react';
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Download, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import './Calendar.css';
 
-import calendarPhoto from '../assets/pages/calendar-planning.webp';
-import './PageHeadingPhoto.css';
 const TIME_ZONE = 'Africa/Nairobi';
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -56,6 +54,17 @@ function formatSelectedDate(date) {
     month: 'long',
     year: 'numeric',
   }).format(date);
+}
+
+function describeDaysUntil(targetKey, todayKey) {
+  const diff = Math.round((parseDayKey(targetKey) - parseDayKey(todayKey)) / 86_400_000);
+  if (diff <= 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  return `In ${diff} days`;
+}
+
+function formatShortDate(key) {
+  return new Intl.DateTimeFormat('en-KE', { weekday: 'short', day: 'numeric', month: 'short' }).format(parseDayKey(key));
 }
 
 function moodLabel(score) {
@@ -178,6 +187,18 @@ export default function CalendarPage() {
     return grouped;
   }, {}), [items]);
   const selectedItems = itemsByDay[selectedKey] || [];
+  const todayKey = dayKey(today);
+  const [openedAt] = useState(() => Date.now());
+  const upcoming = useMemo(
+    () => items.filter((item) => item.type !== 'mood' && new Date(item.startsAt).getTime() >= openedAt),
+    [items, openedAt],
+  );
+  const nextUp = upcoming[0];
+  const monthPrefix = dayKey(displayMonth).slice(0, 7);
+  const monthCounts = useMemo(() => items.reduce((counts, item) => {
+    if (getNairobiDateKey(item.startsAt).startsWith(monthPrefix)) counts[item.type] += 1;
+    return counts;
+  }, { session: 0, activity: 0, mood: 0 }), [items, monthPrefix]);
   const selectedDate = parseDayKey(selectedKey);
   const monthLabel = new Intl.DateTimeFormat('en-KE', { month: 'long', year: 'numeric' }).format(displayMonth);
 
@@ -185,6 +206,12 @@ export default function CalendarPage() {
     const nextMonth = new Date(displayMonth.getFullYear(), displayMonth.getMonth() + amount, 1, 12);
     setDisplayMonth(nextMonth);
     setSelectedKey(dayKey(nextMonth));
+  };
+
+  const goToDay = (key) => {
+    const date = parseDayKey(key);
+    setDisplayMonth(new Date(date.getFullYear(), date.getMonth(), 1, 12));
+    setSelectedKey(key);
   };
 
   const showToday = () => {
@@ -196,12 +223,42 @@ export default function CalendarPage() {
     <div className="app-shell">
       <Sidebar />
       <main className="page-content begani-calendar-page">
-        <header className="page-heading page-heading--photo">
+        <header className="page-heading">
           <div className="eyebrow"><CalendarDays size={16} /> Your plans and check-ins</div>
           <h1>Calendar</h1>
           <p>See your appointments, registered activities, and mood check-ins together.</p>
-          <img className="page-heading-photo" src={calendarPhoto} alt="" width="640" height="400" loading="lazy" />
         </header>
+
+        {!loading && (
+          <section className="calendar-summary" aria-label="At a glance">
+            <div className={`calendar-next${nextUp ? ` is-${nextUp.type}` : ''}`}>
+              <span className="calendar-next-kicker">Next up</span>
+              {nextUp ? (
+                <>
+                  <strong>{nextUp.title}</strong>
+                  <span className="calendar-next-when">
+                    {describeDaysUntil(getNairobiDateKey(nextUp.startsAt), todayKey)} · {formatShortDate(getNairobiDateKey(nextUp.startsAt))} · {formatTime(nextUp.startsAt)}
+                  </span>
+                  <button type="button" className="calendar-next-button" onClick={() => goToDay(getNairobiDateKey(nextUp.startsAt))}>
+                    View day <ArrowRight size={15} aria-hidden="true" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <strong>Nothing booked yet</strong>
+                  <span className="calendar-next-when">Join an activity or book a counsellor and it will show up here.</span>
+                  <Link className="calendar-next-button" to="/activities">Browse activities <ArrowRight size={15} aria-hidden="true" /></Link>
+                </>
+              )}
+            </div>
+            <dl className="calendar-stats">
+              <div><dt><i className="calendar-dot dot-session" /> Appointments</dt><dd>{monthCounts.session}</dd></div>
+              <div><dt><i className="calendar-dot dot-activity" /> Activities</dt><dd>{monthCounts.activity}</dd></div>
+              <div><dt><i className="calendar-dot dot-mood" /> Check-ins</dt><dd>{monthCounts.mood}</dd></div>
+              <p className="calendar-stats-note">in {monthLabel}</p>
+            </dl>
+          </section>
+        )}
 
         <div className="calendar-layout">
           <section className="calendar-month panel" aria-label="Monthly calendar">
@@ -211,7 +268,7 @@ export default function CalendarPage() {
                 <span>East Africa Time</span>
               </div>
               <div className="calendar-controls">
-                <button className="button button-secondary calendar-today-button" type="button" onClick={showToday}>Today</button>
+                <button className="button button-secondary calendar-today-button" type="button" onClick={showToday} disabled={selectedKey === todayKey && dayKey(displayMonth).slice(0, 7) === todayKey.slice(0, 7)}>Today</button>
                 <button className="icon-button" type="button" aria-label="Previous month" onClick={() => shiftMonth(-1)}><ChevronLeft size={19} /></button>
                 <button className="icon-button" type="button" aria-label="Next month" onClick={() => shiftMonth(1)}><ChevronRight size={19} /></button>
               </div>
@@ -271,18 +328,42 @@ export default function CalendarPage() {
                   </div>
                 )}
                 {selectedItems.length === 0 ? (
+                  <>
                   <div className="calendar-empty-day">
                     <CalendarDays size={26} />
-                    <p>No plans or check-ins for this day.</p>
+                    <p>{selectedKey === todayKey ? 'Nothing planned for today.' : 'No plans or check-ins for this day.'}</p>
+                    <div className="calendar-empty-links">
+                      <Link to="/activities">Find an activity</Link>
+                      <Link to="/support">Find support</Link>
+                    </div>
                   </div>
+                  {upcoming.length > 0 && (
+                    <div className="calendar-coming">
+                      <h3>Coming up</h3>
+                      <ul>
+                        {upcoming.slice(0, 3).map((item) => {
+                          const key = getNairobiDateKey(item.startsAt);
+                          return (
+                            <li key={item.id}>
+                              <button type="button" onClick={() => goToDay(key)}>
+                                <i className={`calendar-dot dot-${item.type}`} aria-hidden="true" />
+                                <span><strong>{item.title}</strong><small>{formatShortDate(key)} · {formatTime(item.startsAt)}</small></span>
+                                <ChevronRight size={16} aria-hidden="true" />
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                  </>
                 ) : (
                   <ul className="calendar-event-list">
                     {selectedItems.map((event) => (
                       <li className={`calendar-event event-${event.type}`} key={event.id}>
-                        <span className="calendar-event-marker" aria-hidden="true" />
+                        <time className="calendar-event-clock" dateTime={event.startsAt}>{formatTime(event.startsAt)}</time>
                         <div className="calendar-event-copy">
                           <strong>{event.title}</strong>
-                          <span className="calendar-event-time"><Clock3 size={14} />{formatTime(event.startsAt)}</span>
                           {event.type === 'session' && <span className="calendar-event-detail">Counselling appointment · {event.status === 'confirmed' ? 'Confirmed' : 'Awaiting confirmation'}</span>}
                           {event.type === 'activity' && <span className="calendar-event-detail">Registered activity</span>}
                           {event.type === 'mood' && <span className="calendar-event-detail">You felt {moodLabel(event.score).toLowerCase()}</span>}

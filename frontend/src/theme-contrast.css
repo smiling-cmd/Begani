@@ -27,7 +27,7 @@
   --terracotta-text: #f2a891;
   --terracotta-solid: #b4563e;
   --eyebrow-ink: #6fe3d0;
-  --on-brand-green: #04302a;    /* --brand-green is bright teal at night: use dark text */
+  --on-brand-green: #171d19;    /* --brand-green is bright teal at night: use dark text */
 }
 
 /* ---- Small labels: bigger and darker (light) / brighter (night) ---------- */
@@ -47,14 +47,14 @@
    Primary: light mode = white on deep green, night mode = dark on bright teal. */
 :root[data-theme='dark'] .button:not(.button-secondary):not(.button-light):not(.button-warning):not(.button-danger),
 :root[data-theme='dark'] .btn-primary {
-  color: #04302a;
+  color: #171d19;
   border-color: #25c5ae;
   background: linear-gradient(180deg, #46dcc6, #25c5ae);
 }
 :root .button:not(.button-secondary):not(.button-light):not(.button-warning):not(.button-danger):hover:not(:disabled),
 :root .btn-primary:hover:not(:disabled) { color: #fff; background: #0f7a6c; }
 :root[data-theme='dark'] .button:not(.button-secondary):not(.button-light):not(.button-warning):not(.button-danger):hover:not(:disabled),
-:root[data-theme='dark'] .btn-primary:hover:not(:disabled) { color: #04302a; background: linear-gradient(180deg, #7aeedc, #46dcc6); }
+:root[data-theme='dark'] .btn-primary:hover:not(:disabled) { color: #171d19; background: linear-gradient(180deg, #7aeedc, #46dcc6); }
 
 /* Warning / danger / urgent: white text on deep terracotta in both themes. */
 :root .button-warning,
@@ -87,8 +87,8 @@
 :root[data-theme='dark'] .home-mood-submit:disabled,
 :root[data-theme='dark'] .tua-composer > button:disabled {
   color: #b7c9be !important;
-  border-color: #3a574f !important;
-  background: #27403a !important;
+  border-color: #415047 !important;
+  background: #2e3932 !important;
 }
 
 /* ---- Placeholders ---------------------------------------------------------- */
@@ -129,7 +129,7 @@
 :root[data-theme='dark'] .admin-form-field textarea {
   color: var(--ink);
   border-color: var(--line);
-  background: #142a24;
+  background: #1c221e;
 }
 :root[data-theme='dark'] .settings-form input:disabled { color: var(--muted); background: var(--surface-subtle); }
 
@@ -146,12 +146,12 @@
 /* Calendar */
 :root[data-theme='dark'] .calendar-month,
 :root[data-theme='dark'] .calendar-agenda { background: var(--card); }
-:root[data-theme='dark'] .calendar-days { background: #12261f; }
+:root[data-theme='dark'] .calendar-days { background: #191f1b; }
 :root[data-theme='dark'] .calendar-day { color: var(--ink); background: var(--surface-raised); }
 :root[data-theme='dark'] .calendar-day:hover { background: var(--surface-subtle); }
-:root[data-theme='dark'] .calendar-day.is-outside { color: #8da398; background: rgba(28, 53, 45, .45); }
-:root[data-theme='dark'] .calendar-day.is-today { background: #1d4a3f; }
-:root[data-theme='dark'] .calendar-day.is-selected { background: #20594b; }
+:root[data-theme='dark'] .calendar-day.is-outside { color: #8da398; background: rgba(36, 45, 40, .45); }
+:root[data-theme='dark'] .calendar-day.is-today { background: #2e3932; }
+:root[data-theme='dark'] .calendar-day.is-selected { background: #36433b; }
 :root[data-theme='dark'] .calendar-day.is-selected .calendar-day-number { color: var(--ink); }
 :root[data-theme='dark'] .calendar-event { border-color: var(--line); background: var(--surface-raised); }
 

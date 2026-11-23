@@ -115,4 +115,10 @@
     padding-top: 76px;
     padding-bottom: calc(90px + env(safe-area-inset-bottom));
   }
+
+  /* TUA is not a .page-content page: keep its heading below the top bar and the composer above the bottom nav */
+  .tua-page { height: 100dvh; }
+  .tua-page .tua-main {
+    padding: 76px 16px calc(var(--mobile-nav-height, 64px) + 12px + env(safe-area-inset-bottom));
+  }
 }

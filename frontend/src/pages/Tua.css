@@ -1,0 +1,77 @@
+/* TUA chat: header, empty state, bubbles, typing dots, composer. */
+.tua-page .tua-main { padding: clamp(16px, 2.5vw, 32px); }
+.tua-page .tua-chat-panel { padding: 0; border-radius: 24px; }
+
+.tua-header { display: flex; align-items: center; gap: 14px; flex: 0 0 auto; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+.tua-header-avatar { width: 46px; height: 46px; flex: none; border-radius: 50%; object-fit: cover; background: var(--tint); }
+.tua-header-text { min-width: 0; }
+.tua-header-text h1 { margin: 0; color: var(--heading); font-size: 1.25rem; line-height: 1.1; }
+.tua-header-text p { display: flex; align-items: center; gap: 6px; margin: 3px 0 0; color: var(--muted); font-size: .82rem; }
+.tua-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #3f9b6e; box-shadow: 0 0 0 3px rgba(63, 155, 110, .18); }
+.tua-toolbar { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-left: auto; }
+.tua-tool { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--heading); background: var(--surface-subtle); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }
+.tua-tool:hover:not(:disabled) { background: var(--tint); }
+.tua-tool:disabled { opacity: .5; cursor: not-allowed; }
+.tua-tool.is-saved { background: var(--tint); }
+.tua-tool-urgent { color: #991b1b; border-color: #f2b8b8; background: #fff5f5; }
+.tua-tool-urgent:hover:not(:disabled), .tua-tool-urgent[aria-expanded='true'] { background: #fee2e2; }
+.tua-tool:focus-visible, .tua-suggestion-grid button:focus-visible { outline: 3px solid var(--forest, #234a3a); outline-offset: 2px; }
+
+.tua-new-chat-error { margin: 10px 20px 0; }
+.tua-urgent-panel { margin: 12px 20px 0; max-width: none; }
+.tua-page .tua-past { inset: 0; top: 0; padding: 18px 20px; }
+
+.tua-empty { display: flex; flex: 1; min-height: 0; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px 20px; overflow-y: auto; text-align: center; }
+.tua-empty-avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: var(--tint); }
+.tua-empty h2 { margin: 10px 0 0; color: var(--heading); font-family: var(--font-heading); font-size: clamp(1.4rem, 3vw, 1.9rem); }
+.tua-empty p { max-width: 460px; margin: 0; color: var(--muted); line-height: 1.55; }
+.tua-suggestion-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: min(100%, 600px); margin-top: 18px; }
+.tua-suggestion-grid button { display: grid; gap: 2px; padding: 13px 15px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface-subtle); color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.tua-suggestion-grid button:hover:not(:disabled) { transform: translateY(-2px); background: var(--tint); }
+.tua-suggestion-grid button:disabled { opacity: .55; cursor: not-allowed; }
+.tua-suggestion-grid strong { color: var(--heading); font-size: .92rem; }
+.tua-suggestion-grid small { color: var(--muted); font-size: .78rem; line-height: 1.35; }
+.tua-suggestion-grid button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+.tua-page .tua-message-list { padding: 20px 24px 12px; gap: 6px; }
+.tua-page .tua-message-row { gap: 6px; }
+.tua-page .tua-message-row.is-user { margin-top: 10px; }
+.tua-page .tua-message-bubble { max-width: min(78%, 640px); padding: 11px 15px; border-radius: 18px 18px 18px 6px; font-size: .95rem; line-height: 1.55; }
+.tua-page .tua-message-bubble.is-user { border-radius: 18px 18px 6px 18px; }
+.tua-chat-avatar { width: 34px; height: 34px; flex: none; border-radius: 50%; object-fit: cover; }
+.tua-chat-avatar-spacer { width: 34px; flex: none; }
+.tua-page .tua-book-link, .tua-page .tua-message-row .tua-crisis-actions { margin-left: 44px; }
+
+.tua-typing-bubble { display: inline-flex; align-items: center; gap: 5px; padding: 14px 16px !important; }
+.tua-typing-bubble span { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); opacity: .45; animation: tua-dot 1.2s infinite ease-in-out; }
+.tua-typing-bubble span:nth-child(2) { animation-delay: .15s; }
+.tua-typing-bubble span:nth-child(3) { animation-delay: .3s; }
+@keyframes tua-dot { 0%, 60%, 100% { transform: translateY(0); opacity: .35; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+.tua-page .tua-composer { display: flex; align-items: flex-end; gap: 10px; flex: 0 0 auto; margin: 4px 16px 0; padding: 8px 8px 8px 16px; border: 1px solid var(--line); border-radius: 24px; background: var(--surface-subtle); }
+.tua-page .tua-composer:focus-within { border-color: var(--forest, #234a3a); box-shadow: 0 0 0 3px rgba(35, 74, 58, .12); }
+.tua-page .tua-composer textarea { flex: 1; min-width: 0; max-height: 140px; padding: 9px 0; border: 0; outline: 0; resize: none; background: transparent; color: var(--ink); font: inherit; font-size: .95rem; line-height: 1.45; }
+.tua-page .tua-composer button { display: grid; flex: none; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 50%; color: #fff; background: var(--forest, #234a3a); cursor: pointer; }
+.tua-page .tua-composer button:disabled { opacity: .4; cursor: not-allowed; }
+.tua-page .tua-disclaimer { margin: 0; padding: 8px 20px 12px; color: var(--muted); font-size: .72rem; line-height: 1.4; text-align: center; }
+
+:root[data-theme='dark'] .tua-tool-urgent { color: #f3b4b4; border-color: #6b2b2b; background: #3a2020; }
+:root[data-theme='dark'] .tua-status-dot { box-shadow: 0 0 0 3px rgba(63, 155, 110, .3); }
+
+@media (max-width: 900px) {
+  .tua-page .tua-main { padding: 76px 12px calc(var(--mobile-nav-height, 64px) + 12px + env(safe-area-inset-bottom)); }
+  .tua-page .tua-chat-panel { border-radius: 20px; }
+  .tua-header { padding: 12px 14px; gap: 10px; }
+  .tua-header-avatar { width: 40px; height: 40px; }
+  .tua-tool span { display: none; }
+  .tua-tool { width: 38px; min-height: 38px; padding: 0; justify-content: center; }
+  .tua-toolbar { flex-wrap: nowrap; gap: 6px; }
+  .tua-header-text p .tua-not-therapist { display: none; }
+  .tua-page .tua-message-list { padding: 14px 14px 8px; }
+  .tua-page .tua-message-bubble { max-width: 84%; }
+  .tua-page .tua-composer { margin: 4px 10px 0; }
+  .tua-suggestion-grid { grid-template-columns: 1fr; }
+  .tua-suggestion-grid small { display: none; }
+  .tua-empty-avatar { width: 76px; height: 76px; }
+}
+@media (prefers-reduced-motion: reduce) { .tua-typing-bubble span { animation: none; opacity: .7; } .tua-suggestion-grid button { transition: none; } }

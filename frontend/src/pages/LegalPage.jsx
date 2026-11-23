@@ -19,7 +19,7 @@ const PRIVACY = [
   ['How we use it', 'To run your account, show your own wellbeing history, connect you with counsellors, and keep the platform safe. We do not sell your data or use it for advertising.'],
   ['Who can see what', 'Mood check-ins and journal entries are private to your account. TUA chats are visible only to you unless you ask for a counsellor to join. A counsellor sees the messages and details you share with them. A phone number is shared only if you agree when you request urgent support.'],
   ['TUA chats', 'TUA chats you do not save are deleted after 90 days. Chats you save stay until you remove them.'],
-  ['Messages are not end-to-end encrypted', 'Messages are stored by BEGANI so you can read them later, and they are not end-to-end encrypted. Do not share passwords or card details in chat.'],
+  ['How we protect it', 'Chat messages, TUA chats, journal entries, urgent-request notes and counsellor reports are encrypted in our database, and traffic between your device and BEGANI uses HTTPS. They are not end-to-end encrypted: BEGANI can decrypt them to show them back to you, and TUA needs to read your messages to reply. Do not share passwords or card details in chat.'],
   ['Your rights', 'Under the Kenya Data Protection Act, 2019 you can ask to see, correct or delete your personal data. Contact the BEGANI team through the details on your university wellbeing page.'],
   ['Safety exception', 'If we believe someone is at serious risk of harm, a counsellor may need to involve emergency help. We will be as open with you about this as we can.'],
 ];

@@ -1,9 +1,11 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import api from '../api';
-import { ArrowLeft, RefreshCw, Send } from 'lucide-react';
+import { ArrowLeft, Lock, RefreshCw, Send } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
+import { dayKeyOf, formatClock, formatDayLabel, initials } from './chatFormat';
+import './Chat.css';
 
 function getMessage(error, fallback) {
   const detail = error.response?.data?.error || error.response?.data?.detail;
@@ -20,6 +22,7 @@ export default function ChatRoom() {
   const [loadError, setLoadError] = useState('');
   const [sendError, setSendError] = useState('');
   const endOfChatRef = useRef(null);
+  const inputRef = useRef(null);
   const requestIdRef = useRef(0);
   const fetchThreadRef = useRef(null);
 
@@ -50,6 +53,21 @@ export default function ChatRoom() {
     endOfChatRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [lastMessageId]);
 
+  // The message box grows with what is typed, up to a few lines.
+  useLayoutEffect(() => {
+    const box = inputRef.current;
+    if (!box) return;
+    box.style.height = 'auto';
+    box.style.height = `${Math.min(box.scrollHeight, 140)}px`;
+  }, [input]);
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
+  };
+
   const handleSend = async (event) => {
     event.preventDefault();
     const body = input.trim();
@@ -76,10 +94,13 @@ export default function ChatRoom() {
     <div className="app-shell">
       <Sidebar />
       <main className="page-content chat-page-content">
-        <header className="page-heading chat-page-heading">
-          <Link className="text-button" to={backTo}><ArrowLeft size={17} /> Back</Link>
-          <h1>Chat with {otherName || 'your counsellor'}</h1>
-          <p>Messages are visible to you and the other participant in this conversation.</p>
+        <header className="chat-room-header">
+          <Link className="chat-back" to={backTo} aria-label="Back to chats"><ArrowLeft size={19} /></Link>
+          <span className="chat-avatar" aria-hidden="true">{initials(otherName)}</span>
+          <div className="chat-room-title">
+            <h1>{otherName || 'Your counsellor'}</h1>
+            <p><Lock size={12} aria-hidden="true" /> Only you and {user?.role === 'student' ? 'your counsellor' : 'the student'} can read this. <Link to="/privacy" target="_blank" rel="noopener">How we protect it</Link></p>
+          </div>
         </header>
 
         {location.state?.priorityRequestSent && (
@@ -99,21 +120,23 @@ export default function ChatRoom() {
           <div className="panel chat-state" role="status">Loading conversation…</div>
         ) : (
           <section className="panel chat-room-panel" aria-label={`Conversation with ${otherName || 'counsellor'}`}>
-            <p className="chat-privacy-note">Messages are stored by Begani and are not end-to-end encrypted.</p>
             <div className="chat-feed" aria-live="polite" aria-relevant="additions">
               {currentThread.messages.length === 0 ? (
                 <p className="chat-empty">Start the conversation with a message.</p>
-              ) : currentThread.messages.map((message) => {
+              ) : currentThread.messages.map((message, index, all) => {
                 const isMine = message.sender_role === user?.role;
+                const newDay = index === 0 || dayKeyOf(all[index - 1].sent_at) !== dayKeyOf(message.sent_at);
+                const sameSender = !newDay && all[index - 1].sender_role === message.sender_role;
                 return (
-                  <div className={`chat-message-row${isMine ? ' mine' : ''}`} key={message.id}>
-                    <div className={`chat-message${isMine ? ' mine' : ''}`}>
-                      <p>{message.body}</p>
-                      <time dateTime={message.sent_at}>
-                        {new Date(message.sent_at).toLocaleString()}
-                      </time>
+                  <Fragment key={message.id}>
+                    {newDay && <div className="chat-day-divider"><span>{formatDayLabel(message.sent_at)}</span></div>}
+                    <div className={`chat-message-row${isMine ? ' mine' : ''}${sameSender ? ' grouped' : ''}`}>
+                      <div className={`chat-message${isMine ? ' mine' : ''}`}>
+                        <p>{message.body}</p>
+                        <time dateTime={message.sent_at}>{formatClock(message.sent_at)}</time>
+                      </div>
                     </div>
-                  </div>
+                  </Fragment>
                 );
               })}
               <div ref={endOfChatRef} />
@@ -124,15 +147,17 @@ export default function ChatRoom() {
               <label className="sr-only" htmlFor="chat-message">Message</label>
               <textarea
                 id="chat-message"
+                ref={inputRef}
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Write a message…"
                 maxLength={5000}
-                rows={2}
+                rows={1}
                 disabled={sending}
               />
-              <button type="submit" className="button" disabled={sending || !input.trim()}>
-                <Send size={17} /> {sending ? 'Sending…' : 'Send'}
+              <button type="submit" className="chat-send" disabled={sending || !input.trim()} aria-label={sending ? 'Sending' : 'Send message'}>
+                <Send size={18} />
               </button>
             </form>
           </section>

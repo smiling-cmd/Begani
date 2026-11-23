@@ -1,0 +1,257 @@
+/* ==========================================================================
+   Night mode (imported last).
+   Surfaces are neutral, text is soft off-white, and colour is used sparingly:
+   teal for the main buttons, the active nav indicator and icons.
+
+   Four palettes are included. The default is warm charcoal with a forest undertone. To switch, set
+   data-night on <html> in index.html:  <html lang="en" data-night="sand">
+   Options: (none = warm charcoal), slate, graphite, sand.
+   ========================================================================== */
+
+/* ---- Default: warm charcoal with a forest undertone ----------------------- */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #171918;
+  --card: #222623;
+  --surface-raised: #2b302c;
+  --surface-subtle: #2f3430;
+  --surface-journal: #2b302c;
+  --line: #343a35;
+  --line-subtle: #2c312d;
+  --line-soft: #2c312d;
+  --heading: #f3f0e9;
+  --ink: #ece8e0;
+  --muted: #b0b5ae;
+  --ink-journal: #e3dfd6;
+  --tint: #26302b;
+  --sage: #a5b9a4;
+  --sage-soft: #29302b;
+  --hero-start: #243029;
+  --hero-end: #1d2420;
+  --surface-tag: #2c332e;
+  --ink-tag: #d3dccf;
+  --surface-success: #223127;
+  --ink-success: #aee3c0;
+  --surface-warning: #373022;
+  --ink-warning: #f0d99b;
+  --surface-paid: #3a3120;
+  --ink-paid: #f0d58f;
+  --terra-soft: #382b28;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 14px 30px -18px rgba(0, 0, 0, .7);
+  --shadow-soft: 0 18px 40px -26px rgba(0, 0, 0, .75);
+  --night-overlay: 12, 15, 13;
+  --chip-on-bg: #e9e4d8;
+  --chip-on-ink: #1a1d1b;
+  --nav-active: rgba(165, 185, 164, .14);
+  --sidebar-top: #151816;
+  --sidebar-bottom: #101310;
+  --sidebar-line: #232824;
+  --banner-from: #2a3029;
+  --banner-to: #222723;
+}
+
+/* ---- Slate: cool blue-grey ------------------------------------------------ */
+:root[data-theme='dark'][data-night='slate'] {
+  --bg: #14171c;
+  --card: #1c2027;
+  --surface-raised: #232831;
+  --surface-subtle: #2b313b;
+  --surface-journal: #232831;
+  --line: #333a46;
+  --line-subtle: #292f39;
+  --line-soft: #292f39;
+  --heading: #f3f5f8;
+  --ink: #e7ebf0;
+  --muted: #a8b1bd;
+  --ink-journal: #dde3ea;
+  --tint: #232d38;
+  --sage-soft: #232831;
+  --hero-start: #222833;
+  --hero-end: #1b1f27;
+  --surface-tag: #2a303a;
+  --ink-tag: #ccd5df;
+  --surface-success: #1e2e2a;
+  --ink-success: #a8e4bd;
+  --surface-warning: #352f22;
+  --ink-warning: #f0d99b;
+  --surface-paid: #382f1f;
+  --ink-paid: #f0d58f;
+  --terra-soft: #35292b;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 14px 30px -18px rgba(0, 0, 0, .7);
+  --shadow-soft: 0 18px 40px -26px rgba(0, 0, 0, .75);
+  --night-overlay: 8, 11, 16;
+  --chip-on-bg: #e3e9f0;
+  --chip-on-ink: #14181d;
+  --nav-active: rgba(255, 255, 255, .09);
+  --sidebar-top: #191d23;
+  --sidebar-bottom: #12151a;
+  --sidebar-line: #262b33;
+  --banner-from: #232a36;
+  --banner-to: #1b2029;
+}
+
+/* ---- Graphite: pure neutral grey ----------------------------------------- */
+:root[data-theme='dark'][data-night='graphite'] {
+  --bg: #141414;
+  --card: #1d1d1e;
+  --surface-raised: #252526;
+  --surface-subtle: #2c2c2e;
+  --surface-journal: #252526;
+  --line: #353537;
+  --line-subtle: #2b2b2d;
+  --line-soft: #2b2b2d;
+  --heading: #f5f5f6;
+  --ink: #e8e8ea;
+  --muted: #a9a9ae;
+  --ink-journal: #dedee0;
+  --tint: #26282a;
+  --sage-soft: #252526;
+  --hero-start: #242425;
+  --hero-end: #1c1c1d;
+  --surface-tag: #2c2c2e;
+  --ink-tag: #d0d0d3;
+  --night-overlay: 10, 10, 10;
+  --chip-on-bg: #ececee;
+  --chip-on-ink: #151516;
+  --sidebar-top: #1a1a1b;
+  --sidebar-bottom: #121212;
+  --sidebar-line: #282829;
+  --banner-from: #26262a;
+  --banner-to: #1d1d20;
+}
+
+/* ---- Warm: soft brown-black with sand highlights ------------------------- */
+:root[data-theme='dark'][data-night='sand'] {
+  --bg: #181513;
+  --card: #211d1a;
+  --surface-raised: #292420;
+  --surface-subtle: #322c27;
+  --surface-journal: #292420;
+  --line: #3d362f;
+  --line-subtle: #302b26;
+  --line-soft: #302b26;
+  --heading: #f7f1e9;
+  --ink: #ede6dc;
+  --muted: #b5ab9f;
+  --ink-journal: #e4dccf;
+  --tint: #2c2621;
+  --sage-soft: #292420;
+  --hero-start: #2a2420;
+  --hero-end: #211d1a;
+  --surface-tag: #312b26;
+  --ink-tag: #d9cfc1;
+  --night-overlay: 16, 12, 9;
+  --chip-on-bg: #eadfcd;
+  --chip-on-ink: #1d1813;
+  --sidebar-top: #1d1916;
+  --sidebar-bottom: #151210;
+  --sidebar-line: #2b2622;
+  --banner-from: #2c2420;
+  --banner-to: #221c19;
+}
+
+/* ---- Shared night rules (they read the tokens above) --------------------- */
+:root[data-theme='dark'] body { background: var(--bg); }
+
+:root[data-theme='dark'] .panel,
+:root[data-theme='dark'] .card,
+:root[data-theme='dark'] .settings-card,
+:root[data-theme='dark'] .settings-appearance,
+:root[data-theme='dark'] .settings-logout,
+:root[data-theme='dark'] .admin-content-panel,
+:root[data-theme='dark'] .therapist-dashboard-card,
+:root[data-theme='dark'] .therapist-info-card,
+:root[data-theme='dark'] .calendar-month,
+:root[data-theme='dark'] .calendar-agenda,
+:root[data-theme='dark'] .journal-panel {
+  border-color: var(--line);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+:root[data-theme='dark'] .home-community-card,
+:root[data-theme='dark'] .activity-intro,
+:root[data-theme='dark'] .resource-hero,
+:root[data-theme='dark'] .home-focus-film { background: linear-gradient(125deg, var(--hero-start), var(--hero-end)); }
+:root[data-theme='dark'] .home-tua-card { background: linear-gradient(135deg, var(--hero-start), var(--hero-end)); }
+:root[data-theme='dark'] .home-community-slideshow { background: var(--card); }
+:root[data-theme='dark'] .home-page-content::before { background: none; }
+:root[data-theme='dark'] .home-page-content { background-image: none; }
+
+/* Sidebar */
+:root[data-theme='dark'] .sidebar {
+  background: linear-gradient(180deg, var(--sidebar-top) 0%, var(--sidebar-bottom) 100%);
+  border-right: 1px solid var(--sidebar-line);
+}
+:root[data-theme='dark'] .sidebar-link.is-active { background: var(--nav-active); }
+:root[data-theme='dark'] .sidebar-user { background: rgba(255, 255, 255, .05); }
+:root[data-theme='dark'] .sidebar-user:hover { background: rgba(255, 255, 255, .09); }
+
+/* Late-night banner */
+:root[data-theme='dark'] .card.late-night-prompt { border-color: var(--line); background: linear-gradient(135deg, var(--banner-from), var(--banner-to)); }
+
+/* Selected filter chips: light neutral instead of green */
+:root[data-theme='dark'] .ax-chip.is-on,
+:root[data-theme='dark'] .fs-chip.is-on,
+:root[data-theme='dark'] .filter-chip.selected { color: var(--chip-on-ink); border-color: var(--chip-on-bg); background: var(--chip-on-bg); }
+:root[data-theme='dark'] .ax-chip.is-on .fs-chip-count,
+:root[data-theme='dark'] .fs-chip.is-on .fs-chip-count { color: var(--chip-on-ink); background: rgba(0, 0, 0, .12); }
+
+/* Photo heroes: neutral shade over the picture instead of forest green */
+:root[data-theme='dark'] .ax-hero,
+:root[data-theme='dark'] .fs-hero,
+:root[data-theme='dark'] .rx-hero { background: var(--card); }
+:root[data-theme='dark'] .ax-hero::before,
+:root[data-theme='dark'] .fs-hero::before,
+:root[data-theme='dark'] .rx-hero::before {
+  background: linear-gradient(100deg, rgba(var(--night-overlay), .9) 0%, rgba(var(--night-overlay), .62) 50%, rgba(var(--night-overlay), .12) 100%);
+}
+@media (max-width: 760px) {
+  :root[data-theme='dark'] .ax-hero::before,
+  :root[data-theme='dark'] .fs-hero::before,
+  :root[data-theme='dark'] .rx-hero::before {
+    background: linear-gradient(0deg, rgba(var(--night-overlay), .93) 20%, rgba(var(--night-overlay), .35) 100%);
+  }
+}
+
+/* Activity art: deep dusk tint of each type's own colour, with a brighter icon */
+:root[data-theme='dark'] .ax-art {
+  filter: none;
+  background: linear-gradient(145deg, color-mix(in srgb, currentColor 38%, var(--card)), color-mix(in srgb, currentColor 14%, var(--bg)));
+}
+:root[data-theme='dark'] .ax-art > svg { color: color-mix(in srgb, currentColor 40%, #fff); }
+:root[data-theme='dark'] .ax-art-orb { background: rgba(255, 255, 255, .16); }
+:root[data-theme='dark'] .ax-art-hill { background: rgba(255, 255, 255, .06); }
+
+/* ---- Botanical touches: keep a little sage and forest in selected places ---- */
+:root[data-theme='dark'] .ax-facts svg,
+:root[data-theme='dark'] .fs-facts svg,
+:root[data-theme='dark'] .ax-kind svg { color: var(--sage); }
+:root[data-theme='dark'] .fs-step-icon { color: var(--sage); background: rgba(165, 185, 164, .12); }
+:root[data-theme='dark'] .fs-topic,
+:root[data-theme='dark'] .ax-badge.is-free { color: #d3dccf; background: rgba(165, 185, 164, .14); }
+:root[data-theme='dark'] .fs-price.is-free { color: var(--ink-success); background: var(--surface-success); }
+:root[data-theme='dark'] .eyebrow, :root[data-theme='dark'] .ax-eyebrow, :root[data-theme='dark'] .fs-eyebrow { color: var(--sage); }
+:root[data-theme='dark'] .ax-hero .ax-eyebrow, :root[data-theme='dark'] .fs-hero .fs-eyebrow { color: #cddccb; }
+:root[data-theme='dark'] .sidebar-group-label { color: #9aa59a; }
+
+/* Softer borders: warm grey, and cards lean on surface shade rather than outlines */
+:root[data-theme='dark'] .panel, :root[data-theme='dark'] .card,
+:root[data-theme='dark'] .ax-card, :root[data-theme='dark'] .fs-card,
+:root[data-theme='dark'] .ax-plans, :root[data-theme='dark'] .fs-steps li,
+:root[data-theme='dark'] .ax-featured, :root[data-theme='dark'] .fs-urgent { border-color: rgba(243, 240, 233, .07); }
+
+/* TUA gets room: a deep forest card, a soft teal glow, and a larger mascot */
+:root[data-theme='dark'] .home-tua-card { background: linear-gradient(135deg, #243329 0%, #1c2420 70%); border-color: rgba(165, 185, 164, .16); }
+:root[data-theme='dark'] .home-tua-image-frame { position: relative; max-width: 260px; height: 270px; overflow: visible; }
+:root[data-theme='dark'] .home-tua-image-frame::before {
+  content: '';
+  position: absolute;
+  inset: 4% -6% 0;
+  z-index: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(32, 201, 179, .28), rgba(32, 201, 179, .08) 55%, transparent 75%);
+}
+:root[data-theme='dark'] .home-tua-image-frame img { position: relative; z-index: 1; filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .45)); }
+:root[data-theme='dark'] .home-tua-cta { color: #04302a; background: #20c9b3; }
+:root[data-theme='dark'] .home-tua-cta:hover { background: #3fe0cb; }

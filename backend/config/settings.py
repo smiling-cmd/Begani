@@ -26,12 +26,18 @@ def env_list(name, default=()):
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Used by encrypted fields if/when they are enabled. Keep it private and stable.
+# Salt for the encrypted fields (chat messages, TUA chats, journals, urgent-request notes, counsellor reports).
+# The encryption key is derived from DJANGO_SECRET_KEY plus this value. Set it once, keep it private, back it up
+# somewhere other than the database, and never change it: data encrypted with the old value could not be read again.
 SALT_KEY = os.environ.get("ENCRYPTION_KEY", "")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env_bool("DJANGO_DEBUG", False)
+
+if not DEBUG and not SALT_KEY:
+    import warnings
+    warnings.warn("ENCRYPTION_KEY is not set. Private text is still encrypted, but set it before real data is stored.")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")

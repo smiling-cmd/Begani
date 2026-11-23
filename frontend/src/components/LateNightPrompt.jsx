@@ -9,13 +9,12 @@ export default function LateNightPrompt() {
 
   return (
     <section
-      className="card"
+      className="card late-night-prompt"
       style={{
         display: 'flex',
         gap: '1rem',
         alignItems: 'flex-start',
         marginBottom: '1.5rem',
-        background: 'linear-gradient(135deg, #1A4331 0%, #245748 100%)',
         color: 'white',
         position: 'relative',
         borderRadius: '20px',

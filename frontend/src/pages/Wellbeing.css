@@ -980,7 +980,7 @@
 
 :root[data-theme='dark'] .wellbeing-checkins,
 :root[data-theme='dark'] .mood-insight-card {
-  background: linear-gradient(135deg, #1a3c32, #1b3029);
+  background: linear-gradient(135deg, #272f2a, #222925);
 }
 
 :root[data-theme='dark'] .week-bar-track {
@@ -1120,7 +1120,7 @@
 }
 
 :root[data-theme='dark'] .journal-panel {
-  background: linear-gradient(125deg, #1b3029, #1a3c32);
+  background: linear-gradient(125deg, #222925, #272f2a);
 }
 
 :root[data-theme='dark'] .journal-entry {

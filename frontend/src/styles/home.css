@@ -91,3 +91,6 @@
   border-radius: 24px;
   background: rgba(248, 237, 229, .84);
 }
+
+/* Late-night banner: forest green by day (its colours used to be inline) */
+.card.late-night-prompt { background: linear-gradient(135deg, #1a4331 0%, #245748 100%); color: #fff; }

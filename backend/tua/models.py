@@ -2,6 +2,8 @@ import uuid
 from django.db import models
 from django.utils import timezone
 
+from config.encrypted import EncryptedTextField
+
 
 class TuaConversation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -25,7 +27,7 @@ class TuaMessage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     conversation = models.ForeignKey(TuaConversation, on_delete=models.CASCADE, related_name="messages")
     role = models.CharField(max_length=20, choices=Role.choices)
-    content = models.TextField(help_text="Stored in Begani's database; not end-to-end encrypted")
+    content = EncryptedTextField(help_text="Encrypted at rest in Begani's database; not end-to-end encrypted")
     model_name = models.CharField(max_length=100, blank=True)
     prompt_version = models.CharField(max_length=50, blank=True)
     safety_label = models.CharField(max_length=50, blank=True, help_text="e.g., distress, crisis")
@@ -103,7 +105,7 @@ class PriorityRequest(models.Model):
     # Consent and contact
     consent_at = models.DateTimeField(help_text="Required. When the student tapped the button.")
     phone_consent = models.BooleanField(default=False, help_text="Only place a phone number can be shared")
-    student_note = models.TextField(blank=True)
+    student_note = EncryptedTextField(blank=True)
     
     created_at = models.DateTimeField(default=timezone.now)
     respond_by = models.DateTimeField(help_text="created_at + 15 minutes")

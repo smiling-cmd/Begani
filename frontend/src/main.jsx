@@ -4,6 +4,7 @@ import './index.css'
 import './design-polish.css'
 import App from './App.jsx'
 import './theme-contrast.css'
+import './styles/dark-neutral.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

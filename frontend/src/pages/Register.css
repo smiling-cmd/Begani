@@ -21,7 +21,7 @@
 }
 
 :root[data-theme='dark'] .begani-auth-wrapper {
-  background-color: #0d1e18;
+  background-color: #131815;
   background-image:
     radial-gradient(ellipse at 15% 12%, rgba(32, 201, 179, 0.14), transparent 48%),
     radial-gradient(ellipse at 85% 88%, rgba(201, 121, 98, 0.09), transparent 42%);
@@ -194,7 +194,7 @@
 }
 
 :root[data-theme='dark'] .begani-auth-form-block {
-  background: linear-gradient(160deg, rgba(18, 48, 38, 0.92) 0%, rgba(12, 32, 26, 0.96) 100%);
+  background: linear-gradient(160deg, rgba(30, 36, 32, 0.92) 0%, rgba(20, 24, 22, 0.96) 100%);
   border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 28px 60px -20px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }

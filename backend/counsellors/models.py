@@ -1,5 +1,7 @@
 from django.db import models
 
+from config.encrypted import EncryptedTextField
+
 # Create your models here.
 import uuid
 from django.db import models
@@ -149,7 +151,7 @@ class TherapistReport(models.Model):
     therapist = models.ForeignKey(TherapistProfile, on_delete=models.CASCADE, related_name="reports")
     reporter_student = models.ForeignKey("accounts.StudentProfile", on_delete=models.CASCADE, related_name="submitted_reports")
     
-    reason = models.TextField()
+    reason = EncryptedTextField()
     created_at = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.OPEN)
     handled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)

@@ -1,5 +1,7 @@
 import uuid
 from django.db import models
+
+from config.encrypted import EncryptedTextField
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -25,7 +27,7 @@ class MoodCheckin(models.Model):
 class JournalEntry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student = models.ForeignKey("accounts.StudentProfile", on_delete=models.CASCADE, related_name="journal_entries")
-    body = models.TextField(help_text="Stored in Begani's database; private to the student")
+    body = EncryptedTextField(help_text="Encrypted at rest in Begani's database; private to the student")
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)

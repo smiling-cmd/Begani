@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import AuthProvider from './context/AuthProvider';
 import { AuthContext } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { PlayerProvider } from './components/AudioPlayer';
 
 // Pages
 import Login from './pages/Login';
@@ -50,6 +51,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
+          <PlayerProvider>
           <Routes>
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<Login />} />
@@ -85,6 +87,7 @@ function App() {
 
 
         </Routes>
+          </PlayerProvider>
       </Router>
     </AuthProvider>
     </ThemeProvider>

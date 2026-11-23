@@ -48,22 +48,22 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #111A16;
-  --card: #1B2821;
+  --bg: #131815;
+  --card: #1e2521;
   --heading: #C6DFCC;
   --ink: #E7EEE8;
   --muted: #A9B6AD;
-  --line: #33463B;
-  --line-soft: #33463b;
-  --tint: #23392C;
-  --surface-subtle: #26372D;
-  --surface-raised: #202F26;
-  --surface-success: #23392c;
+  --line: #36433b;
+  --line-soft: #36433b;
+  --tint: #29332d;
+  --surface-subtle: #2a332e;
+  --surface-raised: #242b27;
+  --surface-success: #29332d;
   --ink-success: #b7dfc1;
   --surface-warning: #3d3420;
   --ink-warning: #f3d996;
-  --hero-start: #24392D;
-  --hero-end: #1B2B22;
+  --hero-start: #2a332e;
+  --hero-end: #202722;
   --terra-soft: #3D2926;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 30px -18px rgba(0, 0, 0, .6);
 }

@@ -11,6 +11,14 @@ from .models import Activity, ActivityRegistration
 
 
 class ActivitySerializer(serializers.ModelSerializer):
+    spots_left = serializers.SerializerMethodField()
+
+    def get_spots_left(self, obj):
+        taken = obj.registrations.filter(
+            status__in=(ActivityRegistration.Status.REGISTERED, ActivityRegistration.Status.PENDING_PAYMENT)
+        ).count()
+        return max(obj.capacity - taken, 0)
+
     class Meta:
         model = Activity
         fields = (
@@ -23,6 +31,7 @@ class ActivitySerializer(serializers.ModelSerializer):
             "location_text",
             "capacity",
             "fee_kes",
+            "spots_left",
         )
 
 

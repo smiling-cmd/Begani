@@ -62,13 +62,13 @@
 .wb-support .button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 
 :root[data-theme='dark'] .wb-title-icon { background: rgba(120, 190, 150, .16); color: #a9d9bd; }
-:root[data-theme='dark'] .wb-tile { --tile-bg: #22362d; --tile-fg: #a9d9bd; }
+:root[data-theme='dark'] .wb-tile { --tile-bg: #28302b; --tile-fg: #a9d9bd; }
 :root[data-theme='dark'] .wb-tone-sage { --tile-bg: #2b3524; --tile-fg: #c5d89a; }
 :root[data-theme='dark'] .wb-tone-amber { --tile-bg: #3a3020; --tile-fg: #e8c27a; }
 :root[data-theme='dark'] .wb-tone-rose { --tile-bg: #3b2a25; --tile-fg: #eba58f; }
 :root[data-theme='dark'] .wb-tile-icon { background: rgba(255, 255, 255, .08); }
 :root[data-theme='dark'] .wb-tile:focus-visible { outline-color: var(--tile-fg); }
-:root[data-theme='dark'] .wb-support { background: #1d3a2e; }
+:root[data-theme='dark'] .wb-support { background: #27302b; }
 
 @media (max-width: 1100px) {
   .wb-tools-layout { grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); }
