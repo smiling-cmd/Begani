@@ -77,7 +77,7 @@ function App() {
           <Route path="/chat/:id" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
         </Routes>
       </Router>
     </AuthProvider>

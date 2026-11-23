@@ -72,3 +72,15 @@ export function parseBody(body) {
 
 export const ARTICLE_DISCLAIMER =
   'BEGANI provides educational wellbeing information and is not a substitute for professional diagnosis, treatment or emergency care. If you are experiencing persistent distress, consider contacting a qualified healthcare professional.';
+
+// BEGANI tools an article can point to. Matched against the wording of a paragraph.
+const FEATURE_LINKS = [
+  { test: /Study & Focus|Pomodoro/i, label: 'Open Study & Focus timer', to: '/wellbeing#study-focus' },
+  { test: /Sleep & Relaxation|rain sounds|relaxing sounds|gentle sounds/i, label: 'Open Sleep & Relaxation sounds', to: '/wellbeing#sleep-sounds' },
+  { test: /guided meditation/i, label: 'Open guided meditation', to: '/wellbeing#meditation' },
+  { test: /\bTua\b/, label: 'Talk to Tua', to: '/tua' },
+];
+
+export function featureLinksFor(text) {
+  return FEATURE_LINKS.filter((link) => link.test.test(text || ''));
+}

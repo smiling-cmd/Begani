@@ -97,7 +97,7 @@ export default function MeditationCard() {
   };
 
   return (
-    <section className="panel practice-card meditation-card" aria-labelledby="meditation-title">
+    <section id="meditation" className="panel practice-card meditation-card" aria-labelledby="meditation-title">
       <span className="wellbeing-practice-kicker">Guided practice · {minutes} minutes</span>
       <div className="section-title-row">
         <h2 id="meditation-title"><Flower2 size={21} aria-hidden="true" /> Quiet mind meditation</h2>

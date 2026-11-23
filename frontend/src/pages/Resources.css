@@ -115,3 +115,15 @@
   font-size: 12px;
   line-height: 1.5;
 }
+
+.resource-callout {
+  margin: 4px 0 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-subtle);
+}
+
+.resource-callout p { margin: 0 0 10px; }
+
+.resource-callout-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.resource-callout-links .button { min-height: 38px; padding: 0 14px; font-size: 13px; }

@@ -1,13 +1,15 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import api from '../api';
 import { Activity, ArrowRight, BookOpen, Footprints, Hand, Heart, NotebookPen, Pause, Play, Sprout, TrendingDown, TrendingUp, Users, Wind } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import BoundariesTool from '../components/wellbeing/BoundariesTool';
 import GratitudeTool from '../components/wellbeing/GratitudeTool';
 import GroundingTool from '../components/wellbeing/GroundingTool';
 import MeditationCard from '../components/wellbeing/MeditationCard';
+import StudyFocusCard from '../components/wellbeing/StudyFocusCard';
+import SleepSoundsCard from '../components/wellbeing/SleepSoundsCard';
 import MovementTool from '../components/wellbeing/MovementTool';
 import SelfCareCard from '../components/wellbeing/SelfCareCard';
 import WeekChart from '../components/wellbeing/WeekChart';
@@ -50,6 +52,14 @@ function formatDate(value) {
 }
 
 export default function Wellbeing() {
+  const { hash } = useLocation();
+
+  // Links from articles open a specific tool, e.g. /wellbeing#study-focus
+  useEffect(() => {
+    if (!hash) return;
+    document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [hash]);
+
   const { token } = useContext(AuthContext);
   const [checkins, setCheckins] = useState([]);
   const [journalEntries, setJournalEntries] = useState([]);
@@ -330,6 +340,11 @@ export default function Wellbeing() {
             </section>
 
             <MeditationCard />
+          </div>
+
+          <div className="wellbeing-grid">
+            <StudyFocusCard />
+            <SleepSoundsCard />
           </div>
 
           <section className="panel selfcare-panel" aria-labelledby="selfcare-title">

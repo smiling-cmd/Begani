@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight, Bookmark, X } from 'lucide-react';
 import {
   ACTION_LABELS,
   ARTICLE_DISCLAIMER,
+  featureLinksFor,
   TYPE_LABELS,
   formatReference,
   getEmbedUrl,
@@ -126,7 +128,20 @@ export default function ResourceViewer({ resource, saved, onToggleSaved, onClose
                 return <ul key={index}>{block.items.map((item) => <li key={item}>{item}</li>)}</ul>;
               }
               if (block.kind === 'lead') return <p key={index} className="resource-lead">{block.text}</p>;
-              return <p key={index}>{block.text}</p>;
+              const links = featureLinksFor(block.text);
+              if (links.length === 0) return <p key={index}>{block.text}</p>;
+              return (
+                <div key={index} className="resource-callout">
+                  <p>{block.text}</p>
+                  <div className="resource-callout-links">
+                    {links.map((link) => (
+                      <Link key={link.to} className="button button-secondary" to={link.to} onClick={onClose}>
+                        {link.label} <ArrowRight size={15} />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
             })}
           </div>
         )}
