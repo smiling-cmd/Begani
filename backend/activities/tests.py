@@ -102,14 +102,14 @@ class ActivityRegistrationTests(APITestCase):
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(ActivityRegistration.objects.filter(activity=self.activity, student=self.student).count(), 1)
 
-    def test_rejects_paid_activity_until_checkout_is_available(self):
+    def test_paid_activity_holds_a_place_until_payment(self):
         self.activity.fee_kes = 300
         self.activity.save(update_fields=("fee_kes",))
 
         response = self.client.post(f"/api/activities/{self.activity.id}/register/", {}, format="json")
 
-        self.assertEqual(response.status_code, 409)
-        self.assertFalse(ActivityRegistration.objects.filter(activity=self.activity).exists())
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["status"], "pending_payment")
 
     def test_rejects_registration_when_activity_is_full(self):
         other_user = User.objects.create_user(

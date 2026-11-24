@@ -14,7 +14,12 @@ from django.db.models.functions import TruncMonth
 from messaging.models import ChatThread
 
 from .models import Booking, expire_stale_bookings
-from .serializers import BookingCreateSerializer, StudentBookingSerializer, TherapistBookingSerializer
+from .serializers import (
+    BookingCreateSerializer,
+    StudentAppointmentSerializer,
+    StudentBookingSerializer,
+    TherapistBookingSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +48,52 @@ class StudentBookingListView(generics.ListAPIView):
             .select_related('therapist')
             .order_by('starts_at')
         )
+
+
+# --- 1c. Every appointment a student has made, newest first ---
+class StudentAppointmentListView(generics.ListAPIView):
+    serializer_class = StudentAppointmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        student_profile = getattr(self.request.user, 'student_profile', None)
+        if not student_profile:
+            return Booking.objects.none()
+        expire_stale_bookings()
+        return (
+            Booking.objects.filter(student=student_profile)
+            .select_related('therapist', 'therapist__user')
+            .order_by('-starts_at')[:200]
+        )
+
+
+# --- 1d. A student cancels their own request or upcoming appointment ---
+class StudentBookingCancelView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        student_profile = getattr(request.user, 'student_profile', None)
+        booking = (
+            Booking.objects.select_related('therapist', 'therapist__user')
+            .filter(id=pk, student=student_profile)
+            .first()
+            if student_profile
+            else None
+        )
+        if booking is None:
+            return Response({"error": "Appointment not found."}, status=status.HTTP_404_NOT_FOUND)
+        if booking.status not in (Booking.Status.REQUESTED, Booking.Status.CONFIRMED):
+            return Response({"error": "This appointment can no longer be cancelled."}, status=status.HTTP_400_BAD_REQUEST)
+        if booking.starts_at <= timezone.now():
+            return Response({"error": "This appointment has already started."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            booking.transition(Booking.Status.CANCELLED_BY_STUDENT, by_user=request.user, reason="Cancelled by student.")
+        except ValueError as error:
+            return Response({"error": str(error)}, status=status.HTTP_400_BAD_REQUEST)
+        from payments.services import request_refund_if_paid
+        request_refund_if_paid(booking=booking, reason="Cancelled by student.")
+        booking.refresh_from_db()
+        return Response(StudentAppointmentSerializer(booking).data)
 
 
 # --- 2. The View to LIST bookings (Therapist side) ---
@@ -164,6 +215,9 @@ class BookingStatusUpdateView(APIView):
                 return Response({"error": "Booking transition is not available"}, status=status.HTTP_400_BAD_REQUEST)
 
             transition_method(new_status, by_user=request.user)
+            if new_status == 'cancelled_by_therapist':
+                from payments.services import request_refund_if_paid
+                request_refund_if_paid(booking=booking, reason="Cancelled by therapist.")
 
             return Response({"message": f"Booking {new_status} successfully."})
         except Booking.DoesNotExist:

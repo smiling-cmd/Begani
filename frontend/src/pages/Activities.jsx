@@ -4,6 +4,7 @@ import {
   ArrowRight, CalendarDays, Check, Clock3, Footprints, Leaf, MapPin, Mountain,
   Music, Palette, Search, Sparkles, Sun, Trees, Users, X, BookOpen, MessagesSquare,
 } from 'lucide-react';
+import PayWithMpesaDialog from '../components/PayWithMpesaDialog';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import activitiesPhoto from '../assets/activities.jpeg';
@@ -82,6 +83,7 @@ export default function Activities() {
   const [busyIds, setBusyIds] = useState([]);
   const [notice, setNotice] = useState({ type: '', text: '' });
   const [selected, setSelected] = useState(null);
+  const [paying, setPaying] = useState(null); // { activity, registration }
   const [now] = useState(() => new Date());
 
   useEffect(() => {
@@ -148,7 +150,7 @@ export default function Activities() {
   const setBusy = (id, on) => setBusyIds((current) => (on ? [...current, id] : current.filter((value) => value !== id)));
 
   const join = async (activity) => {
-    if (activity.fee_kes > 0 || activeRegistration(activity.id) || busyIds.includes(activity.id)) return;
+    if (activeRegistration(activity.id) || busyIds.includes(activity.id)) return;
     setBusy(activity.id, true);
     setNotice({ type: '', text: '' });
     try {
@@ -157,6 +159,11 @@ export default function Activities() {
       if (status === 201) {
         setActivities((current) => current.map((item) => (item.id === activity.id && item.spots_left !== undefined
           ? { ...item, spots_left: Math.max(item.spots_left - 1, 0) } : item)));
+      }
+      if (activity.fee_kes > 0 && data.payment_status !== 'paid') {
+        setSelected(null);
+        setPaying({ activity, registration: data });
+        return;
       }
       setNotice({ type: 'success', text: status === 201 ? `You’re in. We’ve saved your place for ${activity.title}.` : `You’re already registered for ${activity.title}.` });
     } catch (requestError) {
@@ -190,6 +197,17 @@ export default function Activities() {
     const registered = Boolean(activeRegistration(activity.id));
     const busy = busyIds.includes(activity.id);
     const full = activity.spots_left === 0;
+    const registration = activeRegistration(activity.id);
+    if (registration && registration.status === 'pending_payment') {
+      return (
+        <div className="ax-actions-row">
+          <button type="button" className={`button${large ? ' ax-button-large' : ''}`} disabled={busy} onClick={() => setPaying({ activity, registration })}>
+            {registration.payment_status === 'processing' ? 'Check payment' : `Complete payment · KES ${activity.fee_kes.toLocaleString()}`}
+          </button>
+          <button type="button" className="text-button" disabled={busy} onClick={() => cancel(activity)}>{busy ? 'Working…' : 'Release place'}</button>
+        </div>
+      );
+    }
     if (registered) {
       return (
         <div className="ax-actions-row">
@@ -198,11 +216,10 @@ export default function Activities() {
         </div>
       );
     }
-    if (activity.fee_kes > 0) return <button type="button" className="button button-secondary" disabled>Booking opens soon</button>;
     if (full) return <button type="button" className="button button-secondary" disabled>Fully booked</button>;
     return (
       <button type="button" className={`button${large ? ' ax-button-large' : ''}`} disabled={busy} onClick={() => join(activity)}>
-        {busy ? 'Saving your place…' : 'Join for free'} <ArrowRight size={16} />
+        {busy ? 'Saving your place…' : activity.fee_kes > 0 ? `Pay KES ${activity.fee_kes.toLocaleString()} to join` : 'Join for free'} <ArrowRight size={16} />
       </button>
     );
   };
@@ -362,13 +379,26 @@ export default function Activities() {
               <li><Sparkles size={16} />{selected.fee_kes ? `KES ${selected.fee_kes.toLocaleString()} per person` : 'Free to join'}</li>
             </ul>
             <p className="dialog-note">
-              {selected.fee_kes > 0 ? 'Paid activities will open for booking when online payment is connected.'
+              {selected.fee_kes > 0 && !activeRegistration(selected.id) ? 'We hold your place while you pay with M-Pesa. It’s released if payment isn’t completed.'
                 : activeRegistration(selected.id) ? 'Your place is saved. You can release it any time before it starts.'
                   : 'Joining saves your place. You can cancel before it starts.'}
             </p>
             {renderAction(selected, true)}
           </section>
         </div>
+      )}
+      {paying && (
+        <PayWithMpesaDialog
+          title={paying.activity.title}
+          amount={paying.activity.fee_kes}
+          startUrl={`/api/payments/registration/${paying.registration.id}/pay/`}
+          onClose={() => setPaying(null)}
+          onPaid={() => {
+            setRegistrations((current) => current.map((item) => (item.id === paying.registration.id
+              ? { ...item, status: 'registered', payment_status: 'paid' } : item)));
+            setNotice({ type: 'success', text: `Payment received. You’re in for ${paying.activity.title}.` });
+          }}
+        />
       )}
     </div>
   );

@@ -25,6 +25,7 @@ import Resources from './pages/Resources';
 import Activities from './pages/Activities';
 import Wellbeing from './pages/Wellbeing';
 import Calendar from './pages/Calendar';
+import Appointments from './pages/Appointments';
 import ChatInbox from './pages/ChatInbox';
 import ChatRoom from './pages/ChatRoom';
 import NotFound from './pages/NotFound';
@@ -77,6 +78,7 @@ function App() {
           <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
           <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
           <Route path="/wellbeing" element={<ProtectedRoute><Wellbeing /></ProtectedRoute>} />
+          <Route path="/appointments" element={<ProtectedRoute allowedRoles={['student']}><Appointments /></ProtectedRoute>} />
           <Route path="/calendar" element={<ProtectedRoute allowedRoles={['student']}><Calendar /></ProtectedRoute>} />
           <Route path="/chats" element={<ProtectedRoute><ChatInbox /></ProtectedRoute>} />
           <Route path="/therapist-chats" element={<ProtectedRoute><ChatInbox /></ProtectedRoute>} />

@@ -74,3 +74,31 @@ class StudentBookingSerializer(serializers.ModelSerializer):
         user = getattr(obj.therapist, 'user', None)
         name = (getattr(user, 'full_name', '') or '').strip()
         return name or 'Your counsellor'
+
+
+class StudentAppointmentSerializer(serializers.ModelSerializer):
+    """Full appointment history for the student's Appointments page."""
+
+    therapist_id = serializers.UUIDField(source='therapist.id', read_only=True)
+    therapist_name = serializers.SerializerMethodField()
+    therapist_title = serializers.CharField(source='therapist.title', read_only=True)
+    duration_minutes = serializers.IntegerField(source='therapist.session_length_minutes', read_only=True)
+    format = serializers.CharField(source='therapist.format', read_only=True)
+    payment_status = serializers.SerializerMethodField()
+
+    def get_payment_status(self, obj):
+        from payments.services import payment_status_for
+        return payment_status_for(obj, obj.fee_kes_snapshot)
+
+    class Meta:
+        model = Booking
+        fields = (
+            'id', 'starts_at', 'status', 'confirm_by', 'fee_kes_snapshot', 'payment_status',
+            'therapist_id', 'therapist_name', 'therapist_title', 'duration_minutes', 'format',
+        )
+        read_only_fields = fields
+
+    def get_therapist_name(self, obj):
+        user = getattr(obj.therapist, 'user', None)
+        name = (getattr(user, 'full_name', '') or '').strip() or (obj.therapist.display_name or '').strip()
+        return name or 'Your counsellor'

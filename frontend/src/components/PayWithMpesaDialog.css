@@ -1,0 +1,20 @@
+.pay-dialog { width: min(420px, calc(100vw - 32px)); text-align: left; }
+.pay-dialog h2 { margin: 12px 0 6px; font-family: var(--font-heading); font-weight: 400; color: var(--heading); }
+.pay-dialog p { color: var(--muted); line-height: 1.5; }
+.pay-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--forest); background: color-mix(in srgb, var(--forest) 12%, var(--card)); }
+.pay-icon.is-ok { color: var(--ink-success, var(--forest)); }
+.pay-icon.is-pulse { animation: pay-pulse 1.6s ease-in-out infinite; }
+@keyframes pay-pulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 10px color-mix(in srgb, var(--forest) 12%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .pay-icon.is-pulse { animation: none; } }
+.pay-sub { margin: 0 0 4px; }
+.pay-amount { margin: 0 0 16px; font-size: 28px; font-weight: 700; color: var(--heading) !important; }
+.pay-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--heading); }
+.pay-input { width: 100%; box-sizing: border-box; min-height: 46px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--heading); font: inherit; font-size: 16px; }
+.pay-input:focus-visible { outline: 2px solid var(--forest); outline-offset: 1px; }
+.pay-error { margin: 10px 0 0; color: #b3261e !important; font-size: 14px; }
+:root[data-theme='dark'] .pay-error { color: #ffb4a9 !important; }
+.pay-note { margin: 12px 0; font-size: 13px; }
+.pay-submit { width: 100%; justify-content: center; }
+.pay-state { text-align: left; }
+.pay-timer { font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 700; color: var(--heading) !important; margin: 8px 0 0; }
+.pay-actions { display: flex; gap: 12px; align-items: center; margin-top: 16px; }

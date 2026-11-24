@@ -30,6 +30,12 @@ class Payment(models.Model):
     amount = models.PositiveIntegerField()
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.INITIATED)
     
+    provider = models.CharField(max_length=20, default="paystack")
+    reference = models.CharField(max_length=64, null=True, blank=True, unique=True)
+    provider_status = models.CharField(max_length=50, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    last_checked_at = models.DateTimeField(null=True, blank=True)
+
     checkout_request_id = models.CharField(max_length=100, blank=True)
     merchant_request_id = models.CharField(max_length=100, blank=True)
     mpesa_receipt = models.CharField(max_length=100, blank=True)

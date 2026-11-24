@@ -185,6 +185,10 @@ PASSWORD_RESET_TIMEOUT = int(os.environ.get('PASSWORD_RESET_TIMEOUT', '3600'))
 # Google Sign-In: the OAuth "Web application" client ID from Google Cloud Console.
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
 
+# Paystack (M-Pesa STK push). Secret key lives only in the local/production environment.
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
+PAYSTACK_API_BASE = os.environ.get('PAYSTACK_API_BASE', 'https://api.paystack.co')
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -194,6 +198,7 @@ REST_FRAMEWORK = {
         'tua_chat': os.environ.get('TUA_CHAT_RATE_LIMIT', '30/hour'),
         'password_reset': os.environ.get('PASSWORD_RESET_RATE_LIMIT', '10/hour'),
         'google_login': os.environ.get('GOOGLE_LOGIN_RATE_LIMIT', '30/hour'),
+        'payment_start': os.environ.get('PAYMENT_START_RATE_LIMIT', '20/hour'),
     },
 }
 

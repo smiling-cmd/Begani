@@ -1,4 +1,4 @@
-from rest_framework.throttling import AnonRateThrottle
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 
 class PasswordResetThrottle(AnonRateThrottle):
@@ -9,3 +9,7 @@ class PasswordResetThrottle(AnonRateThrottle):
 
 class GoogleLoginThrottle(AnonRateThrottle):
     scope = 'google_login'
+
+
+class PaymentStartThrottle(UserRateThrottle):
+    scope = 'payment_start'

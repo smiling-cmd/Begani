@@ -4,6 +4,7 @@ import {
   BarChart,
   BookOpen,
   Calendar,
+  CalendarCheck,
   CalendarDays,
   DollarSign,
   Heart,
@@ -144,6 +145,7 @@ export default function Sidebar() {
             <NavItem icon={<HomeIcon size={18} />} label="Home" to="/home" active={location.pathname === '/home'} />
             <NavItem icon={<img className="tua-nav-icon" src={tuaImage} alt="" />} label="TUA Assistant" to="/tua" active={location.pathname === '/tua'} />
             <NavItem icon={<MessageCircle size={18} />} label="Messages" to="/chats" active={isChatRoute} />
+            <NavItem icon={<CalendarCheck size={18} />} label="Appointments" to="/appointments" active={location.pathname === '/appointments'} />
             <NavItem icon={<CalendarDays size={18} />} label="Calendar" to="/calendar" active={location.pathname === '/calendar'} />
             <NavGroup label="Wellbeing" />
             <NavItem icon={<Heart size={18} color={location.pathname === '/support' ? 'white' : '#E07A5F'} />} label="Find Support" to="/support" active={location.pathname === '/support'} />

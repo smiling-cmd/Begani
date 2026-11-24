@@ -119,3 +119,51 @@ class BookingCreateTests(TestCase):
         self.assertEqual(booking.status, Booking.Status.REQUESTED)
         self.slot.refresh_from_db()
         self.assertEqual(self.slot.status, AvailabilitySlot.Status.BOOKED)
+
+
+class StudentAppointmentsTests(BookingCreateTests):
+    def book(self):
+        response = self.client.post('/api/bookings/create/', {'slot_id': str(self.slot.id)}, format='json')
+        self.assertEqual(response.status_code, 201, response.data)
+        return Booking.objects.get(slot=self.slot)
+
+    def test_lists_all_statuses_with_counsellor_details(self):
+        booking = self.book()
+        rows = self.client.get('/api/bookings/appointments/').json()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['id'], str(booking.id))
+        self.assertEqual(rows[0]['status'], 'requested')
+        self.assertEqual(rows[0]['therapist_name'], 'Test Therapist')
+        self.assertEqual(rows[0]['format'], 'online')
+        self.assertIn('therapist_id', rows[0])
+
+    def test_other_students_do_not_see_my_appointments(self):
+        self.book()
+        other = User.objects.create_user(email='other@example.com', password='x', role=User.Role.STUDENT)
+        StudentProfile.objects.create(user=other, alias='other')
+        self.client.force_authenticate(user=other)
+        self.assertEqual(self.client.get('/api/bookings/appointments/').json(), [])
+
+    def test_student_can_cancel_and_slot_reopens(self):
+        booking = self.book()
+        response = self.client.post(f'/api/bookings/{booking.id}/cancel/', {}, format='json')
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.json()['status'], 'cancelled_by_student')
+        self.slot.refresh_from_db()
+        self.assertEqual(self.slot.status, AvailabilitySlot.Status.OPEN)
+
+    def test_cannot_cancel_twice_or_someone_elses_booking(self):
+        booking = self.book()
+        self.client.post(f'/api/bookings/{booking.id}/cancel/', {}, format='json')
+        again = self.client.post(f'/api/bookings/{booking.id}/cancel/', {}, format='json')
+        self.assertEqual(again.status_code, 400)
+        other = User.objects.create_user(email='other2@example.com', password='x', role=User.Role.STUDENT)
+        StudentProfile.objects.create(user=other, alias='other2')
+        self.client.force_authenticate(user=other)
+        self.assertEqual(self.client.post(f'/api/bookings/{booking.id}/cancel/', {}, format='json').status_code, 404)
+
+    def test_cannot_cancel_after_start(self):
+        booking = self.book()
+        Booking.objects.filter(id=booking.id).update(starts_at=timezone.now() - timedelta(minutes=5))
+        response = self.client.post(f'/api/bookings/{booking.id}/cancel/', {}, format='json')
+        self.assertEqual(response.status_code, 400)

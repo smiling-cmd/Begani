@@ -92,3 +92,96 @@ class TherapistEarningsView(APIView):
                 "items": items,
             }
         )
+
+
+# ---- Paystack payments -------------------------------------------------
+
+import json  # noqa: E402
+
+from django.shortcuts import get_object_or_404  # noqa: E402
+from rest_framework import status as http  # noqa: E402
+from rest_framework.permissions import AllowAny, IsAuthenticated as _IsAuth  # noqa: E402
+from rest_framework.response import Response as _Resp  # noqa: E402
+from rest_framework.views import APIView as _APIView  # noqa: E402
+
+from accounts.throttles import PaymentStartThrottle  # noqa: E402
+from activities.models import ActivityRegistration  # noqa: E402
+from bookings.models import Booking  # noqa: E402
+
+from . import paystack, services  # noqa: E402
+from .models import Payment  # noqa: E402
+
+
+def _payment_payload(payment):
+    return {
+        "id": str(payment.id),
+        "status": payment.status,
+        "amount": payment.amount,
+        "phone_masked": payment.phone_masked,
+        "initiated_at": payment.initiated_at,
+        "message": payment.result_description if payment.status == Payment.Status.FAILED else "",
+    }
+
+
+class _StartPaymentBase(_APIView):
+    permission_classes = [_IsAuth]
+    throttle_classes = [PaymentStartThrottle]
+
+    def start(self, request, **target):
+        try:
+            payment = services.start_payment(user=request.user, phone=request.data.get("phone", ""), **target)
+        except services.PaymentError as exc:
+            return _Resp({"detail": str(exc)}, status=exc.status)
+        return _Resp(_payment_payload(payment), status=http.HTTP_201_CREATED)
+
+
+class BookingPayView(_StartPaymentBase):
+    def post(self, request, pk):
+        student = getattr(request.user, "student_profile", None)
+        booking = get_object_or_404(Booking, pk=pk, student=student) if student else None
+        if booking is None:
+            return _Resp({"detail": "Appointment not found."}, status=404)
+        return self.start(request, booking=booking)
+
+
+class RegistrationPayView(_StartPaymentBase):
+    def post(self, request, pk):
+        student = getattr(request.user, "student_profile", None)
+        reg = get_object_or_404(ActivityRegistration, pk=pk, student=student) if student else None
+        if reg is None:
+            return _Resp({"detail": "Registration not found."}, status=404)
+        return self.start(request, registration=reg)
+
+
+class PaymentStatusView(_APIView):
+    permission_classes = [_IsAuth]
+
+    def get(self, request, pk):
+        student = getattr(request.user, "student_profile", None)
+        payment = Payment.objects.filter(pk=pk).first()
+        owner_ok = payment and student and (
+            (payment.booking_id and payment.booking.student_id == student.pk)
+            or (payment.registration_id and payment.registration.student_id == student.pk)
+        )
+        if not owner_ok:
+            return _Resp({"detail": "Payment not found."}, status=404)
+        payment = services.refresh_payment(payment)
+        return _Resp(_payment_payload(payment))
+
+
+class PaystackWebhookView(_APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = []
+
+    def post(self, request):
+        if not paystack.valid_signature(request.body, request.headers.get("x-paystack-signature", "")):
+            return _Resp(status=401)
+        try:
+            event = json.loads(request.body)
+        except ValueError:
+            return _Resp(status=400)
+        data = event.get("data") or {}
+        if event.get("event") in ("charge.success", "charge.failed") and data.get("reference"):
+            services.apply_result(data["reference"], data)
+        return _Resp(status=200)

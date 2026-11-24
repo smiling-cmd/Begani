@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.permissions import IsUniversityAdmin
+from payments.services import expire_unpaid_registrations, payment_status_for, request_refund_if_paid
 from .models import Activity, ActivityRegistration
 
 
@@ -100,6 +101,11 @@ class ActivityRegistrationSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     location_text = serializers.CharField(source="activity.location_text", read_only=True)
+    fee_kes = serializers.IntegerField(source="activity.fee_kes", read_only=True)
+    payment_status = serializers.SerializerMethodField()
+
+    def get_payment_status(self, obj):
+        return payment_status_for(obj, obj.activity.fee_kes)
 
     class Meta:
         model = ActivityRegistration
@@ -112,6 +118,8 @@ class ActivityRegistrationSerializer(serializers.ModelSerializer):
             "location_text",
             "status",
             "registered_at",
+            "fee_kes",
+            "payment_status",
         )
         read_only_fields = fields
 
@@ -124,7 +132,13 @@ class StudentActivityRegistrationListView(generics.ListAPIView):
         student = getattr(self.request.user, "student_profile", None)
         if student is None:
             return ActivityRegistration.objects.none()
-        return ActivityRegistration.objects.filter(student=student).select_related("activity").order_by("-registered_at")
+        expire_unpaid_registrations()
+        return (
+            ActivityRegistration.objects.filter(student=student)
+            .select_related("activity")
+            .prefetch_related("payments")
+            .order_by("-registered_at")
+        )
 
 
 class ActivityRegistrationCreateView(APIView):
@@ -137,6 +151,7 @@ class ActivityRegistrationCreateView(APIView):
                 {"detail": "Only student accounts can register for activities."},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        expire_unpaid_registrations()
 
         try:
             with transaction.atomic():
@@ -146,11 +161,11 @@ class ActivityRegistrationCreateView(APIView):
                     status=Activity.Status.PUBLISHED,
                     starts_at__gte=timezone.now(),
                 )
-                if activity.fee_kes:
-                    return Response(
-                        {"detail": "Online payment is not available for paid activities yet."},
-                        status=status.HTTP_409_CONFLICT,
-                    )
+                initial_status = (
+                    ActivityRegistration.Status.PENDING_PAYMENT
+                    if activity.fee_kes
+                    else ActivityRegistration.Status.REGISTERED
+                )
 
                 existing = ActivityRegistration.objects.filter(activity=activity, student=student).first()
                 if existing and existing.status in (
@@ -179,7 +194,7 @@ class ActivityRegistrationCreateView(APIView):
                     )
 
                 if existing:
-                    existing.status = ActivityRegistration.Status.REGISTERED
+                    existing.status = initial_status
                     existing.cancelled_at = None
                     existing.registered_at = timezone.now()
                     existing.save(update_fields=("status", "cancelled_at", "registered_at"))
@@ -189,7 +204,7 @@ class ActivityRegistrationCreateView(APIView):
                     registration = ActivityRegistration.objects.create(
                         activity=activity,
                         student=student,
-                        status=ActivityRegistration.Status.REGISTERED,
+                        status=initial_status,
                     )
                     response_status = status.HTTP_201_CREATED
         except IntegrityError:
@@ -246,5 +261,6 @@ class ActivityRegistrationCancelView(APIView):
             registration.status = ActivityRegistration.Status.CANCELLED
             registration.cancelled_at = timezone.now()
             registration.save(update_fields=("status", "cancelled_at"))
+            request_refund_if_paid(registration=registration, reason="Cancelled by student.")
 
         return Response(ActivityRegistrationSerializer(registration).data)

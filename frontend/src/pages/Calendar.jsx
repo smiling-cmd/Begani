@@ -368,7 +368,7 @@ export default function CalendarPage() {
                           {event.type === 'activity' && <span className="calendar-event-detail">Registered activity</span>}
                           {event.type === 'mood' && <span className="calendar-event-detail">You felt {moodLabel(event.score).toLowerCase()}</span>}
                           <div className="calendar-event-actions">
-                            {event.type === 'session' && <Link to="/support">View support</Link>}
+                            {event.type === 'session' && <Link to="/appointments">Manage appointment</Link>}
                             {event.type === 'activity' && <Link to="/activities">View activities</Link>}
                             {event.type !== 'mood' && (
                               <button type="button" onClick={() => downloadCalendarEvent(event)}><Download size={14} /> Add to calendar</button>
