@@ -36,16 +36,23 @@ def _headers():
     return {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
 
 
-def _request(method, path, **kwargs):
+def _raw(method, path, **kwargs):
     headers = _headers()
     try:
         resp = requests.request(method, settings.PAYSTACK_API_BASE + path, headers=headers, timeout=20, **kwargs)
-        data = resp.json()
+        body = resp.json()
     except (requests.RequestException, ValueError) as exc:
         raise PaystackError("Could not reach the payment provider.") from exc
-    if not resp.ok or not data.get("status", False):
-        raise PaystackError(data.get("message") or "Payment provider error.")
-    return data
+    if not isinstance(body, dict):
+        raise PaystackError("Unexpected response from the payment provider.")
+    return resp.ok, body
+
+
+def _request(method, path, **kwargs):
+    ok, body = _raw(method, path, **kwargs)
+    if not ok or not body.get("status", False):
+        raise PaystackError(body.get("message") or "Payment provider error.")
+    return body
 
 
 def charge_mpesa(*, email, amount_kes, phone, reference):
@@ -57,7 +64,15 @@ def charge_mpesa(*, email, amount_kes, phone, reference):
         "reference": reference,
         "mobile_money": {"phone": phone, "provider": "mpesa"},
     }
-    return _request("POST", "/charge", json=payload).get("data", {})
+    ok, body = _raw("POST", "/charge", json=payload)
+    data = body.get("data") if isinstance(body.get("data"), dict) else {}
+    # Paystack can answer a real charge with a top-level status of false and a message such as
+    # "Charge attempted"; the charge's own data.status is what tells us what happened.
+    if data.get("status"):
+        data = dict(data)
+        data.setdefault("gateway_response", body.get("message") or "")
+        return data
+    raise PaystackError(body.get("message") or "Payment provider error.")
 
 
 def verify(reference):

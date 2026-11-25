@@ -53,10 +53,15 @@ class BookingCreateSerializer(serializers.ModelSerializer):
 class TherapistBookingSerializer(serializers.ModelSerializer):
     student_alias = serializers.CharField(source='student.alias', read_only=True)
     slot_time = serializers.DateTimeField(source='starts_at', read_only=True)
+    payment_status = serializers.SerializerMethodField()
+
+    def get_payment_status(self, obj):
+        from payments.services import payment_status_for
+        return payment_status_for(obj, obj.fee_kes_snapshot)
 
     class Meta:
         model = Booking
-        fields = ('id', 'student_alias', 'slot_time', 'status', 'fee_kes_snapshot', 'is_priority')
+        fields = ('id', 'student_alias', 'slot_time', 'status', 'fee_kes_snapshot', 'is_priority', 'payment_status')
 
 class StudentBookingSerializer(serializers.ModelSerializer):
     therapist_name = serializers.SerializerMethodField()
