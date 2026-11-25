@@ -185,3 +185,4 @@ class PaystackWebhookView(_APIView):
         if event.get("event") in ("charge.success", "charge.failed") and data.get("reference"):
             services.apply_result(data["reference"], data)
         return _Resp(status=200)
+

@@ -123,7 +123,7 @@ def apply_result(reference, data):
     payment.last_checked_at = timezone.now()
 
     if remote == "success":
-        if int(data.get("amount", -1)) != payment.amount * 100 or data.get("currency", "KES") != "KES":
+        if (data.get("amount") is not None and int(data["amount"]) != payment.amount * 100) or data.get("currency", "KES") != "KES":
             payment.status = Payment.Status.FAILED
             payment.result_description = "amount mismatch"
             payment.save()
