@@ -243,6 +243,8 @@ export default function TherapistDashboard() {
                           <span className={`therapist-booking-status${booking.status === 'requested' ? ' is-requested' : ''}`}>
                             {booking.status.replace(/_/g, ' ')}
                           </span>
+                          {booking.payment_status === 'paid' && <span className="therapist-pay-badge is-paid">Paid · KES {booking.fee_kes_snapshot.toLocaleString()}</span>}
+                          {booking.status === 'confirmed' && ['unpaid', 'processing'].includes(booking.payment_status) && <span className="therapist-pay-badge">Awaiting payment</span>}
                         </td>
                         <td data-label="Actions" className="therapist-booking-actions-cell">
                           <div className="therapist-booking-actions">

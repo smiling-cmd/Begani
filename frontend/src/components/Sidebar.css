@@ -238,3 +238,27 @@
 @media (prefers-reduced-motion: reduce) {
   .sidebar { transition: none; }
 }
+
+/* Light/dark toggle: top-right of the page (desktop; mobile has it in the header) */
+.page-theme-toggle { display: none; }
+@media (min-width: 901px) {
+  .page-theme-toggle {
+    position: fixed;
+    top: 14px;
+    right: 20px;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    color: var(--heading);
+    background: var(--card);
+    box-shadow: 0 6px 18px -10px rgba(10, 35, 28, .5);
+    cursor: pointer;
+    transition: transform .2s ease, border-color .2s ease;
+  }
+  .page-theme-toggle:hover { transform: scale(1.06); border-color: var(--brand-teal, #20c9b3); }
+  .page-theme-toggle:focus-visible { outline: 2px solid var(--brand-teal, #20c9b3); outline-offset: 2px; }
+}
