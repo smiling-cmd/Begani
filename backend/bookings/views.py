@@ -118,6 +118,8 @@ class TherapistInsightsView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    # A class with fewer students than this is folded into "Other groups" so nobody can be picked out.
+    MIN_GROUP_STUDENTS = 3
     EXCLUDED_STATUSES = (
         Booking.Status.DECLINED,
         Booking.Status.EXPIRED,
@@ -168,6 +170,26 @@ class TherapistInsightsView(APIView):
             for row in rows
         ]
 
+        audience = "school" if therapist.type == therapist.Type.SCHOOL else "private"
+        groups = []
+        if audience == "school":
+            class_rows = (
+                counted.values("student__class_group__name")
+                .annotate(count=Count("id"), students=Count("student", distinct=True))
+                .order_by("-count")
+            )
+            other = 0
+            for row in class_rows:
+                if row["students"] < self.MIN_GROUP_STUDENTS:
+                    other += row["count"]
+                else:
+                    groups.append({"name": row["student__class_group__name"] or "Not provided", "count": row["count"]})
+            if other:
+                groups.append({"name": "Other groups", "count": other})
+            top = max((group["count"] for group in groups), default=0)
+            for group in groups:
+                group["percentage"] = round(group["count"] / top * 100) if top else 0
+
         ongoing_chats = (
             ChatThread.objects.filter(
                 therapist=therapist,
@@ -188,7 +210,9 @@ class TherapistInsightsView(APIView):
                 ).count(),
                 "ongoing_chats": ongoing_chats,
                 "monthly": monthly,
-                "schools": schools,
+                "audience": audience,
+                "schools": schools if audience == "private" else [],
+                "groups": groups,
             }
         )
 

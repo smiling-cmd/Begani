@@ -10,7 +10,6 @@ import {
   Hand,
   Headphones,
   Heart,
-  NotebookPen,
   Timer,
   TrendingDown,
   TrendingUp,
@@ -22,7 +21,6 @@ import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import BoundariesTool from '../components/wellbeing/BoundariesTool';
 import BreathingCard from '../components/wellbeing/BreathingCard';
-import GratitudeTool from '../components/wellbeing/GratitudeTool';
 import GroundingTool from '../components/wellbeing/GroundingTool';
 import MeditationCard from '../components/wellbeing/MeditationCard';
 import StudyFocusCard from '../components/wellbeing/StudyFocusCard';
@@ -54,7 +52,6 @@ const TOOLS = [
   { id: 'sleep-sounds', hash: 'sleep-sounds', label: 'Sleep sounds', blurb: 'Drift into better sleep.', icon: Headphones, tone: 'rose' },
   { id: 'movement', hash: 'movement', label: 'Movement', blurb: 'Move your body, lift your mood.', icon: Footprints, tone: 'green' },
   { id: 'grounding', hash: 'grounding', label: 'Grounding', blurb: 'Come back to the present.', icon: Hand, tone: 'sage' },
-  { id: 'gratitude', hash: 'gratitude', label: 'Gratitude', blurb: 'Notice the good.', icon: NotebookPen, tone: 'amber' },
   { id: 'boundaries', hash: 'boundaries', label: 'Boundaries', blurb: 'Protect your peace.', icon: Users, tone: 'rose' },
 ];
 const TOOL_BY_HASH = Object.fromEntries(TOOLS.map((tool) => [tool.hash, tool.id]));
@@ -186,15 +183,6 @@ export default function Wellbeing() {
     }
   };
 
-  const handleSaveGratitude = async (items) => {
-    const body = `Grateful for:\n${items.map((item, index) => `${index + 1}. ${item}`).join('\n')}`;
-    try {
-      await saveJournalBody(body);
-    } catch (error) {
-      throw new Error(getErrorMessage(error, 'Could not save your gratitude note. Please try again.'));
-    }
-  };
-
   const renderTool = (id) => {
     switch (id) {
       case 'breathing': return <BreathingCard />;
@@ -214,14 +202,6 @@ export default function Wellbeing() {
           <section className="panel wb-selfcare">
             <SelfCareCard icon={Hand} title="5 Senses Grounding" text="Notice 5 things you see, 4 you can touch, 3 you hear, 2 you smell and 1 you taste to anchor yourself in the present.">
               <GroundingTool />
-            </SelfCareCard>
-          </section>
-        );
-      case 'gratitude':
-        return (
-          <section className="panel wb-selfcare">
-            <SelfCareCard icon={NotebookPen} title="Gratitude & Reflection" text="Write down a few good moments or things you appreciate to shift your focus toward what is helping.">
-              <GratitudeTool onSave={handleSaveGratitude} />
             </SelfCareCard>
           </section>
         );
@@ -346,7 +326,7 @@ export default function Wellbeing() {
             </div>
             <form onSubmit={handleSaveJournal} className="journal-form">
               <label className="sr-only" htmlFor="journal-entry">Write a private journal entry</label>
-              <textarea id="journal-entry" value={journalDraft} onChange={(event) => { setJournalDraft(event.target.value); setJournalSaved(false); }} placeholder="Write whatever is on your mind..." rows="4" maxLength="4000" />
+              <textarea id="journal-entry" value={journalDraft} onChange={(event) => { setJournalDraft(event.target.value); setJournalSaved(false); }} placeholder="Write whatever is on your mind, or three things that went well today..." rows="4" maxLength="4000" />
               <div className="journal-form-footer"><span role="status">{journalSaved ? 'Entry saved' : `${journalDraft.length}/4000`}</span><button type="submit" className="button" disabled={!journalDraft.trim() || savingJournal}>{savingJournal ? 'Saving…' : 'Save entry'}</button></div>
             </form>
             {journalError && <p className="form-message error" role="alert">{journalError}</p>}

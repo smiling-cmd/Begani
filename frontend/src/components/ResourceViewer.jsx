@@ -31,7 +31,7 @@ function ReferenceText({ ref_: ref }) {
   return link ? <a href={link} target="_blank" rel="noreferrer">{text}</a> : text;
 }
 
-function MediaPlayer({ resource }) {
+export function MediaPlayer({ resource }) {
   const { type, media_url: url, audio_file: audioFile, video_file: videoFile } = resource;
 
   if (type === 'audio') {

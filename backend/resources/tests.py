@@ -225,3 +225,17 @@ class SeedAudioCommandTests(APITestCase):
                 self.assertEqual(rain.status, Resource.Status.PUBLISHED)
                 self.assertEqual(guided.status, Resource.Status.PENDING_REVIEW)
                 self.assertTrue(rain.audio_file.name.endswith(".mp3"))
+
+
+class SeedAudioBundledFilesTests(APITestCase):
+    def test_every_catalogued_track_is_in_the_bundled_folder_and_is_small(self):
+        from pathlib import Path
+
+        from resources.management.commands.seed_audio import CATALOG, DEFAULT_SOURCE, KEEP_AS_IS_BYTES
+
+        for filename in CATALOG:
+            path = DEFAULT_SOURCE / filename
+            if not path.is_file():
+                path = DEFAULT_SOURCE / f"{Path(filename).stem}.mp3"
+            self.assertTrue(path.is_file(), f"missing bundled audio for {filename}")
+            self.assertLessEqual(path.stat().st_size, KEEP_AS_IS_BYTES, f"{path.name} is too large to keep in the repo")

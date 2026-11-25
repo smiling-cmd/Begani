@@ -93,3 +93,28 @@
 }
 @media (hover: none) { .wb-tile:hover:not(:active) { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .wb-tile { transition: none; } .wb-tile:hover, .wb-tile:active { transform: none; } }
+/* Seven tiles: let the last one span the row. */
+.wb-tiles .wb-tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* Guided meditation videos inside the Meditation card. */
+.wb-videos { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.wb-videos h3 { margin: 0; color: var(--heading); font-size: 1.05rem; }
+.wb-videos > p { margin: 3px 0 12px; color: var(--muted); font-size: .88rem; }
+.wb-videos ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.wb-videos li button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-subtle); color: var(--ink); text-align: left; font: inherit; cursor: pointer; }
+.wb-videos li button:hover { background: var(--tint); }
+.wb-videos li button[aria-pressed='true'] { border-color: var(--forest, #234a3a); background: var(--tint); }
+.wb-videos li button:focus-visible { outline: 3px solid var(--forest, #234a3a); outline-offset: 2px; }
+.wb-videos li svg { flex: none; color: var(--forest, #234a3a); }
+.wb-videos li span { display: grid; gap: 2px; min-width: 0; }
+.wb-videos li strong { color: var(--heading); font-size: .93rem; }
+.wb-videos li small { overflow: hidden; color: var(--muted); font-size: .8rem; text-overflow: ellipsis; white-space: nowrap; }
+.wb-video-player { margin-top: 14px; }
+.wb-video-player video, .wb-video-player .resource-embed { width: 100%; border-radius: 14px; }
+.wb-video-player .resource-embed { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
+.wb-video-player .resource-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* The Meditation card has a dark green background, so its video block uses light text. */
+.meditation-card .wb-videos { border-top-color: rgba(255, 255, 255, .22); }
+.meditation-card .wb-videos h3 { color: #fff; }
+.meditation-card .wb-videos > p { color: rgba(255, 255, 255, .8); }

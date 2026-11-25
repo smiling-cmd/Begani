@@ -35,7 +35,8 @@ export default function Insights() {
   }, [token]);
 
   const monthly = data?.monthly ?? [];
-  const schools = data?.schools ?? [];
+  const isSchool = data?.audience === 'school';
+  const breakdown = (isSchool ? data?.groups : data?.schools) ?? [];
   const peak = Math.max(1, ...monthly.map((item) => item.count));
   const year = data?.year ?? CURRENT_YEAR;
   const dash = '—';
@@ -45,7 +46,7 @@ export default function Insights() {
       <Sidebar />
       <main className="page-content">
         <header className="page-heading">
-          <div className="eyebrow"><BarChart3 size={16} aria-hidden="true" /> Your practice</div>
+          <div className="eyebrow"><BarChart3 size={16} aria-hidden="true" /> {isSchool ? 'Your caseload' : 'Your practice'}</div>
           <h1>Insights</h1>
           <p>Your appointments, chats and anonymised insights. You never see a student&apos;s phone number; students appear by alias.</p>
         </header>
@@ -62,7 +63,9 @@ export default function Insights() {
         <section className="panel report-panel" aria-labelledby="insights-title">
           <h2 id="insights-title">Insights for data analysis</h2>
           <p className="report-note">
-            Private therapist view: students come from different schools, so they are grouped by school and year. No names or contact details are used.
+            {isSchool
+              ? 'School counsellor view: sessions are grouped by class. Classes with fewer than 3 students are combined into "Other groups" so no student can be identified. No names or contact details are used.'
+              : 'Private therapist view: students come from different schools, so they are grouped by school and year. No names or contact details are used.'}
           </p>
 
           <h3>Bookings by month ({year})</h3>
@@ -89,14 +92,14 @@ export default function Insights() {
             </>
           )}
 
-          <h3>By school</h3>
+          <h3>{isSchool ? 'By class' : 'By school'}</h3>
           {loading ? (
             <p className="report-empty">Loading…</p>
-          ) : schools.length === 0 ? (
-            <p className="report-empty">No school breakdown yet.</p>
+          ) : breakdown.length === 0 ? (
+            <p className="report-empty">{isSchool ? 'No class breakdown yet.' : 'No school breakdown yet.'}</p>
           ) : (
             <ul className="school-list">
-              {schools.map((school) => (
+              {breakdown.map((school) => (
                 <li className="school-row" key={school.name}>
                   <span className="school-name">{school.name}</span>
                   <span className="school-track" aria-hidden="true">

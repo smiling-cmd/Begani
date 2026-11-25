@@ -11,8 +11,10 @@ from django.utils.text import slugify
 
 from resources.models import Resource, ResourceCategory
 
-# frontend/src/assets/audio, three folders up from backend/resources/management/commands
-DEFAULT_SOURCE = Path(__file__).resolve().parents[4] / "frontend" / "src" / "assets" / "audio"
+# backend/resources/seed_audio: compact copies that live in the repo. Pass --source to use a folder of full-size originals.
+DEFAULT_SOURCE = Path(__file__).resolve().parents[2] / "seed_audio"
+# A file that is already an mp3 and no bigger than this is used as it is, so compact copies are not re-encoded.
+KEEP_AS_IS_BYTES = 8 * 1024 * 1024
 
 SLEEP = "Sleep & Student Wellbeing"
 CALM = "Anxiety & Overthinking"
@@ -83,13 +85,18 @@ class Command(BaseCommand):
             for filename, (title, topic, summary, guided) in CATALOG.items():
                 path = source / filename
                 if not path.is_file():
+                    # The repo stores compact mp3 copies of the .wav originals under the same name.
+                    path = source / f"{Path(filename).stem}.mp3"
+                if not path.is_file():
                     self.stdout.write(self.style.WARNING(f"Missing, skipped: {filename}"))
                     skipped += 1
                     continue
 
                 slug = slugify(title)
                 target = Path(tmp) / f"{slug}.mp3"
-                if not transcode(path, target, options["bitrate"]):
+                if path.suffix.lower() == ".mp3" and path.stat().st_size <= KEEP_AS_IS_BYTES:
+                    shutil.copyfile(path, target)
+                elif not transcode(path, target, options["bitrate"]):
                     if path.suffix.lower() != ".mp3":
                         self.stdout.write(self.style.WARNING(f"ffmpeg not found, so {filename} was skipped (wav is too large to store)."))
                         skipped += 1

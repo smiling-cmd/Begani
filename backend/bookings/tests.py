@@ -68,6 +68,40 @@ class TherapistInsightsTests(TestCase):
         self.assertEqual(response.data['schools'][0]['name'], 'Not provided')
         self.assertEqual(response.data['schools'][0]['count'], 2)
 
+    def test_private_therapist_has_no_class_groups(self):
+        self.api_client.force_authenticate(user=self.therapist_user)
+        data = self.api_client.get('/api/bookings/insights/').data
+        self.assertEqual(data['audience'], 'private')
+        self.assertEqual(data['groups'], [])
+
+    def test_school_counsellor_sees_classes_and_small_groups_are_folded(self):
+        from accounts.models import ClassGroup, University
+        self.therapist.type = TherapistProfile.Type.SCHOOL
+        self.therapist.fee_kes = None
+        self.therapist.save()
+        school = University.objects.create(name='JKUAT')
+        big = ClassGroup.objects.create(university=school, name='BBIT Year 3')
+        small = ClassGroup.objects.create(university=school, name='MSc Year 1')
+
+        def add_student(index, group):
+            user = User.objects.create_user(email=f's{index}@example.com', password='pw-12345', role=User.Role.STUDENT)
+            return StudentProfile.objects.create(user=user, alias=f's{index}', class_group=group)
+
+        for index in range(3):
+            self.student = add_student(index, big)
+            self.create_booking(offset_days=2 + index)
+        self.student = add_student(9, small)
+        self.create_booking(offset_days=9)
+        self.api_client.force_authenticate(user=self.therapist_user)
+
+        data = self.api_client.get('/api/bookings/insights/').data
+
+        self.assertEqual(data['audience'], 'school')
+        self.assertEqual(data['schools'], [])
+        names = {group['name']: group['count'] for group in data['groups']}
+        self.assertEqual(names, {'BBIT Year 3': 3, 'Other groups': 1})
+        self.assertNotIn('MSc Year 1', names)
+
     def test_students_cannot_view_insights(self):
         self.api_client.force_authenticate(user=self.student_user)
 
