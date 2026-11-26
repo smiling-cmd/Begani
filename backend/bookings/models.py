@@ -52,6 +52,9 @@ class Booking(models.Model):
         if to_status == "confirmed" and self.confirm_by <= timezone.now():
             raise ValueError("This booking request has expired. Please ask the student to book again.")
         
+        if to_status == "completed" and self.starts_at > timezone.now():
+            raise ValueError("You can only mark a session completed once it has started.")
+
         with transaction.atomic():
             BookingStatusHistory.objects.create(
                 booking=self, 

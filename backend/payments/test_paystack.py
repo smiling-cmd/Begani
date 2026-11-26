@@ -237,7 +237,6 @@ class TherapistVisibilityAndAdminTests(PaymentTestBase):
         r, _ = self.pay(f"/api/payments/booking/{b.id}/pay/")
         t = APIClient()
         t.force_authenticate(self.therapist.user)
-        rows = t.get("/api/bookings/therapist-bookings/").data if False else None
         from bookings.serializers import TherapistBookingSerializer
         self.assertEqual(TherapistBookingSerializer(b).data["payment_status"], "processing")
         with mock.patch.object(paystack, "verify", return_value={"status": "success", "amount": 100000, "currency": "KES"}):

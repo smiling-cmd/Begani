@@ -10,7 +10,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.models import StudentProfile
 from counsellors.models import TherapistProfile
 from notifications.models import Notification
 from .models import ChatMessage, ChatThread

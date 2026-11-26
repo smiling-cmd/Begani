@@ -22,6 +22,8 @@ export default function AuthProvider({ children }) {
 
     let active = true;
     const requestVersion = profileRequestVersion.current;
+    // Show the loading screen again while the new token's profile is fetched.
+    // oxlint-disable-next-line react/set-state-in-effect
     setInitializing(true);
 
     // The shared client attaches the current token and handles 401 responses.

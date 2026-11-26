@@ -71,6 +71,8 @@ export default function TherapistDashboard() {
 
   useEffect(() => {
     if (!token) return undefined;
+    // Fetch on mount and whenever the token changes, then keep refreshing on a timer.
+    // oxlint-disable-next-line react/set-state-in-effect
     void fetchDashboard();
     void fetchPriorityRequests();
     const dashboardRefresh = window.setInterval(() => void fetchDashboard(), 30000);

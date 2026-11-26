@@ -17,10 +17,27 @@ class AutoPayoutTests(PaymentTestBase):
     def setUp(self):
         super().setUp()
         self.booking_obj = self.booking(Booking.Status.CONFIRMED)
+        self.started(self.booking_obj)
         self.payout = Payout.objects.create(booking=self.booking_obj, gross_kes=1000, commission_rate_percent=10)
+
+    def started(self, booking):
+        from datetime import timedelta
+        from django.utils import timezone
+        Booking.objects.filter(pk=booking.pk).update(starts_at=timezone.now() - timedelta(hours=1))
+        booking.refresh_from_db()
 
     def add_account(self):
         return TherapistPayoutAccount.objects.create(therapist=self.therapist, phone="254712345678", account_name="Amina Otieno")
+
+    def test_cannot_complete_a_future_session(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        Booking.objects.filter(pk=self.booking_obj.pk).update(starts_at=timezone.now() + timedelta(days=1))
+        self.booking_obj.refresh_from_db()
+        with self.assertRaises(ValueError):
+            self.booking_obj.transition("completed")
+        self.booking_obj.refresh_from_db()
+        self.assertEqual(self.booking_obj.status, Booking.Status.CONFIRMED)
 
     def complete(self):
         with self.captureOnCommitCallbacks(execute=True):
@@ -126,3 +143,43 @@ class DisableOtpCommandTests(PaymentTestBase):
         with mock.patch.object(paystack, "_request", side_effect=paystack.PaystackError("Not allowed")):
             with self.assertRaises(CommandError):
                 self.run_cmd()
+
+
+class PruneBookingsTests(PaymentTestBase):
+    def run_cmd(self, *args):
+        from io import StringIO
+        from django.core.management import call_command
+        out = StringIO()
+        call_command("prune_bookings", *args, stdout=out)
+        return out.getvalue()
+
+    def make_past(self, n):
+        from datetime import timedelta
+        from django.utils import timezone
+        made = []
+        for i in range(n):
+            b = self.booking(Booking.Status.COMPLETED)
+            Booking.objects.filter(pk=b.pk).update(starts_at=timezone.now() - timedelta(days=i + 1))
+            Payout.objects.create(booking=b, gross_kes=1000, commission_rate_percent=10)
+            made.append(b.pk)
+        return made
+
+    def test_dry_run_changes_nothing_and_yes_keeps_newest(self):
+        ids = self.make_past(5)  # ids[0] newest ... ids[4] oldest
+        self.assertIn("Dry run", self.run_cmd("--keep", "2"))
+        self.assertEqual(Booking.objects.count(), 5)
+        self.run_cmd("--keep", "2", "--yes")
+        self.assertEqual(set(Booking.objects.values_list("pk", flat=True)), set(ids[:2]))
+        self.assertEqual(Payout.objects.count(), 2)
+
+    def test_future_bookings_are_never_deleted(self):
+        future = self.booking(Booking.Status.CONFIRMED)
+        self.make_past(2)
+        self.run_cmd("--keep", "0", "--yes")
+        self.assertEqual(list(Booking.objects.values_list("pk", flat=True)), [future.pk])
+
+    @override_settings(PAYSTACK_SECRET_KEY="sk_live_abc")
+    def test_refuses_with_live_key(self):
+        from django.core.management.base import CommandError
+        with self.assertRaises(CommandError):
+            self.run_cmd("--yes")

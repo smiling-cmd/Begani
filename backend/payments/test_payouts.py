@@ -1,15 +1,12 @@
 import hashlib
 import hmac
 import json
-from datetime import timedelta
 from unittest import mock
 
 from django.contrib.admin.sites import site
 from django.test import RequestFactory, override_settings
-from django.utils import timezone
 from rest_framework.test import APIClient
 
-from accounts.models import User
 from bookings.models import Booking
 from counsellors.models import TherapistProfile
 

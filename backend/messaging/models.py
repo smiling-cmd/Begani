@@ -1,12 +1,9 @@
-from django.db import models
-from django.db.models import Q
-
-# Create your models here.
 import uuid
 from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from encrypted_fields.fields import EncryptedTextField
 

@@ -8,7 +8,7 @@ from accounts.models import StudentProfile, User
 from activities.models import Activity, ActivityRegistration
 from administration.models import AuditLog
 from bookings.models import Booking
-from counsellors.models import AvailabilitySlot, TherapistProfile, TherapistVerification
+from counsellors.models import AvailabilitySlot, TherapistProfile
 from payments.models import Payment, Refund
 from resources.models import Resource, ResourceCategory
 

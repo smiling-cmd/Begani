@@ -67,12 +67,12 @@ def start_payment(*, user, phone, booking=None, registration=None):
                 raise PaymentError("You can pay once your counsellor has confirmed the session.", 409)
             if booking.starts_at <= timezone.now():
                 raise PaymentError("This session has already started.", 409)
-            amount, target = booking.fee_kes_snapshot, booking
+            amount = booking.fee_kes_snapshot
         else:
             registration = ActivityRegistration.objects.select_for_update().select_related("activity").get(pk=registration.pk)
             if registration.status != ActivityRegistration.Status.PENDING_PAYMENT:
                 raise PaymentError("This registration is not waiting for payment.", 409)
-            amount, target = registration.activity.fee_kes, registration
+            amount = registration.activity.fee_kes
         if amount <= 0:
             raise PaymentError("Nothing to pay for this one.", 409)
 

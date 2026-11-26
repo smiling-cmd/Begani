@@ -20,7 +20,7 @@ class Command(BaseCommand):
         parser.add_argument("--amount", type=int, default=1)
         parser.add_argument("--checkout-id")
 
-    def handle(self, *args, action, phone, amount, checkout_id, **opts):
+    def handle(self, *args, action, phone, amount, checkout_id, **_options):
         try:
             if action == "token":
                 token = daraja.get_token()

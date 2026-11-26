@@ -1,14 +1,10 @@
-from django.db import models
-
-from config.encrypted import EncryptedTextField
-
-# Create your models here.
 import uuid
+
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 
-from accounts.models import User, ClassGroup
+from accounts.models import ClassGroup, User
+from config.encrypted import EncryptedTextField
 
 
 class TherapistProfile(models.Model):

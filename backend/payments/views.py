@@ -106,7 +106,6 @@ from rest_framework.views import APIView as _APIView  # noqa: E402
 
 from accounts.throttles import PaymentStartThrottle  # noqa: E402
 from activities.models import ActivityRegistration  # noqa: E402
-from bookings.models import Booking  # noqa: E402
 
 from . import paystack, services  # noqa: E402
 from .models import Payment  # noqa: E402

@@ -8,6 +8,8 @@ import './AudioPlayer.css';
 // playing while the student moves between pages.
 const PlayerContext = createContext(null);
 
+// The hook lives beside its provider on purpose: they are one feature and always used together.
+// oxlint-disable-next-line react/only-export-components
 export function usePlayer() {
   const value = useContext(PlayerContext);
   if (!value) throw new Error('usePlayer must be used inside <PlayerProvider>');
@@ -93,6 +95,8 @@ export function PlayerProvider({ children }) {
 
   // Signing out stops the audio so it doesn't carry on over the login page
   useEffect(() => {
+    // Stopping the player when the session ends is the point of this effect.
+    // oxlint-disable-next-line react/set-state-in-effect
     if (!token && trackId) close();
   }, [token, trackId, close]);
 
