@@ -5,9 +5,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.db import transaction
+from django.utils.crypto import get_random_string
+
+from accounts.models import User
 from accounts.permissions import IsUniversityAdmin
+from administration.audit import log_admin_action
 from .models import TherapistProfile, AvailabilitySlot
+from .models import TherapistVerification
 from .serializers import (
+    AdminTherapistCreateSerializer,
+    AdminTherapistDetailSerializer,
     AdminTherapistSerializer,
     TherapistProfileSerializer,
     TherapistDetailSerializer,
@@ -114,11 +122,79 @@ class AdminTherapistApproveView(APIView):
             verification.save(update_fields=['verified_by', 'verified_at'])
             therapist.status = TherapistProfile.Status.APPROVED
             message = 'Therapist approved successfully.'
+            log_admin_action(request, 'therapist.approve', 'TherapistProfile', therapist.id)
         elif action == 'reject':
             therapist.status = TherapistProfile.Status.SUSPENDED
             message = 'Therapist rejected.'
+            log_admin_action(request, 'therapist.suspend', 'TherapistProfile', therapist.id)
         else:
             return Response({'error': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
 
         therapist.save(update_fields=['status'])
         return Response({'message': message, 'status': therapist.status})
+
+
+
+class AdminTherapistCreateView(APIView):
+    """Admin adds a therapist. The account is created active with a one-time temporary password;
+    the profile stays PENDING until the verification checklist is ticked and an admin approves."""
+
+    permission_classes = [IsUniversityAdmin]
+
+    def post(self, request):
+        serializer = AdminTherapistCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        d = serializer.validated_data
+        temp_password = get_random_string(12, 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789')
+        with transaction.atomic():
+            user = User.objects.create_user(
+                email=d['email'], password=temp_password, role=User.Role.THERAPIST,
+                full_name=d['full_name'], phone=d.get('phone', ''), is_active=True,
+            )
+            profile = TherapistProfile.objects.create(
+                user=user, type=d['type'], category=d['category'], display_name=d['display_name'],
+                title=d.get('title', ''), bio=d.get('bio', ''), approach=d.get('approach', ''),
+                languages=d.get('languages', ''), session_length_minutes=d.get('session_length_minutes', 50),
+                format=d['format'], location_text=d.get('location_text', ''), fee_kes=d.get('fee_kes'),
+                status=TherapistProfile.Status.PENDING,
+            )
+            TherapistVerification.objects.create(
+                therapist=profile, registration_body=d['registration_body'],
+                registration_number=d['registration_number'], licence_expiry=d['licence_expiry'],
+            )
+        log_admin_action(request, 'therapist.create', 'TherapistProfile', profile.id)
+        return Response(
+            {'therapist': AdminTherapistDetailSerializer(profile).data, 'temporary_password': temp_password},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class AdminTherapistDetailView(APIView):
+    permission_classes = [IsUniversityAdmin]
+
+    def get(self, request, pk):
+        therapist = get_object_or_404(TherapistProfile.objects.select_related('user'), id=pk)
+        return Response(AdminTherapistDetailSerializer(therapist).data)
+
+    def patch(self, request, pk):
+        therapist = get_object_or_404(TherapistProfile.objects.select_related('user'), id=pk)
+        serializer = AdminTherapistDetailSerializer(therapist, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        log_admin_action(request, 'therapist.update', 'TherapistProfile', therapist.id)
+        therapist.refresh_from_db()
+        return Response(AdminTherapistDetailSerializer(therapist).data)
+
+    def delete(self, request, pk):
+        therapist = get_object_or_404(TherapistProfile.objects.select_related('user'), id=pk)
+        if therapist.bookings.exists():
+            return Response(
+                {'error': 'This therapist has booking history, so they cannot be deleted. Suspend them instead.'},
+                status=status.HTTP_409_CONFLICT,
+            )
+        user = therapist.user
+        log_admin_action(request, 'therapist.delete', 'TherapistProfile', therapist.id)
+        with transaction.atomic():
+            therapist.delete()
+            user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

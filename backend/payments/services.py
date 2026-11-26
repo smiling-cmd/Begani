@@ -106,7 +106,7 @@ def start_payment(*, user, phone, booking=None, registration=None):
     payment.provider_status = str(data.get("status", ""))[:50]
     payment.status = Payment.Status.PENDING
     payment.save(update_fields=("provider_status", "status"))
-    if data.get("status") in ("success", "failed"):
+    if data.get("status") in ("success", "failed", "abandoned", "reversed"):
         apply_result(payment.reference, data)
         payment.refresh_from_db()
     return payment

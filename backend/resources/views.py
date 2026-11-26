@@ -56,14 +56,29 @@ class AdminResourceCreateView(generics.CreateAPIView):
             published_at=timezone.now(),
         )
 
-class AdminResourceDetailView(generics.RetrieveUpdateAPIView):
+class AdminResourceDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Admin-facing detail/update — allows fetching a single article for editing,
-    and saving updates (PATCH/PUT).
+    Admin-facing detail — fetch one resource for editing, save updates (PATCH/PUT),
+    or delete it (students' saved copies go with it).
     """
     queryset = Resource.objects.all()
     serializer_class = AdminResourceCreateSerializer
     permission_classes = [IsUniversityAdmin]
+
+class AdminResourceUnpublishView(generics.GenericAPIView):
+    """Admin-facing unpublish — moves a published resource back to DRAFT so students stop seeing it."""
+    queryset = Resource.objects.all()
+    serializer_class = AdminResourceCreateSerializer
+    permission_classes = [IsUniversityAdmin]
+
+    def post(self, request, *args, **kwargs):
+        resource = self.get_object()
+        if resource.status != Resource.Status.PUBLISHED:
+            return Response({"detail": "Only published resources can be unpublished."}, status=http_status.HTTP_400_BAD_REQUEST)
+        resource.status = Resource.Status.DRAFT
+        resource.save(update_fields=["status"])
+        return Response(AdminResourceCreateSerializer(resource, context={"request": request}).data)
+
 
 class AdminResourcePublishView(generics.GenericAPIView):
     """Admin-facing publish — flips a draft to PUBLISHED and stamps published_at."""

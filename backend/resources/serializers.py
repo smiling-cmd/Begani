@@ -123,6 +123,7 @@ class AdminResourceCreateSerializer(serializers.ModelSerializer):
         # Create nested references
         for index, ref_data in enumerate(references_data):
             ref_data.pop("id", None)
+            ref_data.pop("order", None)  # position comes from the list order
             ResourceReference.objects.create(
                 resource=resource,
                 order=index,
@@ -134,6 +135,9 @@ class AdminResourceCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         references_data = validated_data.pop("references", None)
         category_name = validated_data.pop("category", None)
+        # Multipart forms cannot send an empty list, so the admin form sends this flag to remove every reference.
+        if references_data is None and str(self.initial_data.get("clear_references", "")).lower() in ("1", "true"):
+            references_data = []
 
         if category_name:
             instance.category, _ = ResourceCategory.objects.get_or_create(
@@ -150,6 +154,7 @@ class AdminResourceCreateSerializer(serializers.ModelSerializer):
             instance.references.all().delete()
             for index, ref_data in enumerate(references_data):
                 ref_data.pop("id", None)
+                ref_data.pop("order", None)
                 ResourceReference.objects.create(resource=instance, order=index, **ref_data)
 
         return instance

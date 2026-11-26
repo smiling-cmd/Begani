@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import api from '../api';
-import { BookOpen, PlusCircle, Upload, Plus, Trash2, Save } from 'lucide-react';
+import { BookOpen, PlusCircle, Upload, Plus, Trash2, Save, Pencil } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import { ConfirmDialog, StatusChip } from '../components/admin/AdminUi';
 
 const emptyReference = {
   author: '',
@@ -45,32 +46,80 @@ export default function AdminResources() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [drafts, setDrafts] = useState([]);
-  const [publishingId, setPublishingId] = useState(null);
+  const [items, setItems] = useState([]);
+  const [busyId, setBusyId] = useState(null);
+  const [editing, setEditing] = useState(null); // the resource being edited, or null when creating
+  const [deleting, setDeleting] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
 
-  const loadDrafts = useCallback(() => {
+  const loadItems = useCallback(() => {
     api.get('/api/resources/admin/')
-      .then(({ data }) => {
-        const list = Array.isArray(data) ? data : data.results || [];
-        setDrafts(list.filter((item) => item.status === 'draft' || item.status === 'pending_review'));
-      })
-      .catch(() => { /* the form still works without the drafts list */ });
+      .then(({ data }) => setItems(Array.isArray(data) ? data : data.results || []))
+      .catch(() => { /* the form still works without the list */ });
   }, []);
 
-  useEffect(() => { loadDrafts(); }, [loadDrafts]);
+  useEffect(() => { loadItems(); }, [loadItems]);
 
-  const publishDraft = async (id) => {
-    setPublishingId(id);
+  const changeStatus = async (item, action) => {
+    setBusyId(item.id);
     setError('');
     setNotice('');
     try {
-      await api.post(`/api/resources/admin/${id}/publish/`);
-      setNotice('Resource published. Students can now find it in Resources.');
-      loadDrafts();
+      await api.post(`/api/resources/admin/${item.id}/${action}/`);
+      setNotice(action === 'publish' ? 'Resource published. Students can now find it in Resources.' : 'Resource unpublished. Students no longer see it.');
+      loadItems();
     } catch (requestError) {
       setError(getErrorMessage(requestError));
     } finally {
-      setPublishingId(null);
+      setBusyId(null);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData(emptyForm);
+    setCoverImage(null);
+    setVideoFile(null);
+    setAudioFile(null);
+    setReferences([]);
+  };
+
+  const startEdit = (item) => {
+    setEditing(item);
+    setError('');
+    setNotice('');
+    setFormData({
+      title: item.title || '', summary: item.summary || '', body: item.body || '', type: item.type || 'article',
+      category: item.category_name || '', media_url: item.media_url || '', language: item.language || 'en',
+      author_display: item.author_display || 'BEGANI Editorial Team', image_alt: item.image_alt || '',
+    });
+    setCoverImage(null);
+    setVideoFile(null);
+    setAudioFile(null);
+    setReferences((item.references || []).map((ref) => ({
+      author: ref.author || '', year: ref.year ?? '', title: ref.title || '', publication: ref.publication || '', url: ref.url || '', doi: ref.doi || '',
+    })));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditing(null);
+    resetForm();
+    setError('');
+  };
+
+  const confirmDelete = async () => {
+    setBusyId(deleting.id);
+    setDeleteError('');
+    try {
+      await api.delete(`/api/resources/admin/${deleting.id}/`);
+      setNotice(`“${deleting.title}” was deleted.`);
+      if (editing?.id === deleting.id) cancelEdit();
+      setDeleting(null);
+      loadItems();
+    } catch (requestError) {
+      setDeleteError(getErrorMessage(requestError));
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -108,7 +157,7 @@ export default function AdminResources() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const asDraft = event.nativeEvent.submitter?.value === 'draft';
+    const asDraft = editing ? editing.status !== 'published' : event.nativeEvent.submitter?.value === 'draft';
     if (saving) return;
     
     // Frontend validation matching backend (a draft can be incomplete, except for a title and topic)
@@ -139,7 +188,7 @@ export default function AdminResources() {
     setNotice('');
 
     const payload = new FormData();
-    payload.append('save_as', asDraft ? 'draft' : 'publish');
+    if (!editing) payload.append('save_as', asDraft ? 'draft' : 'publish');
     
     // 1. Append basic text fields
     Object.keys(formData).forEach(key => {
@@ -153,6 +202,7 @@ export default function AdminResources() {
 
     // 3. Append References correctly for Django REST Framework
     const cleanRefs = references.filter(r => r.author.trim() !== '' && r.title.trim() !== '');
+    if (editing && cleanRefs.length === 0) payload.append('clear_references', 'true');
     cleanRefs.forEach((ref, index) => {
       payload.append(`references[${index}]author`, ref.author);
       payload.append(`references[${index}]year`, ref.year || new Date().getFullYear());
@@ -164,18 +214,20 @@ export default function AdminResources() {
     });
 
     try {
-      await api.post('/api/resources/admin/create/', payload, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setFormData(emptyForm);
-      setCoverImage(null);
-      setVideoFile(null);
-      setAudioFile(null);
-      setReferences([]);
-      setNotice(asDraft ? 'Draft saved. Students cannot see it until you publish it.' : 'Resource published. Students can now find it in Resources.');
-      loadDrafts();
+      if (editing) {
+        await api.patch(`/api/resources/admin/${editing.id}/`, payload, { headers: { 'Content-Type': 'multipart/form-data' } });
+        setNotice('Changes saved.');
+        setEditing(null);
+      } else {
+        await api.post('/api/resources/admin/create/', payload, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        setNotice(asDraft ? 'Draft saved. Students cannot see it until you publish it.' : 'Resource published. Students can now find it in Resources.');
+      }
+      resetForm();
+      loadItems();
     } catch (requestError) {
       setError(getErrorMessage(requestError));
     } finally {
@@ -186,7 +238,7 @@ export default function AdminResources() {
   return (
     <div className="app-shell">
       <Sidebar />
-      <main className="page-content admin-content-page">
+      <main className="page-content admin-content-page admin-content-page-wide">
         <header className="page-heading">
           <div className="eyebrow"><BookOpen size={16} /> Content management</div>
           <h1>Manage Resources</h1>
@@ -194,8 +246,12 @@ export default function AdminResources() {
         </header>
 
         <section className="panel admin-content-panel">
-          <h2><PlusCircle size={20} /> Create a resource</h2>
-          <p className="muted-copy">Published resources appear in the student library immediately.</p>
+          <h2>{editing ? <Pencil size={20} /> : <PlusCircle size={20} />} {editing ? 'Edit resource' : 'Create a resource'}</h2>
+          <p className="muted-copy">
+            {editing
+              ? `You are editing “${editing.title}”. Leave file fields empty to keep the current files.`
+              : 'Published resources appear in the student library immediately.'}
+          </p>
           
           <form className="admin-content-form" onSubmit={handleSubmit}>
             <label className="admin-form-field">
@@ -305,33 +361,57 @@ export default function AdminResources() {
             {error && <p className="form-message error" role="alert">{error}</p>}
             {notice && <p className="form-message success" role="status">{notice}</p>}
             
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button className="button-secondary button" type="submit" value="draft" formNoValidate disabled={saving}>
-                <Save size={17} /> Save draft
-              </button>
-              <button className="button" type="submit" value="publish" disabled={saving}>
-                <PlusCircle size={17} /> {saving ? 'Saving…' : 'Publish resource'}
-              </button>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px', flexWrap: 'wrap' }}>
+              {editing ? (
+                <>
+                  <button className="button" type="submit" disabled={saving}><Save size={17} /> {saving ? 'Saving…' : 'Save changes'}</button>
+                  <button className="text-button" type="button" onClick={cancelEdit} disabled={saving}>Cancel editing</button>
+                </>
+              ) : (
+                <>
+                  <button className="button-secondary button" type="submit" value="draft" formNoValidate disabled={saving}>
+                    <Save size={17} /> Save draft
+                  </button>
+                  <button className="button" type="submit" value="publish" disabled={saving}>
+                    <PlusCircle size={17} /> {saving ? 'Saving…' : 'Publish resource'}
+                  </button>
+                </>
+              )}
             </div>
           </form>
 
-          {drafts.length > 0 && (
-            <div className="admin-drafts" style={{ marginTop: '28px' }}>
-              <h2>Waiting to publish</h2>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 0', display: 'grid', gap: '8px' }}>
-                {drafts.map((item) => (
-                  <li key={item.id} style={{ display: 'flex', gap: '12px', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', border: '1px solid var(--line)', borderRadius: '12px' }}>
-                    <span><strong>{item.title}</strong> <small className="muted-copy">· {item.status === 'draft' ? 'Draft' : 'Pending review'}</small></span>
-                    <button type="button" className="button" disabled={publishingId === item.id} onClick={() => publishDraft(item.id)}>
-                      {publishingId === item.id ? 'Publishing…' : 'Publish'}
-                    </button>
+          <div className="admin-drafts" style={{ marginTop: '32px' }}>
+            <h2>All resources ({items.length})</h2>
+            {items.length === 0 ? <p className="ap-empty">Nothing yet. Create the first resource above.</p> : (
+              <ul className="ap-list" style={{ marginTop: 10 }}>
+                {items.map((item) => (
+                  <li key={item.id} className="ap-row">
+                    <div className="ap-row-main">
+                      <h3>{item.title} <StatusChip status={item.status} /></h3>
+                      <p>{item.type} · {item.category_name}</p>
+                    </div>
+                    <div className="ap-row-actions">
+                      <button type="button" className="button button-secondary ap-small" onClick={() => startEdit(item)}><Pencil size={14} /> Edit</button>
+                      {item.status === 'published' ? (
+                        <button type="button" className="button button-secondary ap-small" disabled={busyId === item.id} onClick={() => changeStatus(item, 'unpublish')}>Unpublish</button>
+                      ) : (
+                        <button type="button" className="button ap-small" disabled={busyId === item.id} onClick={() => changeStatus(item, 'publish')}>{busyId === item.id ? 'Publishing…' : 'Publish'}</button>
+                      )}
+                      <button type="button" className="text-button" onClick={() => { setDeleteError(''); setDeleting(item); }} aria-label={`Delete ${item.title}`}>Delete</button>
+                    </div>
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            )}
+          </div>
         </section>
       </main>
+
+      {deleting && (
+        <ConfirmDialog title="Delete this resource?" confirmLabel="Delete resource" danger busy={busyId === deleting.id} error={deleteError} onConfirm={confirmDelete} onClose={() => setDeleting(null)}>
+          <p><strong>{deleting.title}</strong> will be removed for good, including any copies students saved. If you only want to hide it, use Unpublish instead.</p>
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

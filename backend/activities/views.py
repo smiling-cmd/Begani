@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.permissions import IsUniversityAdmin
+from administration.audit import log_admin_action
 from payments.services import expire_unpaid_registrations, payment_status_for, request_refund_if_paid
 from .models import Activity, ActivityRegistration
 
@@ -91,6 +92,93 @@ class AdminActivityCreateView(generics.CreateAPIView):
             status=Activity.Status.PUBLISHED,
             created_by=self.request.user,
         )
+
+
+ACTIVE_REGISTRATION = (ActivityRegistration.Status.REGISTERED, ActivityRegistration.Status.PENDING_PAYMENT)
+
+
+class AdminActivitySerializer(AdminActivityCreateSerializer):
+    """Admin list/edit shape: the create fields plus how many places are taken."""
+    status = serializers.CharField(read_only=True)
+    taken = serializers.SerializerMethodField()
+    registrations_total = serializers.SerializerMethodField()
+
+    class Meta(AdminActivityCreateSerializer.Meta):
+        fields = AdminActivityCreateSerializer.Meta.fields + ("taken", "registrations_total")
+
+    def get_taken(self, obj):
+        return obj.registrations.filter(status__in=ACTIVE_REGISTRATION).count()
+
+    def get_registrations_total(self, obj):
+        return obj.registrations.count()
+
+    def validate_starts_at(self, value):
+        # When editing, only insist on a future date if the date is actually being changed.
+        if self.instance is not None and value == self.instance.starts_at:
+            return value
+        return super().validate_starts_at(value)
+
+    def validate_capacity(self, value):
+        value = super().validate_capacity(value)
+        if self.instance is not None:
+            taken = self.instance.registrations.filter(status__in=ACTIVE_REGISTRATION).count()
+            if value < taken:
+                raise serializers.ValidationError(f"{taken} students are already registered. Capacity can't go below that.")
+        return value
+
+
+class AdminActivityListView(generics.ListAPIView):
+    serializer_class = AdminActivitySerializer
+    permission_classes = [IsUniversityAdmin]
+
+    def get_queryset(self):
+        return Activity.objects.prefetch_related("registrations").order_by("-starts_at")
+
+
+class AdminActivityDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Activity.objects.all()
+    serializer_class = AdminActivitySerializer
+    permission_classes = [IsUniversityAdmin]
+    http_method_names = ["get", "patch", "delete", "head", "options"]
+
+    def perform_update(self, serializer):
+        serializer.save()
+        log_admin_action(self.request, "activity.update", "Activity", serializer.instance.id)
+
+    def destroy(self, request, *args, **kwargs):
+        activity = self.get_object()
+        if activity.registrations.exists():
+            return Response(
+                {"detail": "Students have registered for this activity, so it can't be deleted. Cancel it instead, which releases places and queues refunds for paid ones."},
+                status=status.HTTP_409_CONFLICT,
+            )
+        log_admin_action(request, "activity.delete", "Activity", activity.id)
+        activity.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AdminActivityCancelView(APIView):
+    """Cancel an activity: hide it from students, release every place, queue refunds for paid ones."""
+
+    permission_classes = [IsUniversityAdmin]
+
+    def post(self, request, activity_id):
+        with transaction.atomic():
+            activity = get_object_or_404(Activity.objects.select_for_update(), id=activity_id)
+            if activity.status == Activity.Status.CANCELLED:
+                return Response({"detail": "This activity is already cancelled."}, status=status.HTTP_400_BAD_REQUEST)
+            activity.status = Activity.Status.CANCELLED
+            activity.save(update_fields=("status",))
+            now = timezone.now()
+            released = 0
+            for registration in activity.registrations.filter(status__in=ACTIVE_REGISTRATION):
+                registration.status = ActivityRegistration.Status.CANCELLED
+                registration.cancelled_at = now
+                registration.save(update_fields=("status", "cancelled_at"))
+                request_refund_if_paid(registration=registration, reason="Activity cancelled by organisers.")
+                released += 1
+        log_admin_action(request, "activity.cancel", "Activity", activity.id)
+        return Response({"message": f"Activity cancelled. {released} registration(s) released.", "released": released})
 
 
 class ActivityRegistrationSerializer(serializers.ModelSerializer):

@@ -1,0 +1,43 @@
+.ap-dialog { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow-y: auto; text-align: left; }
+.ap-dialog.is-wide { width: min(780px, calc(100vw - 32px)); }
+.ap-dialog h2 { margin: 0 36px 14px 0; font-family: var(--font-heading); font-weight: 400; color: var(--heading); }
+.ap-form { display: grid; gap: 18px; }
+.ap-form fieldset { display: grid; gap: 12px; margin: 0; padding: 14px 16px 16px; border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
+.ap-form legend { padding: 0 6px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ap-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ap-checks { display: grid; gap: 8px; }
+.ap-check { display: flex; align-items: center; gap: 10px; color: var(--heading); font-size: 14px; }
+.ap-check input { width: 18px; height: 18px; accent-color: var(--forest); }
+.ap-dialog-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 6px; }
+.ap-confirm-body { color: var(--muted); line-height: 1.55; }
+.ap-confirm-body strong { color: var(--heading); }
+.ap-danger { background: #b3261e !important; border-color: #b3261e !important; color: #fff !important; }
+.ap-secret { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 12px; background: color-mix(in srgb, var(--forest) 6%, var(--card)); }
+.ap-secret code { font-size: 18px; letter-spacing: .04em; color: var(--heading); word-break: break-all; }
+
+.ap-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.ap-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.ap-filter { min-height: 34px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.ap-filter[aria-pressed='true'] { color: #fff; background: var(--forest); border-color: var(--forest); }
+.ap-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.ap-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
+.ap-row-main { min-width: 0; flex: 1 1 260px; }
+.ap-row-main h3 { margin: 0 0 3px; font-size: 16px; color: var(--heading); overflow-wrap: anywhere; }
+.ap-row-main p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.ap-row-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ap-small { min-height: 36px; padding: 0 14px; font-size: 13px; }
+.ap-chip { display: inline-flex; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: capitalize; color: #4a4a4a; background: #eceae3; }
+.ap-chip.is-approved, .ap-chip.is-published { color: #14532d; background: #dcfce7; }
+.ap-chip.is-pending, .ap-chip.is-draft, .ap-chip.is-pending_review { color: #7a4b00; background: #fdf0cf; }
+.ap-chip.is-suspended, .ap-chip.is-cancelled, .ap-chip.is-left { color: #8a1c14; background: #fde2df; }
+.ap-chip.is-completed { color: #1d3d7a; background: #dfe8fb; }
+:root[data-theme='dark'] .ap-chip { color: #d6d9d2; background: rgba(255,255,255,.08); }
+:root[data-theme='dark'] .ap-chip.is-approved, :root[data-theme='dark'] .ap-chip.is-published { color: #9be3b4; background: rgba(155,227,180,.14); }
+:root[data-theme='dark'] .ap-chip.is-pending, :root[data-theme='dark'] .ap-chip.is-draft, :root[data-theme='dark'] .ap-chip.is-pending_review { color: #f5d48a; background: rgba(245,212,138,.14); }
+:root[data-theme='dark'] .ap-chip.is-suspended, :root[data-theme='dark'] .ap-chip.is-cancelled, :root[data-theme='dark'] .ap-chip.is-left { color: #ffb4a9; background: rgba(255,180,169,.14); }
+.ap-empty { padding: 28px 12px; text-align: center; color: var(--muted); }
+.ap-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 4px; color: var(--muted); font-size: 13px; }
+
+.page-content:has(> .admin-content-page-wide) { grid-template-columns: minmax(0, 1fr); }
+.admin-content-panel.is-wide { max-width: 960px; }
+@media (max-width: 640px) { .ap-grid { grid-template-columns: 1fr; } .ap-row-actions { width: 100%; } }

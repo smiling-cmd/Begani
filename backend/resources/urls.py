@@ -4,6 +4,7 @@ from .views import (
     AdminResourcePublishView,
     AdminResourceDetailView,
     AdminResourceListView,
+    AdminResourceUnpublishView,
     ResourceListView,
 )
 
@@ -15,5 +16,6 @@ urlpatterns = [
     path("admin/", AdminResourceListView.as_view(), name="admin-resource-list"),
     path("admin/create/", AdminResourceCreateView.as_view(), name="admin-resource-create"),
     path("admin/<uuid:pk>/", AdminResourceDetailView.as_view(), name="admin-resource-detail"),
+    path("admin/<uuid:pk>/unpublish/", AdminResourceUnpublishView.as_view(), name="admin-resource-unpublish"),
     path("admin/<uuid:pk>/publish/", AdminResourcePublishView.as_view(), name="admin-resource-publish"),
 ]
