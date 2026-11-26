@@ -229,4 +229,5 @@ class PayoutAccountView(_APIView):
         if account.phone != phone[1:] or account.account_name != name:
             account.phone, account.account_name, account.recipient_code = phone[1:], name[:120], ""
             account.save()
+        services.queue_sweep_for_therapist(t)
         return _Resp(self._payload(account))

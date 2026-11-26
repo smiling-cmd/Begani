@@ -120,3 +120,13 @@ def initiate_transfer(*, amount_kes, recipient_code, reference, reason):
 
 def finalize_transfer(*, transfer_code, otp):
     return _request("POST", "/transfer/finalize_transfer", json={"transfer_code": transfer_code, "otp": otp}).get("data", {})
+
+
+def disable_transfer_otp():
+    """Step 1: Paystack sends a confirmation code to the business owner."""
+    return _request("POST", "/transfer/disable_otp").get("message", "")
+
+
+def finalize_disable_transfer_otp(otp):
+    """Step 2: enter that code to switch transfer OTP off."""
+    return _request("POST", "/transfer/disable_otp_finalize", json={"otp": otp}).get("message", "")

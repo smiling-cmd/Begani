@@ -189,6 +189,13 @@ GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
 PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
 PAYSTACK_API_BASE = os.environ.get('PAYSTACK_API_BASE', 'https://api.paystack.co')
 
+# Instant payouts: send the therapist's share as soon as a session is marked completed.
+# Set AUTO_PAYOUTS_ENABLED=0 to go back to manual. The daily cap limits how much can leave
+# automatically in one day; anything over waits for the next sweep (or an admin).
+# An admin can also pause it from Django admin: Platform settings > key "auto_payouts_paused", value "1".
+AUTO_PAYOUTS_ENABLED = env_bool('AUTO_PAYOUTS_ENABLED', True)
+AUTO_PAYOUT_DAILY_CAP_KES = int(os.environ.get('AUTO_PAYOUT_DAILY_CAP_KES', '50000'))
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

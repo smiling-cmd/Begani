@@ -67,6 +67,10 @@ class Booking(models.Model):
                 self.completed_at = timezone.now()
             self.save()
 
+            if to_status == "completed":
+                from payments.services import queue_payout_for_booking
+                queue_payout_for_booking(self.pk)
+
             if to_status in {
                 "declined",
                 "expired",

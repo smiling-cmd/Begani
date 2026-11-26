@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import timedelta
 from decimal import Decimal
@@ -10,7 +11,9 @@ from activities.models import ActivityRegistration
 from bookings.models import Booking
 
 from . import paystack
-from .models import LedgerEntry, Payment, Payout, Refund, TherapistPayoutAccount
+from .models import LedgerEntry, Payment, Payout, PlatformSetting, Refund, TherapistPayoutAccount
+
+logger = logging.getLogger(__name__)
 
 PENDING_STATES = (Payment.Status.INITIATED, Payment.Status.PENDING)
 TIMEOUT = timedelta(minutes=5)
@@ -322,3 +325,71 @@ def apply_transfer_event(data):
             return payout
         _apply_transfer_status(payout, data)
     return payout
+
+
+# ---- Instant (automatic) payouts ---------------------------------------------------------
+
+PAUSE_KEY = "auto_payouts_paused"
+
+
+def auto_payouts_active():
+    """On only when enabled in settings, Paystack is configured and no admin pause is set."""
+    if not getattr(settings, "AUTO_PAYOUTS_ENABLED", True) or not getattr(settings, "PAYSTACK_SECRET_KEY", ""):
+        return False
+    paused = PlatformSetting.objects.filter(key=PAUSE_KEY).values_list("value", flat=True).first()
+    return str(paused or "").strip().lower() not in ("1", "true", "yes", "on")
+
+
+def _sent_today_kes():
+    start = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
+    sent = Payout.objects.filter(
+        last_attempt_at__gte=start,
+        status__in=(Payout.Status.PROCESSING, Payout.Status.AWAITING_OTP, Payout.Status.PAID),
+    )
+    return sum(sent.values_list("net_kes", flat=True))
+
+
+def try_auto_payout(payout_id):
+    """Send one payout if automatic payouts are on. Never raises; leaves a reason on failure.
+
+    A payout that can't go (no number yet, over the daily cap, Paystack error) stays pending,
+    so the admin action or the next sweep can still send it.
+    """
+    try:
+        if not auto_payouts_active():
+            return None
+        payout = Payout.objects.select_related("booking").get(pk=payout_id)
+        if payout.status != Payout.Status.PENDING or payout.booking.status != Booking.Status.COMPLETED:
+            return None
+        if not TherapistPayoutAccount.objects.filter(therapist=payout.booking.therapist).exists():
+            return None
+        if _sent_today_kes() + payout.net_kes > settings.AUTO_PAYOUT_DAILY_CAP_KES:
+            Payout.objects.filter(pk=payout.pk).update(failure_reason="Daily automatic payout limit reached; will retry.")
+            return None
+        return send_payout(payout.pk)
+    except PayoutError as exc:
+        logger.warning("Auto payout %s not sent: %s", payout_id, exc)
+    except Exception:
+        logger.exception("Auto payout %s crashed", payout_id)
+    return None
+
+
+def run_auto_payouts(therapist=None):
+    """Sweep every payable payout (oldest first). Used after a number is added and by cron."""
+    qs = payable_payouts().order_by("booking__completed_at")
+    if therapist is not None:
+        qs = qs.filter(booking__therapist=therapist)
+    return [p for p in (try_auto_payout(pk) for pk in list(qs.values_list("pk", flat=True))) if p]
+
+
+def queue_payout_for_booking(booking_id):
+    """Call when a booking becomes completed. Runs once the transaction has committed."""
+    def _go():
+        payout = Payout.objects.filter(booking_id=booking_id).first()
+        if payout:
+            try_auto_payout(payout.pk)
+    transaction.on_commit(_go)
+
+
+def queue_sweep_for_therapist(therapist):
+    transaction.on_commit(lambda: run_auto_payouts(therapist))

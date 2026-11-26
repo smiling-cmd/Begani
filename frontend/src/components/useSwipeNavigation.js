@@ -4,7 +4,9 @@ import { useEffect, useRef } from 'react';
 const PAGE = '.app-shell > main';
 const SWIPE_KEY = 'begani-swipe-direction';
 const EDGE_GUARD = 24; // px from the screen edge left to the browser's own back gesture
-const COMMIT_DISTANCE = 70; // px a swipe must travel to change page
+const COMMIT_DISTANCE = 56; // px a slow swipe must travel to change page
+const FLICK_DISTANCE = 32; // px a quick flick must travel...
+const FLICK_SPEED = 0.3; // ...at this many px per millisecond
 const LOCK_DISTANCE = 10; // px before we decide if the gesture is horizontal or vertical
 const IGNORE = 'input, textarea, select, audio, video, canvas, [contenteditable="true"], [data-no-swipe], [role="dialog"], [role="slider"], .mobile-more-sheet';
 
@@ -67,7 +69,7 @@ export default function useSwipeNavigation({ paths, currentIndex, disabled, onNa
     if (!direction || !page || reducedMotion()) return () => window.clearTimeout(forget);
     page.classList.add(direction === 'next' ? 'swipe-in-from-right' : 'swipe-in-from-left');
     const done = () => page.classList.remove('swipe-in-from-right', 'swipe-in-from-left');
-    const timer = window.setTimeout(done, 320);
+    const timer = window.setTimeout(done, 240);
     return () => { window.clearTimeout(timer); done(); };
   }, []);
 
@@ -92,7 +94,7 @@ export default function useSwipeNavigation({ paths, currentIndex, disabled, onNa
       const touch = event.touches[0];
       if (touch.clientX < EDGE_GUARD || touch.clientX > window.innerWidth - EDGE_GUARD) return;
       if (event.target.closest?.(IGNORE) || insideHorizontalScroller(event.target)) return;
-      start = { x: touch.clientX, y: touch.clientY, locked: null };
+      start = { x: touch.clientX, y: touch.clientY, locked: null, time: performance.now() };
     };
 
     const onMove = (event) => {
@@ -115,14 +117,16 @@ export default function useSwipeNavigation({ paths, currentIndex, disabled, onNa
 
     const onEnd = (event) => {
       if (!start) return;
-      const { x, y, locked } = start;
+      const { x, y, locked, time } = start;
       start = null;
       const touch = event.changedTouches[0];
       const dx = touch.clientX - x;
       const dy = touch.clientY - y;
       const target = currentIndex + (dx < 0 ? 1 : -1);
       const selecting = String(window.getSelection?.() || '').length > 0;
-      const commit = locked === 'x' && Math.abs(dx) >= COMMIT_DISTANCE && Math.abs(dx) > Math.abs(dy) * 1.6
+      const speed = Math.abs(dx) / Math.max(1, performance.now() - time);
+      const farEnough = Math.abs(dx) >= COMMIT_DISTANCE || (Math.abs(dx) >= FLICK_DISTANCE && speed >= FLICK_SPEED);
+      const commit = locked === 'x' && farEnough && Math.abs(dx) > Math.abs(dy) * 1.6
         && list[target] && !selecting;
       if (!commit) {
         reset(locked === 'x');
@@ -133,15 +137,8 @@ export default function useSwipeNavigation({ paths, currentIndex, disabled, onNa
       document.addEventListener('click', swallowClick, { capture: true, once: true });
       window.setTimeout(() => document.removeEventListener('click', swallowClick, true), 500);
       writeDirection(dx < 0 ? 'next' : 'previous');
-      const element = page();
-      if (element && !reducedMotion()) {
-        element.style.transition = 'transform .12s ease-in, opacity .12s ease-in';
-        element.style.transform = `translateX(${dx < 0 ? -48 : 48}px)`;
-        element.style.opacity = '0';
-        window.setTimeout(() => navigateRef.current(list[target]), 110);
-      } else {
-        navigateRef.current(list[target]);
-      }
+      // Go straight away: the new page's own slide-in is the animation, so there is no wait here.
+      navigateRef.current(list[target]);
     };
 
     const onCancel = () => { start = null; reset(true); };
