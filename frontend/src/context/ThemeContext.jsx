@@ -11,6 +11,8 @@ export function ThemeProvider({ children }) {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem(storageKey, theme);
+    // Colours the phone's status bar to match the page so the app looks edge to edge.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#131815' : '#fbf8f0');
   }, [theme]);
 
   const toggleTheme = () => {

@@ -36,23 +36,16 @@ def _headers():
     return {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
 
 
-def _raw(method, path, **kwargs):
+def _request(method, path, **kwargs):
     headers = _headers()
     try:
         resp = requests.request(method, settings.PAYSTACK_API_BASE + path, headers=headers, timeout=20, **kwargs)
-        body = resp.json()
+        data = resp.json()
     except (requests.RequestException, ValueError) as exc:
         raise PaystackError("Could not reach the payment provider.") from exc
-    if not isinstance(body, dict):
-        raise PaystackError("Unexpected response from the payment provider.")
-    return resp.ok, body
-
-
-def _request(method, path, **kwargs):
-    ok, body = _raw(method, path, **kwargs)
-    if not ok or not body.get("status", False):
-        raise PaystackError(body.get("message") or "Payment provider error.")
-    return body
+    if not resp.ok or not data.get("status", False):
+        raise PaystackError(data.get("message") or "Payment provider error.")
+    return data
 
 
 def charge_mpesa(*, email, amount_kes, phone, reference):
@@ -64,15 +57,7 @@ def charge_mpesa(*, email, amount_kes, phone, reference):
         "reference": reference,
         "mobile_money": {"phone": phone, "provider": "mpesa"},
     }
-    ok, body = _raw("POST", "/charge", json=payload)
-    data = body.get("data") if isinstance(body.get("data"), dict) else {}
-    # Paystack can answer a real charge with a top-level status of false and a message such as
-    # "Charge attempted"; the charge's own data.status is what tells us what happened.
-    if data.get("status"):
-        data = dict(data)
-        data.setdefault("gateway_response", body.get("message") or "")
-        return data
-    raise PaystackError(body.get("message") or "Payment provider error.")
+    return _request("POST", "/charge", json=payload).get("data", {})
 
 
 def verify(reference):
@@ -85,3 +70,38 @@ def valid_signature(raw_body, signature):
         return False
     expected = hmac.new(key.encode(), raw_body, hashlib.sha512).hexdigest()
     return hmac.compare_digest(expected, signature)
+
+
+# ---- Transfers (payouts to therapists' M-Pesa) -------------------------------------------
+
+def create_recipient(*, name, phone_e164):
+    """Register an M-Pesa wallet as a transfer recipient. Returns the recipient_code."""
+    local = "0" + phone_e164.lstrip("+")[3:]  # +254712345678 -> 0712345678
+    data = _request(
+        "POST",
+        "/transferrecipient",
+        json={"type": "mobile_money", "name": name, "account_number": local, "bank_code": "MPESA", "currency": "KES"},
+    ).get("data", {})
+    if not data.get("recipient_code"):
+        raise PaystackError("Could not register the payout number.")
+    return data["recipient_code"]
+
+
+def initiate_transfer(*, amount_kes, recipient_code, reference, reason):
+    """Start a transfer from the Paystack balance. Status is 'otp', 'pending', 'success'..."""
+    return _request(
+        "POST",
+        "/transfer",
+        json={
+            "source": "balance",
+            "amount": int(amount_kes) * 100,
+            "recipient": recipient_code,
+            "reference": reference,
+            "reason": reason,
+            "currency": "KES",
+        },
+    ).get("data", {})
+
+
+def finalize_transfer(*, transfer_code, otp):
+    return _request("POST", "/transfer/finalize_transfer", json={"transfer_code": transfer_code, "otp": otp}).get("data", {})

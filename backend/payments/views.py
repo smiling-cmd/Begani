@@ -184,5 +184,49 @@ class PaystackWebhookView(_APIView):
         data = event.get("data") or {}
         if event.get("event") in ("charge.success", "charge.failed") and data.get("reference"):
             services.apply_result(data["reference"], data)
+        elif event.get("event") in ("transfer.success", "transfer.failed", "transfer.reversed"):
+            data = {**data, "status": event["event"].split(".", 1)[1]}
+            services.apply_transfer_event(data)
         return _Resp(status=200)
 
+
+class PayoutAccountView(_APIView):
+    """A private therapist's M-Pesa number for payouts. The full number is never sent back."""
+
+    permission_classes = [_IsAuth]
+
+    def _therapist(self, request):
+        from counsellors.models import TherapistProfile
+        t = getattr(request.user, "therapist_profile", None)
+        if t is None or t.type == TherapistProfile.Type.SCHOOL:
+            return None
+        return t
+
+    def _payload(self, account):
+        if account is None:
+            return {"has_account": False, "phone_masked": "", "account_name": ""}
+        return {"has_account": True, "phone_masked": services.mask_phone("+" + account.phone), "account_name": account.account_name}
+
+    def get(self, request):
+        t = self._therapist(request)
+        if t is None:
+            return _Resp({"detail": "Only private therapists have a payout account."}, status=403)
+        from .models import TherapistPayoutAccount
+        return _Resp(self._payload(TherapistPayoutAccount.objects.filter(therapist=t).first()))
+
+    def put(self, request):
+        t = self._therapist(request)
+        if t is None:
+            return _Resp({"detail": "Only private therapists have a payout account."}, status=403)
+        from .models import TherapistPayoutAccount
+        phone = paystack.normalize_phone(request.data.get("phone", ""))
+        name = (request.data.get("account_name") or "").strip()
+        if not phone:
+            return _Resp({"detail": "Enter a valid Safaricom number, e.g. 0712 345 678."}, status=400)
+        if len(name) < 3:
+            return _Resp({"detail": "Enter the name registered on that M-Pesa line."}, status=400)
+        account, _ = TherapistPayoutAccount.objects.get_or_create(therapist=t, defaults={"phone": phone[1:], "account_name": name})
+        if account.phone != phone[1:] or account.account_name != name:
+            account.phone, account.account_name, account.recipient_code = phone[1:], name[:120], ""
+            account.save()
+        return _Resp(self._payload(account))

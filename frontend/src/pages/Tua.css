@@ -59,7 +59,7 @@
 :root[data-theme='dark'] .tua-status-dot { box-shadow: 0 0 0 3px rgba(63, 155, 110, .3); }
 
 @media (max-width: 900px) {
-  .tua-page .tua-main { padding: 76px 12px calc(var(--mobile-nav-height, 64px) + 12px + env(safe-area-inset-bottom)); }
+  .tua-page .tua-main { padding: calc(76px + env(safe-area-inset-top)) 12px calc(var(--mobile-nav-height, 64px) + 12px + env(safe-area-inset-bottom)); }
   .tua-page .tua-chat-panel { border-radius: 20px; }
   .tua-header { padding: 12px 14px; gap: 10px; }
   .tua-header-avatar { width: 40px; height: 40px; }

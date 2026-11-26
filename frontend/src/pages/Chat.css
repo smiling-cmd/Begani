@@ -47,7 +47,7 @@
 :root[data-theme='dark'] .chat-avatar { color: #cfe4d6; background: #2c4a3b; }
 
 @media (max-width: 900px) {
-  .chat-page-content { padding-top: 76px; padding-bottom: calc(var(--mobile-nav-height, 64px) + 12px + env(safe-area-inset-bottom)); }
+  .chat-page-content { padding-top: calc(76px + env(safe-area-inset-top)); padding-bottom: calc(var(--mobile-nav-height, 64px) + 12px + env(safe-area-inset-bottom)); }
   .chat-page-content .chat-message { max-width: 84%; }
   .chat-page-content .chat-composer { margin: 0 10px 10px; }
 }

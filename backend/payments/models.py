@@ -4,6 +4,8 @@ from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+from config.encrypted import EncryptedTextField
+
 
 class PlatformSetting(models.Model):
     key = models.CharField(primary_key=True, max_length=50)
@@ -98,9 +100,24 @@ class Refund(models.Model):
         return f"Refund {self.id} - {self.amount} KES - {self.status}"
 
 
+class TherapistPayoutAccount(models.Model):
+    """Where a private therapist's share is sent (M-Pesa). The number is encrypted at rest."""
+
+    therapist = models.OneToOneField("counsellors.TherapistProfile", on_delete=models.CASCADE, related_name="payout_account")
+    phone = EncryptedTextField(help_text="Safaricom number as 2547XXXXXXXX")
+    account_name = models.CharField(max_length=120, help_text="Name registered on the M-Pesa line")
+    recipient_code = models.CharField(max_length=64, blank=True, help_text="Paystack transfer recipient")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Payout account for {self.therapist_id}"
+
+
 class Payout(models.Model):
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"
+        AWAITING_OTP = "awaiting_otp", "Awaiting OTP"
+        PROCESSING = "processing", "Processing"
         PAID = "paid", "Paid"
         FAILED = "failed", "Failed"
 
@@ -115,6 +132,11 @@ class Payout(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     mpesa_reference = models.CharField(max_length=100, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
+
+    transfer_reference = models.CharField(max_length=64, null=True, blank=True, unique=True)
+    transfer_code = models.CharField(max_length=64, blank=True)
+    failure_reason = models.CharField(max_length=255, blank=True)
+    last_attempt_at = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Automatically calculate commission if not set

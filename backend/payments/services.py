@@ -10,7 +10,7 @@ from activities.models import ActivityRegistration
 from bookings.models import Booking
 
 from . import paystack
-from .models import LedgerEntry, Payment, Payout, Refund
+from .models import LedgerEntry, Payment, Payout, Refund, TherapistPayoutAccount
 
 PENDING_STATES = (Payment.Status.INITIATED, Payment.Status.PENDING)
 TIMEOUT = timedelta(minutes=5)
@@ -106,7 +106,7 @@ def start_payment(*, user, phone, booking=None, registration=None):
     payment.provider_status = str(data.get("status", ""))[:50]
     payment.status = Payment.Status.PENDING
     payment.save(update_fields=("provider_status", "status"))
-    if data.get("status") in ("success", "failed", "abandoned", "reversed"):
+    if data.get("status") in ("success", "failed"):
         apply_result(payment.reference, data)
         payment.refresh_from_db()
     return payment
@@ -123,7 +123,7 @@ def apply_result(reference, data):
     payment.last_checked_at = timezone.now()
 
     if remote == "success":
-        if (data.get("amount") is not None and int(data["amount"]) != payment.amount * 100) or data.get("currency", "KES") != "KES":
+        if int(data.get("amount", -1)) != payment.amount * 100 or data.get("currency", "KES") != "KES":
             payment.status = Payment.Status.FAILED
             payment.result_description = "amount mismatch"
             payment.save()
@@ -210,3 +210,115 @@ def refresh_payment(payment):
     apply_result(payment.reference, data)
     payment.refresh_from_db()
     return payment
+
+
+# ---- Payouts to therapists ---------------------------------------------------------------
+
+class PayoutError(Exception):
+    pass
+
+
+def payable_payouts():
+    """Pending payouts for completed sessions whose therapist has a payout number."""
+    return Payout.objects.filter(
+        status=Payout.Status.PENDING,
+        booking__status=Booking.Status.COMPLETED,
+        booking__therapist__payout_account__isnull=False,
+    ).select_related("booking", "booking__therapist", "booking__therapist__payout_account")
+
+
+def mark_payout_paid(payout, reference=""):
+    """Idempotent: write ledger entries only the first time a payout becomes paid."""
+    if payout.status == Payout.Status.PAID:
+        return payout
+    payout.status = Payout.Status.PAID
+    payout.paid_at = timezone.now()
+    payout.failure_reason = ""
+    if reference:
+        payout.mpesa_reference = reference[:100]
+    payout.save(update_fields=("status", "paid_at", "failure_reason", "mpesa_reference"))
+    LedgerEntry.objects.create(booking=payout.booking, type=LedgerEntry.Type.PAYOUT_OUT, amount=payout.net_kes)
+    LedgerEntry.objects.create(booking=payout.booking, type=LedgerEntry.Type.COMMISSION, amount=payout.commission_kes)
+    return payout
+
+
+def _apply_transfer_status(payout, data):
+    status = data.get("status")
+    payout.transfer_code = data.get("transfer_code") or payout.transfer_code
+    if status == "success":
+        payout.save(update_fields=("transfer_code",))
+        mark_payout_paid(payout, data.get("reference") or "")
+    elif status == "otp":
+        payout.status = Payout.Status.AWAITING_OTP
+        payout.save(update_fields=("status", "transfer_code"))
+    elif status in ("failed", "reversed"):
+        payout.status = Payout.Status.PENDING
+        payout.failure_reason = str(data.get("reason") or data.get("message") or status)[:255]
+        payout.save(update_fields=("status", "transfer_code", "failure_reason"))
+    else:  # pending / received / queued
+        payout.status = Payout.Status.PROCESSING
+        payout.save(update_fields=("status", "transfer_code"))
+
+
+def send_payout(payout_id):
+    """Start the Paystack transfer for one payout. Raises PayoutError with a plain reason."""
+    error = None
+    with transaction.atomic():
+        payout = Payout.objects.select_for_update().select_related("booking__therapist").get(pk=payout_id)
+        if payout.status != Payout.Status.PENDING:
+            raise PayoutError("Already sent or paid.")
+        if payout.booking.status != Booking.Status.COMPLETED:
+            raise PayoutError("The session isn't marked completed.")
+        account = TherapistPayoutAccount.objects.filter(therapist=payout.booking.therapist).first()
+        if account is None:
+            raise PayoutError("The therapist hasn't added a payout number.")
+        try:
+            if not account.recipient_code:
+                account.recipient_code = paystack.create_recipient(name=account.account_name, phone_e164="+" + account.phone)
+                account.save(update_fields=("recipient_code",))
+            payout.transfer_reference = "po_" + uuid.uuid4().hex[:24]
+            payout.last_attempt_at = timezone.now()
+            payout.failure_reason = ""
+            payout.save(update_fields=("transfer_reference", "last_attempt_at", "failure_reason"))
+            data = paystack.initiate_transfer(
+                amount_kes=payout.net_kes, recipient_code=account.recipient_code,
+                reference=payout.transfer_reference, reason="Begani session payout",
+            )
+        except paystack.PaystackError as exc:
+            error = str(exc)
+        else:
+            _apply_transfer_status(payout, data)
+    if error:
+        # Saved outside the transaction so the reason survives. If the error says Paystack
+        # could not be reached, check Paystack > Transfers before retrying (the transfer may have gone through).
+        Payout.objects.filter(pk=payout_id).update(failure_reason=error[:255])
+        raise PayoutError(error)
+    payout.refresh_from_db()
+    return payout
+
+
+def finalize_payout(payout_id, otp):
+    with transaction.atomic():
+        payout = Payout.objects.select_for_update().select_related("booking").get(pk=payout_id)
+        if payout.status != Payout.Status.AWAITING_OTP or not payout.transfer_code:
+            raise PayoutError("Not waiting for an OTP.")
+        try:
+            data = paystack.finalize_transfer(transfer_code=payout.transfer_code, otp=otp)
+        except paystack.PaystackError as exc:
+            raise PayoutError(str(exc))
+        data = {**data, "transfer_code": payout.transfer_code}
+        _apply_transfer_status(payout, data)
+    return payout
+
+
+def apply_transfer_event(data):
+    """Handle transfer.success / transfer.failed / transfer.reversed webhooks (idempotent)."""
+    reference = data.get("reference")
+    if not reference:
+        return None
+    with transaction.atomic():
+        payout = Payout.objects.select_for_update().filter(transfer_reference=reference).first()
+        if payout is None or payout.status == Payout.Status.PAID:
+            return payout
+        _apply_transfer_status(payout, data)
+    return payout

@@ -75,9 +75,6 @@ export default function Sidebar() {
       <MobileHeader />
       <aside className={`sidebar sidebar-desktop${collapsed ? ' is-collapsed' : ''}`} aria-label="Main navigation">
         <div className="sidebar-brand">
-          <Link to={homePath} className="sidebar-mark" aria-label="Begani Home" title="Begani Home">
-            <Leaf size={20} aria-hidden="true" />
-          </Link>
           <Link to={homePath} className="brand-logo-link" aria-label="Begani Home">
             <img
               className="brand-logo-image"
@@ -165,15 +162,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
-    <button
-      type="button"
-      className="page-theme-toggle"
-      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      onClick={toggleTheme}
-    >
-      {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-    </button>
     <MobileBottomNav />
   </>
   );

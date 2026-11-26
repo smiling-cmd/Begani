@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { Wallet } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import PayoutAccountCard from '../components/PayoutAccountCard';
 import Sidebar from '../components/Sidebar';
 import api from '../api';
 import './TherapistReports.css';
@@ -9,6 +10,8 @@ const PAYOUT_STATUS_LABELS = {
   paid: 'Paid out',
   pending: 'Pending payout',
   failed: 'Payout failed',
+  processing: 'Sending now',
+  awaiting_otp: 'Sending now',
 };
 
 const money = (value) => `KES ${Number(value ?? 0).toLocaleString()}`;
@@ -56,6 +59,7 @@ export default function Earnings() {
         </header>
 
         {error && <p className="form-message error" role="alert">{error}</p>}
+        <PayoutAccountCard />
         {earnings?.estimated && (
           <p className="report-note">
             Some completed sessions do not have a payout record yet. Those figures use the platform commission rate ({commissionRate}%) until the payout is issued.
@@ -97,7 +101,7 @@ export default function Earnings() {
                     <td data-label="Commission">{money(item.commission_kes)}</td>
                     <td data-label="You receive" className="is-net">{money(item.net_kes)}</td>
                     <td data-label="Status">
-                      <span className={`report-pill${item.status === 'pending' ? ' is-pending' : item.status === 'failed' ? ' is-failed' : ''}`}>
+                      <span className={`report-pill${['pending', 'processing', 'awaiting_otp'].includes(item.status) ? ' is-pending' : item.status === 'failed' ? ' is-failed' : ''}`}>
                         {PAYOUT_STATUS_LABELS[item.status] ?? item.status}
                       </span>
                     </td>
