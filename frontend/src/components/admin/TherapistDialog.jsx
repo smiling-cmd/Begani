@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../../api';
 import { getErrorMessage } from './adminHelpers';
 import { Modal } from './AdminUi';
+import { SkeletonList } from '../Skeleton';
 
 const PRIVATE_CATEGORIES = [
   ['counsellor', 'Counsellor'],
@@ -117,7 +118,7 @@ export default function TherapistDialog({ mode, therapistId, onClose, onSaved })
 
   return (
     <Modal title={creating ? 'Add a therapist' : 'Review therapist'} onClose={onClose} wide busy={busy}>
-      {loading ? <p className="muted-copy" role="status">Loading…</p> : (
+      {loading ? <SkeletonList label="Loading therapist" rows={4} /> : (
         <form className="ap-form" onSubmit={submit}>
           <fieldset>
             <legend>Account</legend>

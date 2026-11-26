@@ -6,6 +6,7 @@ import { CalendarCheck, CalendarDays, CalendarPlus, Clock3, MessageCircle } from
 import { useNavigate } from 'react-router-dom';
 import { getGreeting } from '../utils/greeting';
 import './TherapistDashboard.css';
+import { SkeletonList } from '../components/Skeleton';
 
 function loadDashboard() {
   return Promise.all([
@@ -166,7 +167,7 @@ export default function TherapistDashboard() {
             <h2 id="priority-requests-title">Priority requests</h2>
             <span className="therapist-priority-badge">Urgent</span>
           </div>
-          {priorityLoading ? <p style={muted}>Loading priority requests…</p> : priorityError ? (
+          {priorityLoading ? <SkeletonList label="Loading priority requests" rows={2} /> : priorityError ? (
             <p style={muted} role="alert">{priorityError}</p>
           ) : activePriorityRequests.length === 0 ? (
             <p style={muted}>No active priority requests.</p>
@@ -208,7 +209,7 @@ export default function TherapistDashboard() {
             </form>
             <div className="therapist-availability">
               <h3>Your availability</h3>
-              {loading ? <p style={muted}>Loading slots…</p> : slots.length === 0 ? <p style={muted}>No slots added yet.</p> : (
+              {loading ? <SkeletonList label="Loading slots" rows={2} /> : slots.length === 0 ? <p style={muted}>No slots added yet.</p> : (
                 <div style={{ display: 'grid', gap: '0.6rem', maxHeight: 260, overflowY: 'auto' }}>
                   {slots.map((slot) => <div key={slot.id} className="therapist-availability-slot">
                     <Clock3 size={16} /> <span>{new Date(slot.starts_at).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span><strong style={{ marginLeft: 'auto', textTransform: 'capitalize' }}>{slot.status}</strong>
@@ -220,7 +221,7 @@ export default function TherapistDashboard() {
 
           <section className="panel therapist-dashboard-card">
             <h2 className="therapist-dashboard-section-title">Recent appointments</h2>
-            {loading ? <p style={muted}>Loading appointments…</p> : bookings.length === 0 ? <p style={muted}>No appointments yet.</p> : (
+            {loading ? <SkeletonList label="Loading appointments" rows={3} /> : bookings.length === 0 ? <p style={muted}>No appointments yet.</p> : (
               <div className="therapist-appointments-scroll">
                 <table className="therapist-appointments-table">
                   <thead>

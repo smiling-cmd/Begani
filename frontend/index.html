@@ -12,11 +12,43 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/icon-192.png" />
   <title>Begani — Share the load.</title>
-
+  <script>
+    // Apply the saved theme before anything paints, so a dark-mode user never sees a white flash.
+    try { if (localStorage.getItem('begani-theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) { /* storage blocked */ }
+  </script>
+  <style>
+    /* Shown while the app's JavaScript loads: same colours as the app, with soft shimmering blocks. */
+    html { background: #fbf8f0; }
+    html[data-theme='dark'] { background: #131815; color-scheme: dark; }
+    body { margin: 0; background: inherit; }
+    .boot { box-sizing: border-box; min-height: 100vh; display: flex; }
+    .boot-side { flex: none; width: 260px; padding: 24px 18px; display: grid; align-content: start; gap: 10px; border-right: 1px solid #dde6dd; background: #fffdf8; }
+    .boot-main { flex: 1; padding: 40px clamp(20px, 4vw, 56px); display: grid; align-content: start; gap: 18px; }
+    .boot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .boot i { display: block; border-radius: 12px; background: linear-gradient(100deg, #e9eee7 30%, #f7f8f3 50%, #e9eee7 70%); background-size: 220% 100%; animation: boot-sweep 1.4s linear infinite; }
+    html[data-theme='dark'] .boot-side { background: #1e2521; border-color: #36433b; }
+    html[data-theme='dark'] .boot i { background: linear-gradient(100deg, #2a332e 30%, #323d36 50%, #2a332e 70%); background-size: 220% 100%; }
+    @keyframes boot-sweep { to { background-position: -220% 0; } }
+    @media (max-width: 900px) { .boot-side { display: none; } .boot-main { padding: 16px 16px 90px; } .boot-grid { grid-template-columns: 1fr; } }
+    @media (prefers-reduced-motion: reduce) { .boot i { animation: none; } }
+  </style>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div class="boot" aria-hidden="true">
+      <div class="boot-side">
+        <i style="height:34px;width:70%;margin-bottom:16px"></i>
+        <i style="height:38px"></i><i style="height:38px"></i><i style="height:38px"></i><i style="height:38px"></i><i style="height:38px"></i><i style="height:38px"></i><i style="height:38px"></i>
+      </div>
+      <div class="boot-main">
+        <i style="height:30px;width:46%"></i>
+        <i style="height:14px;width:62%"></i>
+        <i style="height:170px;border-radius:22px"></i>
+        <div class="boot-grid"><i style="height:110px"></i><i style="height:110px"></i><i style="height:110px"></i></div>
+      </div>
+    </div>
+  </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

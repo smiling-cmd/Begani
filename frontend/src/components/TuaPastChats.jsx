@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bookmark, X } from 'lucide-react';
 import api from '../api';
+import { SkeletonList } from './Skeleton';
 
 function formatWhen(value) {
   const date = new Date(value);
@@ -44,7 +45,7 @@ export default function TuaPastChats({ currentId, onOpen, onClose, onSavedChange
         </button>
       </div>
       {error && <p className="tua-new-chat-error" role="alert">{error}</p>}
-      {chats === null && !error && <p className="tua-past-empty" role="status">Loading…</p>}
+      {chats === null && !error && <SkeletonList label="Loading past chats" rows={3} className="sk-compact" />}
       {chats && chats.length === 0 && <p className="tua-past-empty">No past chats yet. Your conversations will show up here.</p>}
       {chats && chats.length > 0 && (
         <ul className="tua-past-list">

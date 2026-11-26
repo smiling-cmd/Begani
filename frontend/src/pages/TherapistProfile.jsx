@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import onlineSessionPhoto from '../assets/online.jpeg';
 import inPersonSessionPhoto from '../assets/physical .jpeg';
+import { LoadingRegion, Skeleton, SkeletonCards, SkeletonLines } from '../components/Skeleton';
 
 export default function TherapistProfile() {
   const { id } = useParams();
@@ -62,7 +63,12 @@ export default function TherapistProfile() {
         </Link>
 
         {loading ? (
-          <p>Loading profile...</p>
+          <LoadingRegion label="Loading profile">
+            <Skeleton circle width={96} height={96} />
+            <Skeleton height={28} width="45%" style={{ marginTop: 16 }} />
+            <SkeletonLines lines={4} className="sk-profile-lines" />
+            <SkeletonCards count={3} height={90} />
+          </LoadingRegion>
         ) : error ? (
           <p className="form-message error" role="alert">{error}</p>
         ) : (

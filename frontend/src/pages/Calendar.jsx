@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import './Calendar.css';
+import { SkeletonList } from '../components/Skeleton';
 
 const TIME_ZONE = 'Africa/Nairobi';
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -319,7 +320,7 @@ export default function CalendarPage() {
               <span>{selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}</span>
             </div>
 
-            {loading ? <p className="muted-copy">Loading your calendar…</p> : (
+            {loading ? <SkeletonList label="Loading your calendar" rows={4} /> : (
               <>
                 {errors.length > 0 && (
                   <div className="calendar-load-error" role="status">

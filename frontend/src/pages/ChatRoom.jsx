@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import { dayKeyOf, formatClock, formatDayLabel, initials } from './chatFormat';
 import './Chat.css';
+import { SkeletonBubbles } from '../components/Skeleton';
 
 function getMessage(error, fallback) {
   const detail = error.response?.data?.error || error.response?.data?.detail;
@@ -117,7 +118,7 @@ export default function ChatRoom() {
             </button>
           </div>
         ) : !currentThread ? (
-          <div className="panel chat-state" role="status">Loading conversation…</div>
+          <div className="panel chat-state"><SkeletonBubbles /></div>
         ) : (
           <section className="panel chat-room-panel" aria-label={`Conversation with ${otherName || 'counsellor'}`}>
             <div className="chat-feed" aria-live="polite" aria-relevant="additions">

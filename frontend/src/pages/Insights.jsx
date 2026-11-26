@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import api from '../api';
 import Sidebar from '../components/Sidebar';
 import './TherapistReports.css';
+import { SkeletonList } from '../components/Skeleton';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -70,7 +71,7 @@ export default function Insights() {
 
           <h3>Bookings by month ({year})</h3>
           {loading ? (
-            <p className="report-empty">Loading your bookings…</p>
+            <SkeletonList label="Loading your bookings" rows={3} />
           ) : monthly.length === 0 ? (
             <p className="report-empty">No bookings yet this year.</p>
           ) : (
@@ -94,7 +95,7 @@ export default function Insights() {
 
           <h3>{isSchool ? 'By class' : 'By school'}</h3>
           {loading ? (
-            <p className="report-empty">Loading…</p>
+            <SkeletonList rows={3} />
           ) : breakdown.length === 0 ? (
             <p className="report-empty">{isSchool ? 'No class breakdown yet.' : 'No school breakdown yet.'}</p>
           ) : (

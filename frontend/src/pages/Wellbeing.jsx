@@ -34,6 +34,7 @@ import heroPhoto from '../assets/pages/wellbeing-hero.webp';
 import './Wellbeing.css';
 import '../components/wellbeing/FocusSleep.css';
 import './WellbeingHub.css';
+import { Skeleton, SkeletonList } from '../components/Skeleton';
 
 // Faces shown next to past check-ins. The daily check-in itself lives on Home.
 const moods = [
@@ -239,7 +240,7 @@ export default function Wellbeing() {
               <span className="wb-count">{checkins.length} total</span>
             </div>
             {moodError && <p className="form-message error" role="alert">{moodError}</p>}
-            {loadingMoods ? <p className="muted-copy">Loading your check-ins…</p> : checkins.length === 0 ? (
+            {loadingMoods ? <SkeletonList label="Loading your check-ins" rows={3} /> : checkins.length === 0 ? (
               <p className="muted-copy wb-empty">No check-ins yet. Your daily check-in lives on Home, and each one will show up here.</p>
             ) : (
               <>
@@ -270,7 +271,7 @@ export default function Wellbeing() {
                 <div className="week-empty-bars" aria-hidden="true">
                   {[45, 70, 55, 85, 60, 75, 50].map((height, index) => <span key={index} style={{ height: `${height}%` }} />)}
                 </div>
-                <p className="mood-insight-line">{loadingMoods ? 'Loading your week…' : weekLine}</p>
+                <p className="mood-insight-line">{loadingMoods ? <Skeleton height="0.8rem" width="70%" /> : weekLine}</p>
               </div>
             ) : (
               <>
@@ -330,7 +331,7 @@ export default function Wellbeing() {
               <div className="journal-form-footer"><span role="status">{journalSaved ? 'Entry saved' : `${journalDraft.length}/4000`}</span><button type="submit" className="button" disabled={!journalDraft.trim() || savingJournal}>{savingJournal ? 'Saving…' : 'Save entry'}</button></div>
             </form>
             {journalError && <p className="form-message error" role="alert">{journalError}</p>}
-            {loadingJournal ? <p className="muted-copy">Loading your journal…</p> : journalEntries.length === 0 ? (
+            {loadingJournal ? <SkeletonList label="Loading your journal" rows={3} /> : journalEntries.length === 0 ? (
               <p className="muted-copy journal-empty">No entries yet. Your writing is private to your account.</p>
             ) : (
               <div className="journal-list">

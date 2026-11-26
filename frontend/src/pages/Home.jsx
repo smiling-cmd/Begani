@@ -11,6 +11,7 @@ import heroImage from '../assets/home/hero-campus.webp';
 import './Home.css';
 import { getGreeting } from '../utils/greeting';
 import LateNightPrompt from '../components/LateNightPrompt';
+import { Skeleton } from '../components/Skeleton';
 
 const BOOKING_STATUS_LABELS = {
   requested: 'Awaiting confirmation',
@@ -196,7 +197,7 @@ export default function Home() {
                   icon={<Calendar size={18} />}
                   title="Next session"
                   subtitle={
-                    glance.loading ? 'Loading…'
+                    glance.loading ? <Skeleton height="0.8rem" width="75%" />
                       : glance.failed.session ? 'Could not load right now'
                       : glance.session
                         ? `${formatWhen(glance.session.starts_at)} · ${BOOKING_STATUS_LABELS[glance.session.status] ?? glance.session.status}`
@@ -208,7 +209,7 @@ export default function Home() {
                   icon={<Mountain size={18} />}
                   title="Next activity"
                   subtitle={
-                    glance.loading ? 'Loading…'
+                    glance.loading ? <Skeleton height="0.8rem" width="75%" />
                       : glance.failed.activity ? 'Could not load right now'
                       : glance.activity
                         ? `${glance.activity.activity_title} · ${formatWhen(glance.activity.activity_starts_at)}`
@@ -220,7 +221,7 @@ export default function Home() {
                   icon={<Leaf size={18} />}
                   title="Mood check-ins"
                   subtitle={
-                    glance.loading ? 'Loading…'
+                    glance.loading ? <Skeleton height="0.8rem" width="75%" />
                       : glance.failed.mood ? 'Could not load right now'
                       : getStreakSubtitle(glance.mood)
                   }

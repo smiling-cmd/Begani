@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import { formatThreadTime, initials } from './chatFormat';
 import './Chat.css';
+import { SkeletonList } from '../components/Skeleton';
 
 export default function ChatInbox() {
   const { user, token } = useContext(AuthContext);
@@ -52,7 +53,7 @@ export default function ChatInbox() {
         </header>
 
         {loading ? (
-          <div className="panel chat-state" role="status">Loading conversations…</div>
+          <SkeletonList label="Loading conversations" rows={4} avatar />
         ) : error ? (
           <div className="panel chat-state" role="alert">
             <p>{error}</p>

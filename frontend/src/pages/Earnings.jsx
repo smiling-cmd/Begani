@@ -5,6 +5,7 @@ import PayoutAccountCard from '../components/PayoutAccountCard';
 import Sidebar from '../components/Sidebar';
 import api from '../api';
 import './TherapistReports.css';
+import { SkeletonList } from '../components/Skeleton';
 
 const PAYOUT_STATUS_LABELS = {
   paid: 'Paid out',
@@ -77,7 +78,7 @@ export default function Earnings() {
           <h2 id="payments-title">Payments and payouts</h2>
 
           {loading ? (
-            <p className="report-empty">Loading your payments…</p>
+            <SkeletonList label="Loading your payments" rows={3} />
           ) : items.length === 0 ? (
             <p className="report-empty">No completed sessions yet.</p>
           ) : (

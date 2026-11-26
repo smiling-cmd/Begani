@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import useSwipeNavigation from './useSwipeNavigation';
 import './MobileBottomNav.css';
 
 const CHAT_PATHS = ['/chats', '/therapist-chats'];
@@ -79,6 +80,17 @@ export default function MobileBottomNav() {
   const { tabs: allTabs, more } = NAV_BY_ROLE[user?.role] || NAV_BY_ROLE.student;
   const tabs = allTabs.filter((item) => !item.hideFor?.(user));
   const moreActive = more.some((item) => isHere(item, location.pathname));
+
+  // Swiping steps through the tabs and then the pages in More, in the same order as the menu.
+  const swipeItems = [...tabs, ...more];
+  const swipePaths = swipeItems.map((item) => item.to);
+  const swipeIndex = swipeItems.findIndex((item) => isHere(item, location.pathname));
+  useSwipeNavigation({
+    paths: swipePaths,
+    currentIndex: swipeIndex,
+    disabled: open,
+    onNavigate: navigate,
+  });
 
   const closeSheet = (returnFocus = true) => {
     setOpenAt(null);

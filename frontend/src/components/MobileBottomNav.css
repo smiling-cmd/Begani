@@ -213,3 +213,17 @@
   .mobile-more-sheet { animation: none; }
   .mobile-nav-icon { transition: none; }
 }
+
+/* Swipe between pages: the new page slides in from the side you swiped towards. */
+@keyframes swipe-in-from-right { from { opacity: 0; transform: translateX(36px); } to { opacity: 1; transform: none; } }
+@keyframes swipe-in-from-left { from { opacity: 0; transform: translateX(-36px); } to { opacity: 1; transform: none; } }
+.app-shell > main.swipe-in-from-right { animation: swipe-in-from-right .28s cubic-bezier(.2, .8, .2, 1) both; }
+.app-shell > main.swipe-in-from-left { animation: swipe-in-from-left .28s cubic-bezier(.2, .8, .2, 1) both; }
+@media (min-width: 901px), (prefers-reduced-motion: reduce) {
+  .app-shell > main.swipe-in-from-right, .app-shell > main.swipe-in-from-left { animation: none; }
+}
+
+/* Horizontal swipes belong to the app on phones: stop the browser treating them as "go back". */
+@media (max-width: 900px) {
+  html, body { overscroll-behavior-x: none; }
+}

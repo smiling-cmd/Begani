@@ -10,6 +10,7 @@ import ResourceViewer from '../components/ResourceViewer';
 import ArtScene from '../components/ResourceArt';
 import { ACTION_LABELS, TYPE_LABELS, isAudioUrl } from '../utils/resourceMedia';
 import './Resources.css';
+import { SkeletonCards } from '../components/Skeleton';
 
 const FORMATS = [
   { id: 'read', label: 'Read', blurb: 'Articles and guides', types: ['article', 'guide'], icon: BookOpen },
@@ -202,7 +203,7 @@ export default function Resources() {
           </div>
         )}
 
-        {loading ? <p className="muted-copy">Loading resources…</p> : error ? (
+        {loading ? <SkeletonCards label="Loading resources" count={6} height={200} /> : error ? (
           <section className="empty-state panel" role="alert">
             <h2>Resources are unavailable</h2>
             <p>{error}</p>

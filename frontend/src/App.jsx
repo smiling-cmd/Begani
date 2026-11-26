@@ -33,6 +33,7 @@ import NotFound from './pages/NotFound';
 import LegalPage from './pages/LegalPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import { PageSkeleton } from './components/Skeleton';
 
 
 const homeFor = (role) => (role === 'admin' ? '/admin-dashboard' : role === 'therapist' ? '/therapist-dashboard' : '/home');
@@ -41,7 +42,7 @@ const homeFor = (role) => (role === 'admin' ? '/admin-dashboard' : role === 'the
 const ProtectedRoute = ({ children, allowedRoles, allowUser }) => {
   const { token, user, initializing } = useContext(AuthContext);
   if (!token) return <Navigate to="/login" replace />;
-  if (initializing) return <main className="page-content"><p role="status">Loading your account…</p></main>;
+  if (initializing) return <PageSkeleton />;
   if (!user) return <Navigate to="/login" replace />;
   if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to={homeFor(user.role)} replace />;
   if (allowUser && !allowUser(user)) return <Navigate to={homeFor(user.role)} replace />;

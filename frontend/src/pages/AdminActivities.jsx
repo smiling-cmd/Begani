@@ -4,6 +4,7 @@ import { CalendarPlus, Mountain, Pencil } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { getErrorMessage } from '../components/admin/adminHelpers';
 import { ConfirmDialog, Modal, StatusChip } from '../components/admin/AdminUi';
+import { SkeletonList } from '../components/Skeleton';
 
 const TYPES = [
   ['hiking', 'Hiking'], ['painting', 'Painting'], ['yoga', 'Yoga'], ['music', 'Music'], ['reading_club', 'Reading club'],
@@ -162,7 +163,7 @@ export default function AdminActivities() {
           {error && <p className="form-message error" role="alert">{error}</p>}
           {notice && <p className="form-message success" role="status">{notice}</p>}
 
-          {loading ? <p className="muted-copy" role="status">Loading activities…</p> : activities.length === 0 ? (
+          {loading ? <SkeletonList label="Loading activities" rows={4} /> : activities.length === 0 ? (
             <p className="ap-empty">No activities yet. Create the first one.</p>
           ) : (
             <ul className="ap-list">

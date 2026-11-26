@@ -6,6 +6,7 @@ import TherapistDialog from '../components/admin/TherapistDialog';
 import { formatLabel, getErrorMessage } from '../components/admin/adminHelpers';
 import { ConfirmDialog, Modal, StatusChip } from '../components/admin/AdminUi';
 import { AuthContext } from '../context/AuthContext';
+import { SkeletonList } from '../components/Skeleton';
 
 const FILTERS = [['all', 'All'], ['pending', 'Pending'], ['approved', 'Approved'], ['suspended', 'Suspended']];
 
@@ -143,7 +144,7 @@ export default function AdminDashboard() {
           {notice && <p className="form-message success" role="status">{notice}</p>}
 
           {loading ? (
-            <p className="muted-copy" role="status">Loading therapist accounts…</p>
+            <SkeletonList label="Loading therapist accounts" rows={4} avatar />
           ) : visible.length === 0 ? (
             <p className="ap-empty">{therapists.length === 0 ? 'No therapists yet. Add the first one.' : 'No therapists with this status.'}</p>
           ) : (

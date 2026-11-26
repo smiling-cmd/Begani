@@ -6,6 +6,7 @@ import { AuthContext } from '../context/AuthContext';
 import ThemeContext from '../context/ThemeContextValue';
 import logoOnLight from '../assets/logo1.png';
 import logoLight from '../assets/logo-light.png';
+import { SkeletonList } from './Skeleton';
 
 function formatDate(value) {
   const date = new Date(value);
@@ -113,7 +114,7 @@ export default function MobileHeader() {
               </div>
               {error && <p className="form-message error" role="alert">{error}</p>}
               {loading ? (
-                <p className="mobile-notification-empty" role="status">Loading notifications…</p>
+                <SkeletonList label="Loading notifications" rows={3} className="sk-compact" />
               ) : notifications.length === 0 ? (
                 <p className="mobile-notification-empty">You're all caught up.</p>
               ) : (

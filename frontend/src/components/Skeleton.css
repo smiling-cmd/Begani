@@ -1,0 +1,50 @@
+/* Loading placeholders: soft shapes with a light sweep. Colours come from the theme tokens, so they
+   suit light and dark mode, and the sweep stops for people who prefer reduced motion. */
+.sk {
+  --sk-base: color-mix(in srgb, var(--line) 55%, var(--surface-subtle));
+  --sk-shine: color-mix(in srgb, var(--card) 60%, var(--surface-subtle));
+  display: block;
+  max-width: 100%;
+  min-height: 0.5rem;
+  border-radius: 8px;
+  background: linear-gradient(100deg, var(--sk-base) 30%, var(--sk-shine) 50%, var(--sk-base) 70%);
+  background-size: 220% 100%;
+  animation: sk-sweep 1.4s linear infinite;
+}
+@keyframes sk-sweep { to { background-position: -220% 0; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+
+.sk-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.sk-lines { display: grid; gap: 10px; }
+.sk-list { display: grid; gap: 14px; }
+.sk-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
+.sk-row-text { flex: 1; min-width: 0; display: grid; gap: 9px; }
+.sk-avatar { flex: none; }
+
+.sk-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 18px; }
+.sk-card { display: grid; gap: 10px; }
+
+.sk-bubbles { display: grid; gap: 14px; padding: 8px 4px; }
+.sk-bubbles .sk-mine { justify-self: end; }
+
+/* Whole-app loading screen */
+.sk-page { min-height: 100vh; min-height: 100dvh; }
+.sk-sidebar { flex: none; width: 260px; box-sizing: border-box; padding: 24px 18px; display: grid; align-content: start; gap: 26px; border-right: 1px solid var(--line); background: var(--card); }
+.sk-sidebar-links { display: grid; gap: 10px; }
+.sk-main { flex: 1 1 0; min-width: 0; box-sizing: border-box; padding: 40px clamp(20px, 4vw, 56px); display: grid; align-content: start; gap: 18px; }
+.sk-topbar { display: none; }
+.sk-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+
+@media (max-width: 900px) {
+  .sk-sidebar { display: none; }
+  .sk-main { padding: calc(14px + env(safe-area-inset-top)) 16px 90px; }
+  .sk-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .sk-topbar-icons { display: flex; gap: 10px; }
+  .sk-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Compact variant for small panels (notifications, past chats) */
+.sk-list.sk-compact { gap: 8px; padding: 6px 0; }
+.sk-compact .sk-row { padding: 10px 12px; border-radius: 12px; }
+.sk-profile-lines { margin: 14px 0 20px; }
