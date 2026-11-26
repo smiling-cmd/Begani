@@ -165,6 +165,15 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    <button
+      type="button"
+      className="page-theme-toggle"
+      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      onClick={toggleTheme}
+    >
+      {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
     <MobileBottomNav />
   </>
   );

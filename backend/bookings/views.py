@@ -106,7 +106,7 @@ class TherapistBookingListView(generics.ListAPIView):
         if not therapist_profile:
             return Booking.objects.none()
         expire_stale_bookings()
-        return Booking.objects.filter(therapist=therapist_profile).order_by('-requested_at')
+        return Booking.objects.filter(therapist=therapist_profile).prefetch_related('payments').order_by('-requested_at')
 
 
 # --- 2b. Aggregated, anonymised practice stats (Therapist side) ---

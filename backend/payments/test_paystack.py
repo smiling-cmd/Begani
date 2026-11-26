@@ -214,3 +214,48 @@ class ActivityFlowTests(PaymentTestBase):
         expire_unpaid_registrations()
         reg.refresh_from_db()
         self.assertEqual(reg.status, ActivityRegistration.Status.CANCELLED)
+
+
+class ChargeParsingTests(TestCase):
+    @override_settings(PAYSTACK_SECRET_KEY=KEY)
+    def test_charge_attempted_with_status_false_still_returns_charge_data(self):
+        body = {"status": False, "message": "Charge attempted", "data": {"status": "pay_offline", "reference": "r"}}
+        with mock.patch.object(paystack, "_raw", return_value=(True, body)):
+            data = paystack.charge_mpesa(email="a@b.c", amount_kes=5, phone="+254712345678", reference="r")
+        self.assertEqual(data["status"], "pay_offline")
+
+    @override_settings(PAYSTACK_SECRET_KEY=KEY)
+    def test_charge_without_data_raises_with_message(self):
+        with mock.patch.object(paystack, "_raw", return_value=(False, {"status": False, "message": "Invalid key"})):
+            with self.assertRaises(paystack.PaystackError):
+                paystack.charge_mpesa(email="a@b.c", amount_kes=5, phone="+254712345678", reference="r")
+
+
+class TherapistVisibilityAndAdminTests(PaymentTestBase):
+    def test_therapist_sees_payment_status(self):
+        b = self.booking()
+        r, _ = self.pay(f"/api/payments/booking/{b.id}/pay/")
+        t = APIClient()
+        t.force_authenticate(self.therapist.user)
+        rows = t.get("/api/bookings/therapist-bookings/").data if False else None
+        from bookings.serializers import TherapistBookingSerializer
+        self.assertEqual(TherapistBookingSerializer(b).data["payment_status"], "processing")
+        with mock.patch.object(paystack, "verify", return_value={"status": "success", "amount": 100000, "currency": "KES"}):
+            self.client.get(f"/api/payments/{r.data['id']}/")
+        b = Booking.objects.get(pk=b.pk)
+        self.assertEqual(TherapistBookingSerializer(b).data["payment_status"], "paid")
+
+    def test_admin_mark_paid_writes_ledger_once(self):
+        from django.contrib.admin.sites import site
+        from django.test import RequestFactory
+        b = self.booking()
+        payout = Payout.objects.create(booking=b, gross_kes=1000, commission_rate_percent=10)
+        admin_obj = site._registry[Payout]
+        req = RequestFactory().post("/")
+        req.user = self.user
+        req._messages = mock.MagicMock()
+        admin_obj.mark_paid(req, Payout.objects.all())
+        admin_obj.mark_paid(req, Payout.objects.all())
+        payout.refresh_from_db()
+        self.assertEqual(payout.status, "paid")
+        self.assertEqual(LedgerEntry.objects.filter(type="payout_out").count(), 1)

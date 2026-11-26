@@ -106,7 +106,7 @@ def start_payment(*, user, phone, booking=None, registration=None):
     payment.provider_status = str(data.get("status", ""))[:50]
     payment.status = Payment.Status.PENDING
     payment.save(update_fields=("provider_status", "status"))
-    if data.get("status") in ("success", "failed"):
+    if data.get("status") in ("success", "failed", "abandoned", "reversed"):
         apply_result(payment.reference, data)
         payment.refresh_from_db()
     return payment
@@ -123,7 +123,7 @@ def apply_result(reference, data):
     payment.last_checked_at = timezone.now()
 
     if remote == "success":
-        if int(data.get("amount", -1)) != payment.amount * 100 or data.get("currency", "KES") != "KES":
+        if (data.get("amount") is not None and int(data["amount"]) != payment.amount * 100) or data.get("currency", "KES") != "KES":
             payment.status = Payment.Status.FAILED
             payment.result_description = "amount mismatch"
             payment.save()
