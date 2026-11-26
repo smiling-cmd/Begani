@@ -75,3 +75,16 @@
   .tua-empty-avatar { width: 76px; height: 76px; }
 }
 @media (prefers-reduced-motion: reduce) { .tua-typing-bubble span { animation: none; opacity: .7; } .tua-suggestion-grid button { transition: none; } }
+
+/* Short messages ("Hey") must hug their text, never wrap letter by letter. The line needs a definite
+   width so the bubble's percentage max-width resolves, and long words wrap only when they must. */
+.tua-page .tua-message-line { width: 100%; }
+.tua-page .tua-message-bubble { width: fit-content; overflow-wrap: break-word; word-break: normal; }
+
+/* On phones the disclaimer is one short line so it does not crowd the composer. */
+.tua-page .tua-disclaimer-short { display: none; }
+@media (max-width: 900px) {
+  .tua-page .tua-disclaimer-full { display: none; }
+  .tua-page .tua-disclaimer-short { display: inline; }
+  .tua-page .tua-disclaimer { padding: 6px 16px 8px; }
+}

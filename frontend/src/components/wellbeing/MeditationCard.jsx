@@ -3,7 +3,6 @@ import { Flower2, Pause, Play, RotateCcw } from 'lucide-react';
 import useCountdown, { formatClock } from './useCountdown';
 import { localDateKey, readStored, writeStored } from './storage';
 import MeditationVideos from './MeditationVideos';
-import api from '../../api';
 
 const STORAGE_KEY = 'begani-meditation-today';
 const durations = [3, 5, 10];
@@ -60,45 +59,42 @@ function readMinutesToday() {
   return saved && saved.date === localDateKey() ? Number(saved.minutes) || 0 : 0;
 }
 
-// Guided audios from Resources (breathing / mindfulness / meditation). When there are any,
-// the session lengths become those recordings and the timer follows the audio.
-const GUIDED_TITLE = /medit|mindful|breath|body scan|guided/i;
+// Guided audios that ship with the app (src/assets/audio). Whatever breathing / meditation /
+// mindfulness recordings are in that folder become the session lengths, and the timer follows the audio.
+const audioFiles = import.meta.glob('../../assets/audio/*.{mp3,wav,m4a,ogg}', { eager: true, query: '?url', import: 'default' });
+const GUIDED_FILE = /breath|mindful|body[-_ ]?scan|guided/i;
+
+const guidedFiles = Object.entries(audioFiles)
+  .map(([path, src]) => ({ name: path.split('/').pop().replace(/\.[^.]+$/, ''), src }))
+  .filter((file) => GUIDED_FILE.test(file.name) && !/\(\d+\)$/.test(file.name) && !/rain|sleep|music|background|ambient/i.test(file.name))
+  .map((file) => {
+    const spaced = file.name.replace(/([a-z])([A-Z0-9])/g, '$1 $2').replace(/[-_]+/g, ' ');
+    const number = /(\d+)\s*min/i.exec(spaced);
+    return { id: file.name, title: spaced, src: file.src, hint: number ? Number(number[1]) : 0 };
+  });
 
 function useGuidedAudios() {
-  const [audios, setAudios] = useState([]);
   const [lengths, setLengths] = useState({});
 
   useEffect(() => {
     let live = true;
-    const probes = [];
-    api.get('/api/resources/')
-      .then(({ data }) => {
-        if (!live) return;
-        const list = Array.isArray(data) ? data : data.results || [];
-        const found = list
-          .filter((item) => item.type === 'audio' && !/sleep/i.test(item.category || '') && GUIDED_TITLE.test(item.title || ''))
-          .map((item) => ({ id: item.id, title: item.title, src: item.audio_file || item.media_url || '' }))
-          .filter((item) => item.src);
-        setAudios(found);
-        found.forEach((item) => {
-          const probe = new Audio();
-          probe.preload = 'metadata';
-          probe.addEventListener('loadedmetadata', () => {
-            if (live && Number.isFinite(probe.duration) && probe.duration > 0) {
-              setLengths((current) => ({ ...current, [item.id]: Math.ceil(probe.duration) }));
-            }
-          });
-          probe.src = item.src;
-          probes.push(probe);
-        });
-      })
-      .catch(() => { /* the prompt timer still works */ });
-    return () => { live = false; probes.forEach((probe) => { probe.removeAttribute('src'); }); };
+    const probes = guidedFiles.map((item) => {
+      const probe = new Audio();
+      probe.preload = 'metadata';
+      probe.addEventListener('loadedmetadata', () => {
+        if (live && Number.isFinite(probe.duration) && probe.duration > 0) {
+          setLengths((current) => ({ ...current, [item.id]: Math.ceil(probe.duration) }));
+        }
+      });
+      probe.src = item.src;
+      return probe;
+    });
+    return () => { live = false; probes.forEach((probe) => probe.removeAttribute('src')); };
   }, []);
 
-  return audios
+  return guidedFiles
     .filter((item) => lengths[item.id])
-    .map((item) => ({ ...item, seconds: lengths[item.id], minutes: Number((/(\d+)[\s-]*min/i.exec(item.title) || [])[1]) || Math.max(1, Math.round(lengths[item.id] / 60)) }))
+    .map((item) => ({ ...item, seconds: lengths[item.id], minutes: item.hint || Math.max(1, Math.round(lengths[item.id] / 60)) }))
     .sort((a, b) => a.seconds - b.seconds);
 }
 

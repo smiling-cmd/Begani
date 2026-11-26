@@ -311,7 +311,8 @@ export default function Tua() {
             </button>
           </form>
           <p className="tua-disclaimer">
-            TUA is an AI companion, not a therapist, and can't diagnose or treat. In an emergency, call 999 or 112, or use the emergency line on Home or Find Support.
+            <span className="tua-disclaimer-full">TUA is an AI companion, not a therapist, and can't diagnose or treat. In an emergency, call 999 or 112, or use the emergency line on Home or Find Support.</span>
+            <span className="tua-disclaimer-short">AI companion, not a therapist. Emergency? Call 999 or 112.</span>
           </p>
         </section>
       </main>

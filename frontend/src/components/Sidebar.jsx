@@ -12,16 +12,13 @@ import {
   Leaf,
   LogOut,
   MessageCircle,
-  Moon,
   Mountain,
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
-  Sun,
   UserRound,
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
-import ThemeContext from '../context/ThemeContextValue';
 import beganiLogo from '../assets/logo-light.png';
 import tuaImage from '../assets/TUA.png';
 import MobileHeader from './MobileHeader';
@@ -40,9 +37,6 @@ function readCollapsed() {
 
 export default function Sidebar() {
   const { user, logout } = useContext(AuthContext);
-  const themeContext = useContext(ThemeContext);
-  const theme = themeContext?.theme || 'light';
-  const toggleTheme = themeContext?.toggleTheme || (() => {});
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(readCollapsed);
@@ -102,15 +96,6 @@ export default function Sidebar() {
             onClick={toggleCollapsed}
           >
             {collapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
-          </button>
-          <button
-            type="button"
-            className="sidebar-theme-toggle"
-            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            onClick={toggleTheme}
-          >
-            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
         </div>
 

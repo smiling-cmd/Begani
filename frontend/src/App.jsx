@@ -4,6 +4,7 @@ import AuthProvider from './context/AuthProvider';
 import { AuthContext } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { PlayerProvider } from './components/AudioPlayer';
+import DesktopThemeToggle from './components/DesktopThemeToggle';
 
 // Pages
 import Login from './pages/Login';
@@ -44,7 +45,7 @@ const ProtectedRoute = ({ children, allowedRoles, allowUser }) => {
   if (!user) return <Navigate to="/login" replace />;
   if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to={homeFor(user.role)} replace />;
   if (allowUser && !allowUser(user)) return <Navigate to={homeFor(user.role)} replace />;
-  return children;
+  return <><DesktopThemeToggle />{children}</>;
 };
 
 function App() {
